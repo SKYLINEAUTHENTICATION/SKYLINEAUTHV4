@@ -47,4 +47,3 @@ expertMode = true
 [userenv]
 
 [userenv.shared]
-VITE_TURNSTILE_SITE_KEY = "0x4AAAAAACf70OiLrlivNbdk"
