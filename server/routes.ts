@@ -597,6 +597,17 @@ setInterval(() => {
   }
 }, 600000);
 
+async function isLocalAuth(req: any, res: any, next: any) {
+  const sessionId = req.cookies?.kv_session;
+  if (!sessionId) return res.status(401).json({ message: "Not authenticated" });
+  const session = localSessions.get(sessionId);
+  if (!session) return res.status(401).json({ message: "Session expired" });
+  const account = await storage.getAccountByUserId(session.userId);
+  if (!account) return res.status(401).json({ message: "User not found" });
+  req.localUser = { username: account.username, role: account.role, userId: session.userId };
+  next();
+}
+
 async function seedSuperAdmin() {
   try {
     const existing = await storage.getAccountByUsername("SKY-SR");
