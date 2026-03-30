@@ -9,6 +9,10 @@ import {
   LogOut,
   BarChart3,
   UserCog,
+  MessageCircle,
+  Megaphone,
+  FolderOpen,
+  ShoppingBag,
 } from "lucide-react";
 import {
   Sidebar,
@@ -23,6 +27,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
+import logoPath from "@assets/skyline_1774905086386.png";
 
 const ROLE_LABEL: Record<string, string> = {
   superadmin: "Super Admin",
@@ -64,12 +69,11 @@ export function AppSidebar() {
       <SidebarHeader className="p-4" style={{ borderBottom: "1px solid rgba(139,92,246,0.18)" }}>
         <Link href="/dashboard" className="flex items-center gap-3">
           <div style={{
-            width: 36, height: 36, borderRadius: 10,
-            background: "linear-gradient(135deg, #7c3aed, #6366f1)",
-            display: "flex", alignItems: "center", justifyContent: "center",
-            boxShadow: "0 4px 16px rgba(124,58,237,0.4)", flexShrink: 0,
+            width: 38, height: 38, borderRadius: "50%", flexShrink: 0,
+            boxShadow: "0 0 18px rgba(0,200,255,0.5), 0 0 6px rgba(124,58,237,0.6)",
+            overflow: "hidden",
           }}>
-            <span style={{ color: "#fff", fontWeight: 800, fontSize: 14, fontFamily: "Rajdhani, sans-serif", letterSpacing: 1 }}>S</span>
+            <img src={logoPath} alt="SKYLINE" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           <div>
             <span className="skyline-brand-sidebar" style={{ fontSize: 17, display: "block" }} data-testid="text-logo">SKYLINE</span>
@@ -113,6 +117,18 @@ export function AppSidebar() {
             </SidebarGroupContent>
           </SidebarGroup>
         )}
+
+        <SidebarGroup>
+          <SidebarGroupLabel>Community</SidebarGroupLabel>
+          <SidebarGroupContent>
+            <SidebarMenu>
+              {renderItem("Chat", "/dashboard/chat", MessageCircle)}
+              {renderItem("Announcements", "/dashboard/announcements", Megaphone)}
+              {renderItem("Files", "/dashboard/files", FolderOpen)}
+              {renderItem("Resellers", "/dashboard/resellers", ShoppingBag)}
+            </SidebarMenu>
+          </SidebarGroupContent>
+        </SidebarGroup>
 
         {isSuperAdmin && (
           <SidebarGroup>

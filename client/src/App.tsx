@@ -18,6 +18,11 @@ import TokensPage from "@/pages/tokens";
 import AppSettingsPage from "@/pages/app-settings";
 import StatisticsPage from "@/pages/statistics";
 import PanelUsersPage from "@/pages/panel-users";
+import ChatPage from "@/pages/chat";
+import AnnouncementsPage from "@/pages/announcements";
+import FilesPage from "@/pages/files";
+import ResellersPage from "@/pages/resellers";
+import PortalPage from "@/pages/portal";
 import NotFound from "@/pages/not-found";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -60,6 +65,10 @@ function AuthenticatedApp() {
         <Route path="/dashboard/settings" component={AppSettingsPage} />
         <Route path="/dashboard/statistics" component={StatisticsPage} />
         <Route path="/dashboard/panel-users" component={PanelUsersPage} />
+        <Route path="/dashboard/chat" component={ChatPage} />
+        <Route path="/dashboard/announcements" component={AnnouncementsPage} />
+        <Route path="/dashboard/files" component={FilesPage} />
+        <Route path="/dashboard/resellers" component={ResellersPage} />
         <Route path="/">
           <Redirect to="/dashboard" />
         </Route>
@@ -85,6 +94,10 @@ function AppRouter() {
     );
   }
 
+  if (location === "/portal") {
+    return <PortalPage />;
+  }
+
   if (user) {
     if (location === "/login") {
       return <Redirect to="/dashboard" />;
@@ -95,6 +108,7 @@ function AppRouter() {
   return (
     <Switch>
       <Route path="/login" component={LoginPage} />
+      <Route path="/portal" component={PortalPage} />
       <Route path="/">
         <Redirect to="/login" />
       </Route>

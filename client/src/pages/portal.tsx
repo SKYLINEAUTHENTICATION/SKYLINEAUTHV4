@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Download, FolderOpen, Tag, Shield, ArrowLeft } from "lucide-react";
-import logoPath from "@assets/skyline_1774903747201.png";
+import logoPath from "@assets/skyline_1774905086386.png";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "#22c55e",
