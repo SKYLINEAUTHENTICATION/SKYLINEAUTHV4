@@ -1,10 +1,7 @@
 import { useState, useMemo, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Shield } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 
 const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY;
@@ -32,25 +29,18 @@ function PasswordStrength({ password }: { password: string }) {
   const passed = Object.values(checks).filter(Boolean).length;
   const percentage = (passed / 5) * 100;
 
-  const barColor = passed <= 1
-    ? "bg-red-500"
-    : passed <= 2
-      ? "bg-orange-500"
-      : passed <= 3
-        ? "bg-yellow-500"
-        : passed <= 4
-          ? "bg-blue-500"
-          : "bg-emerald-500";
+  const barColor = passed <= 1 ? "#ef4444"
+    : passed <= 2 ? "#f97316"
+    : passed <= 3 ? "#eab308"
+    : passed <= 4 ? "#3b82f6"
+    : "#10b981";
 
   return (
-    <div className="space-y-3" data-testid="password-strength">
-      <div className="h-1 w-full overflow-hidden rounded-full bg-muted">
-        <div
-          className={`h-full rounded-full transition-all duration-300 ${barColor}`}
-          style={{ width: `${percentage}%` }}
-        />
+    <div style={{ marginTop: 8 }} data-testid="password-strength">
+      <div style={{ height: 3, background: "rgba(139,92,246,0.15)", borderRadius: 2, overflow: "hidden", marginBottom: 10 }}>
+        <div style={{ height: "100%", borderRadius: 2, background: barColor, width: `${percentage}%`, transition: "all 0.3s" }} />
       </div>
-      <div className="grid grid-cols-2 gap-x-6 gap-y-1.5">
+      <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: "6px 24px" }}>
         {[
           { key: "length", label: "12+ chars", met: checks.length },
           { key: "lowercase", label: "Lowercase", met: checks.lowercase },
@@ -58,19 +48,14 @@ function PasswordStrength({ password }: { password: string }) {
           { key: "number", label: "Number", met: checks.number },
           { key: "symbol", label: "Symbol", met: checks.symbol },
         ].map((req) => (
-          <div key={req.key} className="flex items-center gap-2" data-testid={`check-${req.key}`}>
-            <div
-              className={`h-2 w-2 rounded-full border transition-colors duration-200 ${
-                req.met
-                  ? "border-emerald-500 bg-emerald-500"
-                  : "border-muted-foreground/40 bg-transparent"
-              }`}
-            />
-            <span className={`text-xs transition-colors duration-200 ${
-              req.met ? "text-foreground" : "text-muted-foreground"
-            }`}>
-              {req.label}
-            </span>
+          <div key={req.key} style={{ display: "flex", alignItems: "center", gap: 7 }} data-testid={`check-${req.key}`}>
+            <div style={{
+              width: 7, height: 7, borderRadius: "50%",
+              background: req.met ? "#10b981" : "transparent",
+              border: `1px solid ${req.met ? "#10b981" : "rgba(139,92,246,0.3)"}`,
+              transition: "all 0.2s",
+            }} />
+            <span style={{ fontSize: 11, color: req.met ? "#c4b5fd" : "#52525b", transition: "color 0.2s" }}>{req.label}</span>
           </div>
         ))}
       </div>
@@ -149,7 +134,7 @@ export default function RegisterPage() {
     const hasNumber = /[0-9]/.test(password);
     const hasSymbol = /[^A-Za-z0-9]/.test(password);
     if (!hasLength || !hasUpper || !hasLower || !hasNumber || !hasSymbol) {
-      toast({ title: "Weak password", description: "Password must meet all requirements: 12+ characters, uppercase, lowercase, number, and symbol.", variant: "destructive" });
+      toast({ title: "Weak password", description: "Password must meet all requirements.", variant: "destructive" });
       return;
     }
 
@@ -194,107 +179,128 @@ export default function RegisterPage() {
 
   if (showVerification) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-black px-4">
+      <div style={{ background: "#000" }} className="flex min-h-screen flex-col items-center justify-center px-4">
         <div className="flex flex-col items-center gap-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-              <Shield className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-4xl font-bold tracking-tight italic text-white" data-testid="text-brand-verify">KeyAuth Manager</span>
-          </div>
-
-          <h2 className="text-xl font-semibold text-white text-center">
+          <span className="skyline-brand" data-testid="text-brand-verify">SKYLINE</span>
+          <p style={{ color: "#a1a1aa", fontSize: 13, letterSpacing: "0.5px", textAlign: "center" }}>
             Please wait while we validate your connection.
-          </h2>
-
+          </p>
           <div ref={turnstileContainerRef} data-testid="turnstile-widget" />
-
-          <Button
-            variant="outline"
-            className="w-64 border-gray-700 bg-gray-900 text-white hover:bg-gray-800"
+          <button
+            style={{
+              background: "rgba(124,58,237,0.15)",
+              border: "1px solid rgba(139,92,246,0.3)",
+              color: "#c4b5fd",
+              borderRadius: 6,
+              padding: "10px 28px",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              letterSpacing: "0.5px",
+            }}
             onClick={() => { setShowVerification(false); setTurnstileToken(null); }}
             data-testid="button-back-register"
           >
             Back to Register
-          </Button>
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[800px] bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.08),_transparent_70%)]" />
+    <div style={{ background: "#000", minHeight: "100vh" }} className="flex flex-col items-center justify-center px-4">
+      <div className="w-full" style={{ maxWidth: 370 }}>
+        <div className="skyline-glow-wrap">
+          <div className="skyline-card" style={{ padding: "40px 28px 36px" }}>
+            <span className="skyline-brand" data-testid="text-brand">SKYLINE</span>
+            <p style={{ textAlign: "center", fontSize: 12, color: "#4e3d6a", letterSpacing: "0.5px", marginBottom: 24, marginTop: 6 }}>
+              Create your account
+            </p>
 
-      <div className="relative z-10 w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
-              <Shield className="h-4.5 w-4.5 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold tracking-tight italic" data-testid="text-brand">KeyAuth Manager</span>
+            <form onSubmit={handleRegisterClick} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px" }}>Username</label>
+                <Input
+                  data-testid="input-username"
+                  placeholder="Choose a username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="username"
+                  autoFocus
+                  style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)", color: "#fff", borderRadius: 6 }}
+                />
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px" }}>Email</label>
+                <Input
+                  data-testid="input-email"
+                  type="email"
+                  placeholder="Enter your email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  autoComplete="email"
+                  style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)", color: "#fff", borderRadius: 6 }}
+                />
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px" }}>Password</label>
+                <Input
+                  data-testid="input-password"
+                  type="password"
+                  placeholder="Create a strong password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="new-password"
+                  style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)", color: "#fff", borderRadius: 6 }}
+                />
+              </div>
+
+              {password.length > 0 && <PasswordStrength password={password} />}
+
+              <button
+                type="submit"
+                disabled={isLoading || !username.trim() || !email.trim() || !password}
+                data-testid="button-submit-register"
+                style={{
+                  marginTop: 6,
+                  background: isLoading || !username.trim() || !email.trim() || !password
+                    ? "rgba(124,58,237,0.4)"
+                    : "linear-gradient(135deg, #7c3aed, #6366f1)",
+                  border: "none",
+                  color: "#fff",
+                  borderRadius: 6,
+                  padding: "11px 0",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: "0.5px",
+                  cursor: isLoading || !username.trim() || !email.trim() || !password ? "not-allowed" : "pointer",
+                  boxShadow: "0 4px 18px rgba(124,58,237,0.35)",
+                  transition: "opacity 0.2s",
+                }}
+              >
+                {isLoading ? "Creating account..." : "Create Account"}
+              </button>
+            </form>
+
+            <p style={{ textAlign: "center", fontSize: 13, color: "#4e3d6a", marginTop: 22 }}>
+              Already have an account?{" "}
+              <button
+                onClick={() => setLocation("/login")}
+                style={{ background: "none", border: "none", color: "#a78bfa", fontWeight: 600, cursor: "pointer", fontSize: 13 }}
+                data-testid="link-login"
+              >
+                Sign in
+              </button>
+            </p>
+
+            <p style={{ textAlign: "center", fontSize: 11, color: "#2a1a3e", marginTop: 18 }}>
+              &copy; 2025 SKYLINE &mdash; Secure Auth Panel
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Have an account?{" "}
-            <button
-              onClick={() => setLocation("/login")}
-              className="font-medium text-primary hover:underline"
-              data-testid="link-login"
-            >
-              Sign in
-            </button>
-          </p>
         </div>
-
-        <Card className="p-6">
-          <form onSubmit={handleRegisterClick} className="space-y-4">
-            <Input
-              data-testid="input-username"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
-              autoFocus
-            />
-
-            <Input
-              data-testid="input-email"
-              type="email"
-              placeholder="Email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              autoComplete="email"
-            />
-
-            <Input
-              data-testid="input-password"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="new-password"
-            />
-
-            {password.length > 0 && <PasswordStrength password={password} />}
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading || !username.trim() || !email.trim() || !password}
-              data-testid="button-submit-register"
-            >
-              {isLoading ? "Creating account..." : "Create Account"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            By creating an account, you agree to our{" "}
-            <span className="underline cursor-pointer">Terms of Service</span>
-            {" "}and{" "}
-            <span className="underline cursor-pointer">Privacy Policy</span>
-          </p>
-        </Card>
       </div>
     </div>
   );

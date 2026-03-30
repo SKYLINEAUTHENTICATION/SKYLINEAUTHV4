@@ -1,10 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Button } from "@/components/ui/button";
-import { Card } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
-import { Shield } from "lucide-react";
 import { queryClient } from "@/lib/queryClient";
 import loginErrorSound from "@assets/login-error_1771588547644.mp3";
 import loginSuccessSound from "@assets/ElevenLabs_2026_02_20T12_28_13_Gojo_Calm,_Clear_and_Measured_p_1771590685418.mp3";
@@ -151,96 +148,113 @@ export default function LoginPage() {
 
   if (showVerification) {
     return (
-      <div className="flex min-h-screen flex-col items-center justify-center bg-black px-4">
+      <div style={{ background: "#000" }} className="flex min-h-screen flex-col items-center justify-center px-4">
         <div className="flex flex-col items-center gap-8">
-          <div className="flex items-center gap-3">
-            <div className="flex h-12 w-12 items-center justify-center rounded-lg bg-primary">
-              <Shield className="h-6 w-6 text-primary-foreground" />
-            </div>
-            <span className="text-4xl font-bold tracking-tight italic text-white" data-testid="text-brand-verify">KeyAuth Manager</span>
-          </div>
-
-          <h2 className="text-xl font-semibold text-white text-center">
+          <span className="skyline-brand" data-testid="text-brand-verify">SKYLINE</span>
+          <p style={{ color: "#a1a1aa", fontSize: 13, letterSpacing: "0.5px", textAlign: "center" }}>
             Please wait while we validate your connection.
-          </h2>
-
+          </p>
           <div ref={turnstileContainerRef} data-testid="turnstile-widget" />
-
-          <Button
-            variant="outline"
-            className="w-64 border-gray-700 bg-gray-900 text-white hover:bg-gray-800"
+          <button
+            style={{
+              background: "rgba(124,58,237,0.15)",
+              border: "1px solid rgba(139,92,246,0.3)",
+              color: "#c4b5fd",
+              borderRadius: 6,
+              padding: "10px 28px",
+              fontSize: 13,
+              fontWeight: 600,
+              cursor: "pointer",
+              letterSpacing: "0.5px",
+            }}
             onClick={() => { setShowVerification(false); setTurnstileToken(null); }}
             data-testid="button-back-login"
           >
             Back to Login
-          </Button>
+          </button>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="flex min-h-screen flex-col items-center justify-center bg-background px-4">
-      <div className="absolute inset-0 bg-gradient-to-b from-primary/5 via-transparent to-transparent" />
-      <div className="absolute top-0 left-1/2 -translate-x-1/2 h-[500px] w-[800px] bg-[radial-gradient(ellipse_at_top,_hsl(var(--primary)/0.08),_transparent_70%)]" />
+    <div style={{ background: "#000", minHeight: "100vh" }} className="flex flex-col items-center justify-center px-4">
+      <div className="w-full" style={{ maxWidth: 370 }}>
+        <div className="skyline-glow-wrap">
+          <div className="skyline-card" style={{ padding: "40px 28px 36px" }}>
+            <span className="skyline-brand" data-testid="text-brand">SKYLINE</span>
+            <p style={{ textAlign: "center", fontSize: 12, color: "#4e3d6a", letterSpacing: "0.5px", marginBottom: 24, marginTop: 6 }}>
+              Secure Auth Panel
+            </p>
 
-      <div className="relative z-10 w-full max-w-md">
-        <div className="mb-8 flex flex-col items-center text-center">
-          <div className="mb-4 flex items-center gap-2.5">
-            <div className="flex h-9 w-9 items-center justify-center rounded-md bg-primary">
-              <Shield className="h-4.5 w-4.5 text-primary-foreground" />
-            </div>
-            <span className="text-2xl font-bold tracking-tight italic" data-testid="text-brand">KeyAuth Manager</span>
+            <form onSubmit={handleLoginClick} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px" }}>Username</label>
+                <Input
+                  data-testid="input-username"
+                  placeholder="Enter your username"
+                  value={username}
+                  onChange={(e) => setUsername(e.target.value)}
+                  autoComplete="username"
+                  autoFocus
+                  style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)", color: "#fff", borderRadius: 6 }}
+                />
+              </div>
+
+              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+                <label style={{ fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px" }}>Password</label>
+                <Input
+                  data-testid="input-password"
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  autoComplete="current-password"
+                  style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)", color: "#fff", borderRadius: 6 }}
+                />
+              </div>
+
+              <button
+                type="submit"
+                disabled={isLoading || !username.trim() || !password}
+                data-testid="button-submit-login"
+                style={{
+                  marginTop: 6,
+                  background: isLoading || !username.trim() || !password
+                    ? "rgba(124,58,237,0.4)"
+                    : "linear-gradient(135deg, #7c3aed, #6366f1)",
+                  border: "none",
+                  color: "#fff",
+                  borderRadius: 6,
+                  padding: "11px 0",
+                  fontSize: 14,
+                  fontWeight: 700,
+                  letterSpacing: "0.5px",
+                  cursor: isLoading || !username.trim() || !password ? "not-allowed" : "pointer",
+                  boxShadow: "0 4px 18px rgba(124,58,237,0.35)",
+                  transition: "opacity 0.2s",
+                }}
+              >
+                {isLoading ? "Signing in..." : "Sign In"}
+              </button>
+            </form>
+
+            <p style={{ textAlign: "center", fontSize: 13, color: "#4e3d6a", marginTop: 22 }}>
+              Don't have an account?{" "}
+              <button
+                onClick={() => setLocation("/register")}
+                style={{ background: "none", border: "none", color: "#a78bfa", fontWeight: 600, cursor: "pointer", fontSize: 13 }}
+                data-testid="link-register"
+              >
+                Sign up
+              </button>
+            </p>
+
+            <p style={{ textAlign: "center", fontSize: 11, color: "#2a1a3e", marginTop: 18 }}>
+              &copy; 2025 SKYLINE &mdash; Secure Auth Panel
+            </p>
           </div>
-          <p className="text-sm text-muted-foreground">
-            Don't have an account?{" "}
-            <button
-              onClick={() => setLocation("/register")}
-              className="font-medium text-primary hover:underline"
-              data-testid="link-register"
-            >
-              Sign up
-            </button>
-          </p>
         </div>
-
-        <Card className="p-6">
-          <form onSubmit={handleLoginClick} className="space-y-4">
-            <Input
-              data-testid="input-username"
-              placeholder="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              autoComplete="username"
-              autoFocus
-            />
-
-            <Input
-              data-testid="input-password"
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              autoComplete="current-password"
-            />
-
-            <Button
-              type="submit"
-              className="w-full"
-              disabled={isLoading || !username.trim() || !password}
-              data-testid="button-submit-login"
-            >
-              {isLoading ? "Signing in..." : "Sign In"}
-            </Button>
-          </form>
-
-          <p className="mt-6 text-center text-xs text-muted-foreground">
-            By signing in, you agree to our{" "}
-            <span className="underline cursor-pointer">Terms of Service</span>
-            {" "}and{" "}
-            <span className="underline cursor-pointer">Privacy Policy</span>
-          </p>
-        </Card>
       </div>
     </div>
   );

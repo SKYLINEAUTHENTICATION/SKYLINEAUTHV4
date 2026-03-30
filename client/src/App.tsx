@@ -4,13 +4,11 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { Toaster } from "@/components/ui/toaster";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { ThemeProvider } from "@/components/theme-provider";
-import { ThemeToggle } from "@/components/theme-toggle";
 import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 
-import LandingPage from "@/pages/landing";
 import LoginPage from "@/pages/login";
 import RegisterPage from "@/pages/register";
 import DashboardPage from "@/pages/dashboard";
@@ -24,7 +22,7 @@ import NotFound from "@/pages/not-found";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const style = {
-    "--sidebar-width": "16rem",
+    "--sidebar-width": "15rem",
     "--sidebar-width-icon": "3rem",
   };
 
@@ -33,9 +31,15 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
       <div className="flex h-screen w-full">
         <AppSidebar />
         <div className="flex flex-1 flex-col overflow-hidden">
-          <header className="sticky top-0 z-50 flex items-center justify-between gap-4 border-b bg-background/80 px-4 py-2 backdrop-blur-md">
+          <header
+            className="sticky top-0 z-50 flex items-center gap-4 px-4 py-2"
+            style={{
+              background: "rgba(0,0,0,0.85)",
+              borderBottom: "1px solid rgba(139,92,246,0.18)",
+              backdropFilter: "blur(12px)",
+            }}
+          >
             <SidebarTrigger data-testid="button-sidebar-toggle" />
-            <ThemeToggle />
           </header>
           <main className="flex-1 overflow-auto">{children}</main>
         </div>
@@ -70,11 +74,11 @@ function AppRouter() {
 
   if (isLoading) {
     return (
-      <div className="flex h-screen items-center justify-center bg-background">
+      <div style={{ background: "#000" }} className="flex h-screen items-center justify-center">
         <div className="space-y-4 text-center">
-          <Skeleton className="mx-auto h-12 w-12 rounded-full" />
-          <Skeleton className="mx-auto h-4 w-48" />
-          <p className="text-sm text-muted-foreground">Loading...</p>
+          <Skeleton className="mx-auto h-12 w-12 rounded-full" style={{ background: "rgba(124,58,237,0.2)" }} />
+          <Skeleton className="mx-auto h-4 w-48" style={{ background: "rgba(124,58,237,0.1)" }} />
+          <p style={{ fontSize: 13, color: "#52525b" }}>Loading...</p>
         </div>
       </div>
     );
@@ -91,7 +95,10 @@ function AppRouter() {
     <Switch>
       <Route path="/login" component={LoginPage} />
       <Route path="/register" component={RegisterPage} />
-      <Route component={LandingPage} />
+      <Route path="/">
+        <Redirect to="/login" />
+      </Route>
+      <Route component={LoginPage} />
     </Switch>
   );
 }

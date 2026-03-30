@@ -7,7 +7,6 @@ import {
   Coins,
   Settings,
   LogOut,
-  Shield,
   BarChart3,
 } from "lucide-react";
 import {
@@ -22,12 +21,10 @@ import {
   SidebarHeader,
   SidebarFooter,
 } from "@/components/ui/sidebar";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { useAuth } from "@/hooks/use-auth";
 
 const mainNav = [
-  { title: "Dashboard", url: "/dashboard", icon: LayoutDashboard },
+  { title: "Overview", url: "/dashboard", icon: LayoutDashboard },
   { title: "Applications", url: "/dashboard/apps", icon: AppWindow },
   { title: "Licenses", url: "/dashboard/licenses", icon: Key },
   { title: "Users", url: "/dashboard/users", icon: Users },
@@ -44,6 +41,7 @@ export function AppSidebar() {
   const { user, logout } = useAuth();
 
   const getInitials = () => {
+    if (user?.username) return user.username.slice(0, 2).toUpperCase();
     const f = user?.firstName?.[0] || "";
     const l = user?.lastName?.[0] || "";
     return (f + l).toUpperCase() || "U";
@@ -71,20 +69,37 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="p-4">
-        <Link href="/dashboard" className="flex items-center gap-2.5">
-          <div className="flex h-8 w-8 items-center justify-center rounded-md bg-primary">
-            <Shield className="h-4 w-4 text-primary-foreground" />
+      <SidebarHeader className="p-4" style={{ borderBottom: "1px solid rgba(139,92,246,0.18)" }}>
+        <Link href="/dashboard" className="flex items-center gap-3">
+          <div
+            style={{
+              width: 36,
+              height: 36,
+              borderRadius: 10,
+              background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              boxShadow: "0 4px 16px rgba(124,58,237,0.4)",
+              flexShrink: 0,
+            }}
+          >
+            <span style={{ color: "#fff", fontWeight: 800, fontSize: 14, fontFamily: "Rajdhani, sans-serif", letterSpacing: 1 }}>S</span>
           </div>
           <div>
-            <span className="text-base font-bold tracking-tight" data-testid="text-logo">KeyAuth Manager</span>
-            <span className="block text-[10px] uppercase tracking-widest text-muted-foreground">Licensing Platform</span>
+            <span className="skyline-brand-sidebar" style={{ fontSize: 17, display: "block" }} data-testid="text-logo">
+              SKYLINE
+            </span>
+            <span style={{ fontSize: 9, color: "#52525b", letterSpacing: "1px", textTransform: "uppercase", display: "block", marginTop: -2 }}>
+              Auth Panel
+            </span>
           </div>
         </Link>
       </SidebarHeader>
+
       <SidebarContent>
         <SidebarGroup>
-          <SidebarGroupLabel>Main</SidebarGroupLabel>
+          <SidebarGroupLabel>Management</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
               {mainNav.map(renderNavItem)}
@@ -100,28 +115,64 @@ export function AppSidebar() {
           </SidebarGroupContent>
         </SidebarGroup>
       </SidebarContent>
-      <SidebarFooter className="p-3">
-        <div className="flex items-center gap-3 rounded-md p-2">
-          <Avatar className="h-8 w-8 border border-border">
-            <AvatarImage src={user?.profileImageUrl || ""} />
-            <AvatarFallback className="bg-primary/10 text-xs text-primary">{getInitials()}</AvatarFallback>
-          </Avatar>
-          <div className="flex-1 overflow-hidden">
-            <p className="truncate text-sm font-medium" data-testid="text-user-name">
-              {user?.firstName} {user?.lastName}
+
+      <SidebarFooter className="p-3" style={{ borderTop: "1px solid rgba(139,92,246,0.18)" }}>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 10,
+            padding: "10px 12px",
+            background: "rgba(139,92,246,0.06)",
+            border: "1px solid rgba(139,92,246,0.18)",
+            borderRadius: 10,
+            marginBottom: 8,
+          }}
+        >
+          <div
+            style={{
+              width: 32,
+              height: 32,
+              borderRadius: "50%",
+              background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+              display: "flex",
+              alignItems: "center",
+              justifyContent: "center",
+              fontSize: 12,
+              fontWeight: 700,
+              color: "#fff",
+              flexShrink: 0,
+            }}
+          >
+            {getInitials()}
+          </div>
+          <div style={{ flex: 1, overflow: "hidden" }}>
+            <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} data-testid="text-user-name">
+              {user?.username || `${user?.firstName || ""} ${user?.lastName || ""}`.trim() || "User"}
             </p>
-            <p className="truncate text-[11px] text-muted-foreground" data-testid="text-user-email">
-              {user?.email}
+            <p style={{ fontSize: 10, color: "#a78bfa", textTransform: "uppercase", letterSpacing: "0.5px" }}>
+              Active
             </p>
           </div>
-          <Button
-            size="icon"
-            variant="ghost"
+          <button
             onClick={() => logout()}
             data-testid="button-logout"
+            style={{
+              background: "transparent",
+              border: "none",
+              cursor: "pointer",
+              color: "#52525b",
+              padding: 4,
+              display: "flex",
+              alignItems: "center",
+              borderRadius: 4,
+              transition: "color 0.2s",
+            }}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#a78bfa")}
+            onMouseLeave={(e) => (e.currentTarget.style.color = "#52525b")}
           >
-            <LogOut className="h-4 w-4" />
-          </Button>
+            <LogOut size={15} />
+          </button>
         </div>
       </SidebarFooter>
     </Sidebar>
