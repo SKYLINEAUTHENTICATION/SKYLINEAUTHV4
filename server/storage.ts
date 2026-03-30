@@ -7,6 +7,9 @@ import {
   appUsers,
   tokens,
   sellers,
+  chatMessages,
+  announcements,
+  appFiles,
   type Application,
   type InsertApplication,
   type License,
@@ -17,6 +20,9 @@ import {
   type InsertToken,
   type Seller,
   type InsertSeller,
+  type ChatMessage,
+  type Announcement,
+  type AppFile,
 } from "@shared/schema";
 import { accounts, users, type Account, type User } from "@shared/models/auth";
 
@@ -114,6 +120,25 @@ export interface IStorage {
   updateAccount(id: string, data: Partial<Account>): Promise<Account | undefined>;
   getUserByNumericId(numericId: string): Promise<User | undefined>;
   ensureNumericId(userId: string): Promise<string>;
+
+  getChatMessages(senderUsername?: string, recipientUsername?: string): Promise<ChatMessage[]>;
+  getPublicChatMessages(): Promise<ChatMessage[]>;
+  getDirectMessages(user1: string, user2: string): Promise<ChatMessage[]>;
+  createChatMessage(senderUsername: string, senderRole: string, message: string, recipientUsername?: string): Promise<ChatMessage>;
+
+  getAnnouncements(): Promise<Announcement[]>;
+  createAnnouncement(authorUsername: string, title: string, content: string): Promise<Announcement>;
+  deleteAnnouncement(id: string): Promise<void>;
+
+  getAppFiles(): Promise<AppFile[]>;
+  getAppFile(id: string): Promise<AppFile | undefined>;
+  createAppFile(data: Partial<AppFile>): Promise<AppFile>;
+  updateAppFile(id: string, data: Partial<AppFile>): Promise<AppFile | undefined>;
+  deleteAppFile(id: string): Promise<void>;
+
+  getResellerAccounts(): Promise<Account[]>;
+  addCredits(accountId: string, credits: number): Promise<Account | undefined>;
+  spendCredits(accountId: string, credits: number): Promise<Account | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -410,6 +435,106 @@ export class DatabaseStorage implements IStorage {
     } while (attempts < 10);
     await db.update(users).set({ numericId }).where(eq(users.id, userId));
     return numericId;
+  }
+
+  async getPublicChatMessages(): Promise<ChatMessage[]> {
+    const { isNull, desc } = await import("drizzle-orm");
+    return db
+      .select()
+      .from(chatMessages)
+      .where(isNull(chatMessages.recipientUsername))
+      .orderBy(desc(chatMessages.createdAt))
+      .limit(100);
+  }
+
+  async getDirectMessages(user1: string, user2: string): Promise<ChatMessage[]> {
+    const { or, desc } = await import("drizzle-orm");
+    return db
+      .select()
+      .from(chatMessages)
+      .where(
+        or(
+          and(eq(chatMessages.senderUsername, user1), eq(chatMessages.recipientUsername, user2)),
+          and(eq(chatMessages.senderUsername, user2), eq(chatMessages.recipientUsername, user1))
+        )
+      )
+      .orderBy(desc(chatMessages.createdAt))
+      .limit(100);
+  }
+
+  async getChatMessages(): Promise<ChatMessage[]> {
+    const { desc } = await import("drizzle-orm");
+    return db.select().from(chatMessages).orderBy(desc(chatMessages.createdAt)).limit(200);
+  }
+
+  async createChatMessage(senderUsername: string, senderRole: string, message: string, recipientUsername?: string): Promise<ChatMessage> {
+    const [msg] = await db
+      .insert(chatMessages)
+      .values({ senderUsername, senderRole, message, recipientUsername: recipientUsername || null })
+      .returning();
+    return msg;
+  }
+
+  async getAnnouncements(): Promise<Announcement[]> {
+    const { desc } = await import("drizzle-orm");
+    return db.select().from(announcements).orderBy(desc(announcements.createdAt));
+  }
+
+  async createAnnouncement(authorUsername: string, title: string, content: string): Promise<Announcement> {
+    const [ann] = await db.insert(announcements).values({ authorUsername, title, content }).returning();
+    return ann;
+  }
+
+  async deleteAnnouncement(id: string): Promise<void> {
+    await db.delete(announcements).where(eq(announcements.id, id));
+  }
+
+  async getAppFiles(): Promise<AppFile[]> {
+    const { desc } = await import("drizzle-orm");
+    return db.select().from(appFiles).orderBy(desc(appFiles.createdAt));
+  }
+
+  async getAppFile(id: string): Promise<AppFile | undefined> {
+    const [file] = await db.select().from(appFiles).where(eq(appFiles.id, id));
+    return file;
+  }
+
+  async createAppFile(data: Partial<AppFile>): Promise<AppFile> {
+    const [file] = await db.insert(appFiles).values(data as any).returning();
+    return file;
+  }
+
+  async updateAppFile(id: string, data: Partial<AppFile>): Promise<AppFile | undefined> {
+    const [file] = await db.update(appFiles).set({ ...data, updatedAt: new Date() }).where(eq(appFiles.id, id)).returning();
+    return file;
+  }
+
+  async deleteAppFile(id: string): Promise<void> {
+    await db.delete(appFiles).where(eq(appFiles.id, id));
+  }
+
+  async getResellerAccounts(): Promise<Account[]> {
+    return db.select().from(accounts).where(eq(accounts.role, "reseller"));
+  }
+
+  async addCredits(accountId: string, credits: number): Promise<Account | undefined> {
+    const { sql: drizzleSql } = await import("drizzle-orm");
+    const [account] = await db
+      .update(accounts)
+      .set({ credits: drizzleSql`${accounts.credits} + ${credits}` } as any)
+      .where(eq(accounts.id, accountId))
+      .returning();
+    return account;
+  }
+
+  async spendCredits(accountId: string, credits: number): Promise<Account | undefined> {
+    const { sql: drizzleSql } = await import("drizzle-orm");
+    const [account] = await db
+      .update(accounts)
+      .set({ credits: drizzleSql`${accounts.credits} - ${credits}` } as any)
+      .where(eq(accounts.id, accountId))
+      .returning();
+    return account;
   }
 }
 

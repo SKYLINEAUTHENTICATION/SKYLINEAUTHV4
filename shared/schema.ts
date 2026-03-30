@@ -108,6 +108,40 @@ export const sellers = pgTable(
   (table) => [index("idx_seller_app").on(table.appId)]
 );
 
+export const chatMessages = pgTable(
+  "chat_messages",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    senderUsername: varchar("sender_username").notNull(),
+    senderRole: varchar("sender_role", { length: 20 }).notNull().default("admin"),
+    recipientUsername: varchar("recipient_username"),
+    message: text("message").notNull(),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [index("idx_chat_sender").on(table.senderUsername)]
+);
+
+export const announcements = pgTable("announcements", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  authorUsername: varchar("author_username").notNull(),
+  title: text("title").notNull(),
+  content: text("content").notNull(),
+  createdAt: timestamp("created_at").defaultNow(),
+});
+
+export const appFiles = pgTable("app_files", {
+  id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+  createdByUsername: varchar("created_by_username").notNull(),
+  name: text("name").notNull(),
+  version: text("version").notNull().default("1.0.0"),
+  about: text("about"),
+  downloadUrl: text("download_url").notNull(),
+  changelog: text("changelog"),
+  status: varchar("status", { length: 20 }).default("active"),
+  createdAt: timestamp("created_at").defaultNow(),
+  updatedAt: timestamp("updated_at").defaultNow(),
+});
+
 export const insertApplicationSchema = createInsertSchema(applications).omit({
   id: true,
   secret: true,
@@ -139,6 +173,22 @@ export const insertSellerSchema = createInsertSchema(sellers).omit({
   createdAt: true,
 });
 
+export const insertChatMessageSchema = createInsertSchema(chatMessages).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAnnouncementSchema = createInsertSchema(announcements).omit({
+  id: true,
+  createdAt: true,
+});
+
+export const insertAppFileSchema = createInsertSchema(appFiles).omit({
+  id: true,
+  createdAt: true,
+  updatedAt: true,
+});
+
 export type Application = typeof applications.$inferSelect;
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
 export type License = typeof licenses.$inferSelect;
@@ -149,3 +199,9 @@ export type Token = typeof tokens.$inferSelect;
 export type InsertToken = z.infer<typeof insertTokenSchema>;
 export type Seller = typeof sellers.$inferSelect;
 export type InsertSeller = z.infer<typeof insertSellerSchema>;
+export type ChatMessage = typeof chatMessages.$inferSelect;
+export type InsertChatMessage = z.infer<typeof insertChatMessageSchema>;
+export type Announcement = typeof announcements.$inferSelect;
+export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
+export type AppFile = typeof appFiles.$inferSelect;
+export type InsertAppFile = z.infer<typeof insertAppFileSchema>;

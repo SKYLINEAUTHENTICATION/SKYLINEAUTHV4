@@ -10,7 +10,7 @@ import fs from "fs";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { storage } from "./storage";
 import { users } from "@shared/models/auth";
-import { licenses as licensesTable } from "@shared/schema";
+import { licenses as licensesTable, applications as applicationsTable } from "@shared/schema";
 import { db } from "./db";
 
 let signingKeyPair: { publicKey: Uint8Array; privateKey: Uint8Array; keyType: string };
@@ -1543,6 +1543,179 @@ export async function registerRoutes(
       console.error("Error deleting token:", error);
       res.status(500).json({ message: "Failed to delete token" });
     }
+  });
+
+  // ─── CHAT ROUTES ────────────────────────────────────────────
+  app.get("/api/chat/contacts", isLocalAuth, async (req: any, res) => {
+    try {
+      const accounts = await storage.getAllAccounts();
+      const contacts = accounts
+        .filter((a) => a.username !== req.localUser.username)
+        .map((a) => ({ id: a.id, username: a.username, role: a.role }));
+      res.json(contacts);
+    } catch { res.status(500).json({ message: "Failed to load contacts" }); }
+  });
+
+  app.get("/api/chat/messages", isLocalAuth, async (req: any, res) => {
+    try {
+      const { with: withUser } = req.query;
+      let msgs;
+      if (withUser) {
+        msgs = await storage.getDirectMessages(req.localUser.username, withUser as string);
+      } else {
+        msgs = await storage.getPublicChatMessages();
+      }
+      res.json(msgs.reverse());
+    } catch { res.status(500).json({ message: "Failed to load messages" }); }
+  });
+
+  app.post("/api/chat/messages", isLocalAuth, async (req: any, res) => {
+    try {
+      const { message, recipientUsername } = req.body;
+      if (!message?.trim()) return res.status(400).json({ message: "Message required" });
+      const msg = await storage.createChatMessage(
+        req.localUser.username,
+        req.localUser.role,
+        message.trim(),
+        recipientUsername || undefined
+      );
+      res.json(msg);
+    } catch { res.status(500).json({ message: "Failed to send message" }); }
+  });
+
+  // ─── ANNOUNCEMENT ROUTES ────────────────────────────────────
+  app.get("/api/announcements", isLocalAuth, async (req: any, res) => {
+    try {
+      const list = await storage.getAnnouncements();
+      res.json(list);
+    } catch { res.status(500).json({ message: "Failed to load announcements" }); }
+  });
+
+  app.post("/api/announcements", isLocalAuth, async (req: any, res) => {
+    try {
+      if (req.localUser.role !== "superadmin") return res.status(403).json({ message: "Forbidden" });
+      const { title, content } = req.body;
+      if (!title?.trim() || !content?.trim()) return res.status(400).json({ message: "Title and content required" });
+      const ann = await storage.createAnnouncement(req.localUser.username, title.trim(), content.trim());
+      res.json(ann);
+    } catch { res.status(500).json({ message: "Failed to create announcement" }); }
+  });
+
+  app.delete("/api/announcements/:id", isLocalAuth, async (req: any, res) => {
+    try {
+      if (req.localUser.role !== "superadmin") return res.status(403).json({ message: "Forbidden" });
+      await storage.deleteAnnouncement(req.params.id);
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to delete announcement" }); }
+  });
+
+  // ─── FILES ROUTES ────────────────────────────────────────────
+  app.get("/api/files", isLocalAuth, async (req: any, res) => {
+    try {
+      const files = await storage.getAppFiles();
+      res.json(files);
+    } catch { res.status(500).json({ message: "Failed to load files" }); }
+  });
+
+  app.post("/api/files", isLocalAuth, async (req: any, res) => {
+    try {
+      if (!["superadmin", "admin"].includes(req.localUser.role)) return res.status(403).json({ message: "Forbidden" });
+      const { name, version, about, downloadUrl, changelog, status } = req.body;
+      if (!name?.trim() || !downloadUrl?.trim()) return res.status(400).json({ message: "Name and download URL required" });
+      const file = await storage.createAppFile({
+        name: name.trim(), version: version || "1.0.0",
+        about: about || "", downloadUrl: downloadUrl.trim(),
+        changelog: changelog || "", status: status || "active",
+        createdByUsername: req.localUser.username,
+      });
+      res.json(file);
+    } catch { res.status(500).json({ message: "Failed to create file" }); }
+  });
+
+  app.patch("/api/files/:id", isLocalAuth, async (req: any, res) => {
+    try {
+      if (!["superadmin", "admin"].includes(req.localUser.role)) return res.status(403).json({ message: "Forbidden" });
+      const file = await storage.updateAppFile(req.params.id, req.body);
+      res.json(file);
+    } catch { res.status(500).json({ message: "Failed to update file" }); }
+  });
+
+  app.delete("/api/files/:id", isLocalAuth, async (req: any, res) => {
+    try {
+      if (!["superadmin", "admin"].includes(req.localUser.role)) return res.status(403).json({ message: "Forbidden" });
+      await storage.deleteAppFile(req.params.id);
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to delete file" }); }
+  });
+
+  // ─── PORTAL (app-user file access) ───────────────────────────
+  app.post("/api/portal/login", async (req, res) => {
+    try {
+      const { username, password } = req.body;
+      if (!username || !password) return res.status(400).json({ message: "Credentials required" });
+      const allApps = await db.select().from(applicationsTable);
+      let appUser = null;
+      for (const app of allApps) {
+        const u = await storage.getAppUserByUsername(username, app.id);
+        if (u && (u.password === password || u.password === null)) { appUser = u; break; }
+      }
+      if (!appUser) return res.status(401).json({ message: "Invalid credentials" });
+      const files = await storage.getAppFiles();
+      res.json({ success: true, files });
+    } catch { res.status(500).json({ message: "Portal login failed" }); }
+  });
+
+  // ─── RESELLERS ROUTES ────────────────────────────────────────
+  app.get("/api/resellers", isLocalAuth, async (req: any, res) => {
+    try {
+      if (!["superadmin", "admin"].includes(req.localUser.role)) return res.status(403).json({ message: "Forbidden" });
+      const resellers = await storage.getResellerAccounts();
+      res.json(resellers.map((r) => ({ id: r.id, username: r.username, credits: r.credits, createdAt: r.createdAt })));
+    } catch { res.status(500).json({ message: "Failed to load resellers" }); }
+  });
+
+  app.post("/api/resellers", isLocalAuth, async (req: any, res) => {
+    try {
+      if (!["superadmin", "admin"].includes(req.localUser.role)) return res.status(403).json({ message: "Forbidden" });
+      const { username, password, credits } = req.body;
+      if (!username?.trim() || !password) return res.status(400).json({ message: "Username and password required" });
+      const existing = await storage.getAccountByUsername(username.trim());
+      if (existing) return res.status(409).json({ message: "Username already taken" });
+      const hash = await bcrypt.hash(password, 10);
+      const account = await storage.createAccount(username.trim(), hash, "", "reseller");
+      if (credits && credits > 0) await storage.addCredits(account.id, credits);
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to create reseller" }); }
+  });
+
+  app.post("/api/resellers/:id/credits", isLocalAuth, async (req: any, res) => {
+    try {
+      if (!["superadmin", "admin"].includes(req.localUser.role)) return res.status(403).json({ message: "Forbidden" });
+      const { amount } = req.body;
+      if (typeof amount !== "number") return res.status(400).json({ message: "Amount required" });
+      const updated = await storage.addCredits(req.params.id, amount);
+      res.json(updated);
+    } catch { res.status(500).json({ message: "Failed to update credits" }); }
+  });
+
+  app.get("/api/resellers/me", isLocalAuth, async (req: any, res) => {
+    try {
+      const account = await storage.getAccountByUsername(req.localUser.username);
+      res.json({ credits: account?.credits ?? 0 });
+    } catch { res.status(500).json({ message: "Failed to get credits" }); }
+  });
+
+  app.post("/api/resellers/spend", isLocalAuth, async (req: any, res) => {
+    try {
+      if (req.localUser.role !== "reseller") return res.status(403).json({ message: "Forbidden" });
+      const { days } = req.body;
+      if (!days || days < 1) return res.status(400).json({ message: "Days required" });
+      const credits = Math.ceil(days / 5);
+      const account = await storage.getAccountByUsername(req.localUser.username);
+      if (!account || (account.credits ?? 0) < credits) return res.status(400).json({ message: "Insufficient credits" });
+      await storage.spendCredits(account.id, credits);
+      res.json({ success: true, creditsSpent: credits });
+    } catch { res.status(500).json({ message: "Failed to spend credits" }); }
   });
 
   app.get("/api/download/telegram-bot", (req, res) => {
