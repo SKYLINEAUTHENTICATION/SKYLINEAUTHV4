@@ -597,98 +597,41 @@ setInterval(() => {
   }
 }, 600000);
 
-function registerLocalAuth(app: Express) {
-  app.post("/api/local/register", async (req, res) => {
-    try {
-      const { username, password, email, turnstileToken } = req.body;
-      if (!username || !password || !email) {
-        return res.status(400).json({ message: "Username, email, and password are required." });
-      }
-
-      if (process.env.TURNSTILE_SECRET_KEY && turnstileToken) {
-        const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            secret: process.env.TURNSTILE_SECRET_KEY,
-            response: turnstileToken,
-          }),
-        });
-        const verifyData = await verifyRes.json() as { success: boolean };
-        if (!verifyData.success) {
-          return res.status(403).json({ message: "Security verification failed. Please try again." });
-        }
-      }
-      if (username.length < 3) {
-        return res.status(400).json({ message: "Username must be at least 3 characters." });
-      }
-      if (password.length < 12) {
-        return res.status(400).json({ message: "Password must be at least 12 characters." });
-      }
-      if (!/[A-Z]/.test(password) || !/[a-z]/.test(password) || !/[0-9]/.test(password) || !/[^A-Za-z0-9]/.test(password)) {
-        return res.status(400).json({ message: "Password must contain uppercase, lowercase, number, and symbol." });
-      }
-      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-      if (!emailRegex.test(email)) {
-        return res.status(400).json({ message: "Please enter a valid email address." });
-      }
-      const existing = await storage.getAccountByUsername(username);
-      if (existing) {
-        return res.status(400).json({ message: "Username already taken." });
-      }
-      const [existingEmail] = await db.select().from(users).where(eq(users.email, email));
-      if (existingEmail) {
-        return res.status(400).json({ message: "Email already in use." });
-      }
-      const passwordHash = await bcrypt.hash(password, 10);
+async function seedSuperAdmin() {
+  try {
+    const existing = await storage.getAccountByUsername("SKY-SR");
+    if (!existing) {
+      const passwordHash = await bcrypt.hash("vc3yge5f", 10);
       const userId = randomUUID();
-      const [user] = await db.insert(users).values({
+      await db.insert(users).values({
         id: userId,
-        firstName: username,
-        email,
-      }).returning();
-      const account = await storage.createAccount(username, passwordHash, userId);
-      const sessionId = randomUUID();
-      localSessions.set(sessionId, { userId, createdAt: Date.now() });
-      res.cookie("kv_session", sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 86400000,
-        path: "/",
+        firstName: "SKY-SR",
+        email: null,
       });
-      return res.json({ success: true, user: { id: userId, firstName: username, email: user.email } });
-    } catch (error: any) {
-      console.error("Register error:", error);
-      if (error?.code === "23505") {
-        return res.status(400).json({ message: "Username or email already taken." });
-      }
-      return res.status(500).json({ message: "Registration failed." });
+      await storage.createAccount("SKY-SR", passwordHash, userId, "superadmin");
+      console.log("[seed] Super admin 'SKY-SR' created.");
+    } else if (existing.role !== "superadmin") {
+      await storage.updateAccount(existing.id, { role: "superadmin" });
+      console.log("[seed] Updated SKY-SR to superadmin role.");
     }
-  });
+  } catch (err) {
+    console.error("[seed] Failed to seed super admin:", err);
+  }
+}
 
+function getLocalSession(req: any) {
+  const sessionId = req.cookies?.kv_session;
+  if (!sessionId) return null;
+  return localSessions.get(sessionId) || null;
+}
+
+function registerLocalAuth(app: Express) {
   app.post("/api/local/login", async (req, res) => {
     try {
-      const { username, password, turnstileToken } = req.body;
+      const { username, password } = req.body;
       if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required." });
       }
-
-      if (process.env.TURNSTILE_SECRET_KEY && turnstileToken) {
-        const verifyRes = await fetch("https://challenges.cloudflare.com/turnstile/v0/siteverify", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            secret: process.env.TURNSTILE_SECRET_KEY,
-            response: turnstileToken,
-          }),
-        });
-        const verifyData = await verifyRes.json() as { success: boolean };
-        if (!verifyData.success) {
-          return res.status(403).json({ message: "Security verification failed. Please try again." });
-        }
-      }
-
       const account = await storage.getAccountByUsername(username);
       if (!account) {
         return res.status(401).json({ message: "Invalid username or password." });
@@ -707,7 +650,7 @@ function registerLocalAuth(app: Express) {
         path: "/",
       });
       const [user] = await db.select().from(users).where(eq(users.id, account.userId!));
-      return res.json({ success: true, user });
+      return res.json({ success: true, user: { ...user, role: account.role, username: account.username } });
     } catch (error) {
       console.error("Login error:", error);
       return res.status(500).json({ message: "Login failed." });
@@ -716,20 +659,17 @@ function registerLocalAuth(app: Express) {
 
   app.get("/api/local/user", async (req, res) => {
     try {
-      const sessionId = req.cookies?.kv_session;
-      if (!sessionId) {
-        return res.status(401).json({ message: "Not authenticated" });
-      }
-      const session = localSessions.get(sessionId);
+      const session = getLocalSession(req);
       if (!session) {
-        return res.status(401).json({ message: "Session expired" });
+        return res.status(401).json({ message: "Not authenticated" });
       }
       const [user] = await db.select().from(users).where(eq(users.id, session.userId));
       if (!user) {
         return res.status(401).json({ message: "User not found" });
       }
+      const account = await storage.getAccountByUserId(session.userId);
       const numericId = await storage.ensureNumericId(user.id);
-      return res.json({ ...user, numericId });
+      return res.json({ ...user, numericId, role: account?.role || "admin", username: account?.username || user.firstName });
     } catch (error) {
       console.error("Get user error:", error);
       return res.status(500).json({ message: "Failed to get user" });
@@ -743,6 +683,110 @@ function registerLocalAuth(app: Express) {
     }
     res.clearCookie("kv_session", { path: "/" });
     return res.json({ success: true });
+  });
+
+  app.get("/api/panel/users", async (req, res) => {
+    try {
+      const session = getLocalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const account = await storage.getAccountByUserId(session.userId);
+      if (!account || account.role !== "superadmin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const allAccounts = await storage.getAllAccounts();
+      const result = await Promise.all(
+        allAccounts.map(async (acc) => {
+          const [u] = await db.select().from(users).where(eq(users.id, acc.userId!));
+          return {
+            id: acc.id,
+            username: acc.username,
+            role: acc.role,
+            email: acc.email || u?.email,
+            createdAt: acc.createdAt,
+          };
+        })
+      );
+      return res.json(result);
+    } catch (error) {
+      console.error("Get panel users error:", error);
+      return res.status(500).json({ message: "Failed to get users" });
+    }
+  });
+
+  app.post("/api/panel/users", async (req, res) => {
+    try {
+      const session = getLocalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const account = await storage.getAccountByUserId(session.userId);
+      if (!account || account.role !== "superadmin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const { username, password, role, email } = req.body;
+      if (!username || !password || !role) {
+        return res.status(400).json({ message: "Username, password, and role are required." });
+      }
+      if (!["admin", "reseller"].includes(role)) {
+        return res.status(400).json({ message: "Role must be 'admin' or 'reseller'." });
+      }
+      if (username.length < 3) {
+        return res.status(400).json({ message: "Username must be at least 3 characters." });
+      }
+      const existing = await storage.getAccountByUsername(username);
+      if (existing) {
+        return res.status(400).json({ message: "Username already taken." });
+      }
+      const passwordHash = await bcrypt.hash(password, 10);
+      const userId = randomUUID();
+      await db.insert(users).values({ id: userId, firstName: username, email: email || null });
+      const newAccount = await storage.createAccount(username, passwordHash, userId, role, email || null);
+      return res.json({ success: true, user: { id: newAccount.id, username, role, email } });
+    } catch (error: any) {
+      console.error("Create panel user error:", error);
+      if (error?.code === "23505") return res.status(400).json({ message: "Username already taken." });
+      return res.status(500).json({ message: "Failed to create user." });
+    }
+  });
+
+  app.delete("/api/panel/users/:id", async (req, res) => {
+    try {
+      const session = getLocalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const account = await storage.getAccountByUserId(session.userId);
+      if (!account || account.role !== "superadmin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const targetAccount = await storage.getAllAccounts().then(all => all.find(a => a.id === req.params.id));
+      if (!targetAccount) return res.status(404).json({ message: "User not found" });
+      if (targetAccount.role === "superadmin") {
+        return res.status(403).json({ message: "Cannot delete the super admin." });
+      }
+      await storage.deleteAccount(targetAccount.id);
+      if (targetAccount.userId) {
+        await db.delete(users).where(eq(users.id, targetAccount.userId));
+      }
+      return res.json({ success: true });
+    } catch (error) {
+      console.error("Delete panel user error:", error);
+      return res.status(500).json({ message: "Failed to delete user." });
+    }
+  });
+
+  app.patch("/api/panel/users/:id/password", async (req, res) => {
+    try {
+      const session = getLocalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const account = await storage.getAccountByUserId(session.userId);
+      if (!account || account.role !== "superadmin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const { password } = req.body;
+      if (!password || password.length < 4) return res.status(400).json({ message: "Password too short." });
+      const passwordHash = await bcrypt.hash(password, 10);
+      await storage.updateAccount(req.params.id, { passwordHash });
+      return res.json({ success: true });
+    } catch (error) {
+      return res.status(500).json({ message: "Failed to update password." });
+    }
   });
 }
 
@@ -767,6 +811,8 @@ export async function registerRoutes(
 
   registerLocalAuth(app);
   registerClientApi(app);
+
+  await seedSuperAdmin();
 
   app.get("/api/applications", isAuthenticatedCombined, async (req: any, res) => {
     try {

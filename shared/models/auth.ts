@@ -31,6 +31,8 @@ export const accounts = pgTable("accounts", {
   username: varchar("username").notNull().unique(),
   passwordHash: varchar("password_hash").notNull(),
   userId: varchar("user_id").references(() => users.id),
+  role: varchar("role", { length: 20 }).notNull().default("admin"),
+  email: varchar("email", { length: 255 }),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

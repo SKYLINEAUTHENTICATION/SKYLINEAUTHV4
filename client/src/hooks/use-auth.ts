@@ -1,7 +1,19 @@
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
-import type { User } from "@shared/models/auth";
 
-async function fetchUser(): Promise<User | null> {
+export type PanelUser = {
+  id: string;
+  email?: string | null;
+  firstName?: string | null;
+  lastName?: string | null;
+  profileImageUrl?: string | null;
+  numericId?: string;
+  createdAt?: string;
+  updatedAt?: string;
+  role: string;
+  username: string;
+};
+
+async function fetchUser(): Promise<PanelUser | null> {
   const localRes = await fetch("/api/local/user", { credentials: "include" });
   if (localRes.ok) {
     return localRes.json();
@@ -14,7 +26,8 @@ async function fetchUser(): Promise<User | null> {
   if (!response.ok) {
     throw new Error(`${response.status}: ${response.statusText}`);
   }
-  return response.json();
+  const data = await response.json();
+  return { ...data, role: data.role || "admin", username: data.username || data.firstName || "User" };
 }
 
 async function logout(): Promise<void> {
@@ -31,7 +44,7 @@ async function logout(): Promise<void> {
 
 export function useAuth() {
   const queryClient = useQueryClient();
-  const { data: user, isLoading } = useQuery<User | null>({
+  const { data: user, isLoading } = useQuery<PanelUser | null>({
     queryKey: ["/api/auth/user"],
     queryFn: fetchUser,
     retry: false,
@@ -51,5 +64,8 @@ export function useAuth() {
     isAuthenticated: !!user,
     logout: logoutMutation.mutate,
     isLoggingOut: logoutMutation.isPending,
+    isSuperAdmin: user?.role === "superadmin",
+    isAdmin: user?.role === "admin" || user?.role === "superadmin",
+    isReseller: user?.role === "reseller",
   };
 }

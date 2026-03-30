@@ -108,7 +108,10 @@ export interface IStorage {
 
   getAccountByUsername(username: string): Promise<Account | undefined>;
   getAccountByUserId(userId: string): Promise<Account | undefined>;
-  createAccount(username: string, passwordHash: string, userId: string): Promise<Account>;
+  createAccount(username: string, passwordHash: string, userId: string, role?: string, email?: string): Promise<Account>;
+  getAllAccounts(): Promise<Account[]>;
+  deleteAccount(id: string): Promise<void>;
+  updateAccount(id: string, data: Partial<Account>): Promise<Account | undefined>;
   getUserByNumericId(numericId: string): Promise<User | undefined>;
   ensureNumericId(userId: string): Promise<string>;
 }
@@ -364,11 +367,24 @@ export class DatabaseStorage implements IStorage {
     return account;
   }
 
-  async createAccount(username: string, passwordHash: string, userId: string): Promise<Account> {
+  async createAccount(username: string, passwordHash: string, userId: string, role = "admin", email?: string): Promise<Account> {
     const [account] = await db
       .insert(accounts)
-      .values({ username, passwordHash, userId })
+      .values({ username, passwordHash, userId, role, email })
       .returning();
+    return account;
+  }
+
+  async getAllAccounts(): Promise<Account[]> {
+    return db.select().from(accounts);
+  }
+
+  async deleteAccount(id: string): Promise<void> {
+    await db.delete(accounts).where(eq(accounts.id, id));
+  }
+
+  async updateAccount(id: string, data: Partial<Account>): Promise<Account | undefined> {
+    const [account] = await db.update(accounts).set(data).where(eq(accounts.id, id)).returning();
     return account;
   }
 

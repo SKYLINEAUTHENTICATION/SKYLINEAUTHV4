@@ -239,16 +239,6 @@ export default function LoginPage() {
               </button>
             </form>
 
-            <p style={{ textAlign: "center", fontSize: 13, color: "#4e3d6a", marginTop: 22 }}>
-              Don't have an account?{" "}
-              <button
-                onClick={() => setLocation("/register")}
-                style={{ background: "none", border: "none", color: "#a78bfa", fontWeight: 600, cursor: "pointer", fontSize: 13 }}
-                data-testid="link-register"
-              >
-                Sign up
-              </button>
-            </p>
 
             <p style={{ textAlign: "center", fontSize: 11, color: "#2a1a3e", marginTop: 18 }}>
               &copy; 2025 SKYLINE &mdash; Secure Auth Panel

@@ -10,7 +10,6 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 
 import LoginPage from "@/pages/login";
-import RegisterPage from "@/pages/register";
 import DashboardPage from "@/pages/dashboard";
 import ManageAppsPage from "@/pages/manage-apps";
 import LicensesPage from "@/pages/licenses";
@@ -18,6 +17,7 @@ import AppUsersPage from "@/pages/app-users";
 import TokensPage from "@/pages/tokens";
 import AppSettingsPage from "@/pages/app-settings";
 import StatisticsPage from "@/pages/statistics";
+import PanelUsersPage from "@/pages/panel-users";
 import NotFound from "@/pages/not-found";
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
@@ -59,6 +59,7 @@ function AuthenticatedApp() {
         <Route path="/dashboard/tokens" component={TokensPage} />
         <Route path="/dashboard/settings" component={AppSettingsPage} />
         <Route path="/dashboard/statistics" component={StatisticsPage} />
+        <Route path="/dashboard/panel-users" component={PanelUsersPage} />
         <Route path="/">
           <Redirect to="/dashboard" />
         </Route>
@@ -85,7 +86,7 @@ function AppRouter() {
   }
 
   if (user) {
-    if (location === "/login" || location === "/register") {
+    if (location === "/login") {
       return <Redirect to="/dashboard" />;
     }
     return <AuthenticatedApp />;
@@ -94,7 +95,6 @@ function AppRouter() {
   return (
     <Switch>
       <Route path="/login" component={LoginPage} />
-      <Route path="/register" component={RegisterPage} />
       <Route path="/">
         <Redirect to="/login" />
       </Route>

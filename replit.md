@@ -1,21 +1,29 @@
-# KeyAuth Manager - Software Licensing Platform
+# SKYLINE Auth Panel
 
 ## Overview
-A KeyAuth-style software licensing and authentication management platform. Users can create applications, generate license keys, manage app users, create registration tokens, and configure app settings - all from a single dashboard. Includes a public client API compatible with KeyAuth-style client libraries.
+A software licensing and authentication management panel with SKYLINE UI. Features role-based access control (Super Admin, Admin, Reseller). No public registration — accounts are created by Super Admin only. Includes a public client API compatible with KeyAuth-style client libraries.
+
+## Credentials
+- **Super Admin**: username `SKY-SR`, password `vc3yge5f` (seeded on startup)
 
 ## Architecture
-- **Frontend**: React + Vite + Tailwind CSS + shadcn/ui components
+- **Frontend**: React + Vite + Tailwind CSS + shadcn/ui components — SKYLINE dark purple theme
 - **Backend**: Express.js with TypeScript
 - **Database**: PostgreSQL with Drizzle ORM
-- **Auth**: Dual auth - Replit Auth (OIDC) + Local username/password auth (bcrypt + cookie sessions)
+- **Auth**: Local username/password auth (bcrypt + cookie sessions). No public registration.
 - **Routing**: wouter (client-side)
+
+## Role System
+- **superadmin**: Full access — can create admins, resellers; manage all resources
+- **admin**: Can manage apps, licenses, app users, tokens, settings
+- **reseller**: Limited access — licenses and app users only
 
 ## Project Structure
 ```
 client/src/
-  pages/         - Landing, Login, Register, Dashboard, ManageApps, Licenses, AppUsers, Tokens, AppSettings, Statistics
-  components/    - AppSidebar, ThemeProvider, ThemeToggle, ui/ (shadcn)
-  hooks/         - use-auth, use-toast, use-mobile
+  pages/         - Login, Dashboard, ManageApps, Licenses, AppUsers, Tokens, AppSettings, Statistics, PanelUsers
+  components/    - AppSidebar (role-based nav), ThemeProvider, ui/ (shadcn)
+  hooks/         - use-auth (includes role/isSuperAdmin/isAdmin), use-toast, use-mobile
   lib/           - queryClient, utils, auth-utils
 
 server/
