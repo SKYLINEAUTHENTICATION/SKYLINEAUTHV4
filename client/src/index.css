@@ -21,31 +21,31 @@
   --sidebar: 0 0% 2%;
   --sidebar-foreground: 0 0% 92%;
   --sidebar-border: 265 40% 11%;
-  --sidebar-primary: 262 78% 57%;
+  --sidebar-primary: 262 78% 38%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 265 50% 12%;
-  --sidebar-accent-foreground: 254 80% 80%;
-  --sidebar-ring: 262 78% 57%;
+  --sidebar-accent-foreground: 254 80% 72%;
+  --sidebar-ring: 262 78% 38%;
   --popover: 270 28% 5%;
   --popover-foreground: 0 0% 96%;
   --popover-border: 265 45% 14%;
-  --primary: 262 78% 57%;
+  --primary: 262 78% 38%;
   --primary-foreground: 0 0% 100%;
   --secondary: 265 40% 11%;
   --secondary-foreground: 0 0% 90%;
   --muted: 265 28% 9%;
   --muted-foreground: 240 5% 64%;
   --accent: 265 40% 11%;
-  --accent-foreground: 254 80% 80%;
+  --accent-foreground: 254 80% 72%;
   --destructive: 0 84% 45%;
   --destructive-foreground: 0 0% 100%;
   --input: 265 28% 10%;
-  --ring: 262 78% 57%;
-  --chart-1: 262 78% 65%;
-  --chart-2: 280 65% 60%;
-  --chart-3: 250 60% 62%;
-  --chart-4: 220 55% 58%;
-  --chart-5: 300 50% 58%;
+  --ring: 262 78% 38%;
+  --chart-1: 262 78% 55%;
+  --chart-2: 280 65% 50%;
+  --chart-3: 250 60% 52%;
+  --chart-4: 220 55% 48%;
+  --chart-5: 300 50% 48%;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
@@ -94,31 +94,31 @@
   --sidebar: 0 0% 2%;
   --sidebar-foreground: 0 0% 92%;
   --sidebar-border: 265 40% 11%;
-  --sidebar-primary: 262 78% 57%;
+  --sidebar-primary: 262 78% 38%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 265 50% 12%;
-  --sidebar-accent-foreground: 254 80% 80%;
-  --sidebar-ring: 262 78% 57%;
+  --sidebar-accent-foreground: 254 80% 72%;
+  --sidebar-ring: 262 78% 38%;
   --popover: 270 28% 5%;
   --popover-foreground: 0 0% 96%;
   --popover-border: 265 45% 14%;
-  --primary: 262 78% 57%;
+  --primary: 262 78% 38%;
   --primary-foreground: 0 0% 100%;
   --secondary: 265 40% 11%;
   --secondary-foreground: 0 0% 90%;
   --muted: 265 28% 9%;
   --muted-foreground: 240 5% 64%;
   --accent: 265 40% 11%;
-  --accent-foreground: 254 80% 80%;
+  --accent-foreground: 254 80% 72%;
   --destructive: 0 84% 45%;
   --destructive-foreground: 0 0% 100%;
   --input: 265 28% 10%;
-  --ring: 262 78% 57%;
-  --chart-1: 262 78% 65%;
-  --chart-2: 280 65% 60%;
-  --chart-3: 250 60% 62%;
-  --chart-4: 220 55% 58%;
-  --chart-5: 300 50% 58%;
+  --ring: 262 78% 38%;
+  --chart-1: 262 78% 55%;
+  --chart-2: 280 65% 50%;
+  --chart-3: 250 60% 52%;
+  --chart-4: 220 55% 48%;
+  --chart-5: 300 50% 48%;
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
@@ -463,57 +463,47 @@ textarea:focus {
 
 /* ── 10. Sidebar active nav button ── */
 [data-sidebar="menu-button"][data-active="true"] {
-  box-shadow:
-    0 0 12px rgba(139,92,246,0.60),
-    0 0 28px rgba(124,58,237,0.35),
-    inset 0 0 10px rgba(139,92,246,0.15) !important;
+  box-shadow: none !important;
 }
 
-/* ── 11. Sidebar active item — icon + text glow ── */
+/* ── 11. Sidebar active item — icon + text (no glow) ── */
 [data-sidebar="menu-button"][data-active="true"] svg,
 [data-sidebar="menu-button"][data-active="true"] span {
-  filter: drop-shadow(0 0 5px var(--pg-text)) drop-shadow(0 0 10px var(--pg-text-soft));
+  filter: none;
 }
 
-/* ── 12. Sidebar hover (non-active items on hover) ── */
+/* ── 12. Sidebar hover (no glow on hover) ── */
 [data-sidebar="menu-button"]:not([data-active="true"]):hover svg,
 [data-sidebar="menu-button"]:not([data-active="true"]):hover span {
-  filter: drop-shadow(0 0 3px rgba(167,139,250,0.50));
+  filter: none;
 }
 
 /* ── 13. Sidebar group labels ── */
 [data-sidebar="group-label"] {
-  text-shadow: 0 0 8px rgba(139,92,246,0.40);
   color: hsl(var(--sidebar-accent-foreground));
 }
 
-/* ── 14. Sidebar header/footer borders (purple) ── */
-[data-slot="sidebar-header"],
-[data-slot="sidebar-footer"] {
-  --border-glow: 0 1px 0 rgba(139,92,246,0.35);
-}
-
-/* ── 15. Sidebar logo box-shadow enhancement ── */
+/* ── 15. Sidebar logo (no glow) ── */
 [data-slot="sidebar-header"] img {
-  filter: drop-shadow(0 0 8px rgba(139,92,246,0.60));
+  filter: none;
 }
 
-/* ── 16. Sidebar user avatar (gradient circle) ── */
+/* ── 16. Sidebar user avatar (no glow) ── */
 [data-slot="sidebar-footer"] [style*="linear-gradient"],
 [data-slot="sidebar-footer"] .rounded-full {
-  box-shadow: 0 0 14px var(--pg), 0 0 28px var(--pg-wide);
+  box-shadow: none;
 }
 
 /* ── 17. Sidebar trigger (hamburger button) ── */
 [data-sidebar="trigger"] svg {
-  filter: drop-shadow(0 0 5px var(--pg));
+  filter: none;
   color: hsl(var(--primary));
 }
 
-/* ── 18. accent-foreground text (light purple on active/hover elements) ── */
+/* ── 18. accent-foreground text ── */
 .text-accent-foreground,
 .text-sidebar-accent-foreground {
-  text-shadow: 0 0 8px var(--pg-text), 0 0 18px var(--pg-text-soft);
+  text-shadow: none;
 }
 
 /* ── 19. ring-ring focus outlines (purple) ── */
@@ -671,7 +661,7 @@ p[style*="a78bfa"] {
 
 /* ── 36. Sidebar trigger hover ── */
 [data-sidebar="trigger"]:hover {
-  box-shadow: 0 0 12px var(--pg);
+  box-shadow: none;
 }
 
 /* ── 37. Chart colors (chart-1 and chart-2 are purple range) ── */

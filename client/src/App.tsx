@@ -84,21 +84,36 @@ function AppRouter() {
 
   if (isLoading) {
     return (
-      <div style={{ background: "#000" }} className="flex h-screen items-center justify-center">
-        <div className="login-progress-bar-track">
-          <div className="login-progress-bar-fill" />
-        </div>
-        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+      <div style={{ background: "#000", position: "relative" }} className="flex h-screen items-center justify-center">
+        <div style={{
+          width: "55%",
+          height: 3,
+          background: "rgba(30,0,60,0.5)",
+          borderRadius: 2,
+          overflow: "hidden",
+        }}>
           <div style={{
-            width: 56, height: 56, borderRadius: "50%",
-            background: "conic-gradient(from 0deg, #7c3aed, #a855f7, #c084fc, #7c3aed)",
-            animation: "spin 1.4s linear infinite",
-            boxShadow: "0 0 20px rgba(139,92,246,0.70), 0 0 40px rgba(124,58,237,0.40)",
+            height: "100%",
+            background: "linear-gradient(90deg, #4c1d95, #7c3aed, #a855f7, #7c3aed, #4c1d95)",
+            backgroundSize: "200% auto",
+            animation: "loading-bar-fill 1.8s cubic-bezier(0.4,0,0.2,1) forwards, loading-bar-shimmer 1.2s linear infinite",
+            boxShadow: "0 0 8px rgba(124,58,237,0.70), 0 0 20px rgba(124,58,237,0.40)",
+            borderRadius: 2,
           }} />
-          <p style={{ fontSize: 13, color: "#7c3aed", letterSpacing: "1px", fontWeight: 600,
-            textShadow: "0 0 10px rgba(139,92,246,0.70)" }}>Loading...</p>
         </div>
-        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
+        <style>{`
+          @keyframes loading-bar-fill {
+            0%   { width: 0%; }
+            40%  { width: 60%; }
+            70%  { width: 82%; }
+            90%  { width: 94%; }
+            100% { width: 100%; }
+          }
+          @keyframes loading-bar-shimmer {
+            0%   { background-position: -200% center; }
+            100% { background-position: 200% center; }
+          }
+        `}</style>
       </div>
     );
   }
