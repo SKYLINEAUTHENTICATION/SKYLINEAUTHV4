@@ -609,21 +609,23 @@ async function isLocalAuth(req: any, res: any, next: any) {
 }
 
 async function seedSuperAdmin() {
+  const adminUsername = process.env.SUPER_ADMIN_USERNAME || "SKY-SR";
+  const adminPassword = process.env.SUPER_ADMIN_PASSWORD || "vc3yge5f";
   try {
-    const existing = await storage.getAccountByUsername("SKY-SR");
+    const existing = await storage.getAccountByUsername(adminUsername);
     if (!existing) {
-      const passwordHash = await bcrypt.hash("vc3yge5f", 10);
+      const passwordHash = await bcrypt.hash(adminPassword, 10);
       const userId = randomUUID();
       await db.insert(users).values({
         id: userId,
-        firstName: "SKY-SR",
+        firstName: adminUsername,
         email: null,
       });
-      await storage.createAccount("SKY-SR", passwordHash, userId, "superadmin");
-      console.log("[seed] Super admin 'SKY-SR' created.");
+      await storage.createAccount(adminUsername, passwordHash, userId, "superadmin");
+      console.log(`[seed] Super admin '${adminUsername}' created.`);
     } else if (existing.role !== "superadmin") {
       await storage.updateAccount(existing.id, { role: "superadmin" });
-      console.log("[seed] Updated SKY-SR to superadmin role.");
+      console.log(`[seed] Updated ${adminUsername} to superadmin role.`);
     }
   } catch (err) {
     console.error("[seed] Failed to seed super admin:", err);
