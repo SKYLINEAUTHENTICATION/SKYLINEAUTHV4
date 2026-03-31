@@ -68,6 +68,11 @@
   --muted-border: hsl(var(--muted));
   --accent-border: hsl(var(--accent));
   --destructive-border: hsl(var(--destructive));
+
+  /* Purple glow strength (70%) */
+  --purple-glow-color: rgba(139, 92, 246, 0.70);
+  --purple-glow-spread: rgba(124, 58, 237, 0.70);
+  --purple-glow-text: rgba(167, 139, 250, 0.70);
 }
 
 /* dark class mirrors :root for compatibility */
@@ -128,6 +133,10 @@
   --muted-border: hsl(var(--muted));
   --accent-border: hsl(var(--accent));
   --destructive-border: hsl(var(--destructive));
+
+  --purple-glow-color: rgba(139, 92, 246, 0.70);
+  --purple-glow-spread: rgba(124, 58, 237, 0.70);
+  --purple-glow-text: rgba(167, 139, 250, 0.70);
 }
 
 @layer base {
@@ -137,6 +146,7 @@
 
   body {
     @apply font-sans antialiased bg-background text-foreground;
+    perspective: 1200px;
   }
 
   ::selection {
@@ -324,10 +334,18 @@
 .skyline-card {
   position: relative;
   z-index: 1;
-  background: #0a0812;
+  background: linear-gradient(160deg, #0f0a1e 0%, #0a0812 60%, #070510 100%);
   border-radius: 4px;
   border: 1px solid rgba(100, 30, 180, 0.4);
   width: 100%;
+  transform: perspective(900px) rotateX(1.5deg);
+  box-shadow:
+    0 2px 0 0 rgba(139,92,246,0.08),
+    0 8px 32px -4px rgba(0,0,0,0.8),
+    0 0 0 1px rgba(139,92,246,0.07),
+    0 20px 60px -12px rgba(124,58,237,0.30),
+    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 -1px 0 rgba(0,0,0,0.5);
 }
 
 .skyline-brand {
@@ -341,6 +359,7 @@
   background-clip: text;
   text-align: center;
   display: block;
+  filter: drop-shadow(0 0 12px rgba(170, 0, 255, 0.70)) drop-shadow(0 0 24px rgba(170, 0, 255, 0.40));
 }
 
 .skyline-brand-sidebar {
@@ -351,4 +370,126 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.70));
+}
+
+/* ── 3D depth for cards ───────────────────── */
+.card, [class*="card"] {
+  transform-style: preserve-3d;
+}
+
+/* ── Purple glow: buttons ───────────────────── */
+button[class*="bg-primary"],
+button[style*="7c3aed"],
+button[style*="linear-gradient(135deg, #7c3aed"],
+.btn-primary {
+  box-shadow:
+    0 0 18px var(--purple-glow-color),
+    0 0 40px rgba(124, 58, 237, 0.35),
+    0 4px 18px rgba(124,58,237,0.35) !important;
+}
+
+/* ── Purple glow: sidebar active items ───────────────────── */
+[data-active="true"] {
+  box-shadow: 0 0 14px var(--purple-glow-color), inset 0 0 8px rgba(139,92,246,0.15);
+}
+
+/* ── Purple glow: badges & status indicators ───────────────────── */
+.badge-purple,
+[class*="bg-primary"][class*="badge"],
+[class*="bg-violet"],
+[class*="bg-purple"] {
+  box-shadow: 0 0 10px var(--purple-glow-color), 0 0 20px rgba(124,58,237,0.35);
+}
+
+/* ── Purple glow: purple-colored labels/text ───────────────────── */
+label[style*="#a78bfa"],
+label[style*="a78bfa"],
+[style*="color: #a78bfa"],
+[style*="color:#a78bfa"] {
+  text-shadow: 0 0 8px var(--purple-glow-text), 0 0 16px rgba(167,139,250,0.40);
+}
+
+/* ── Purple glow: input focus ring ───────────────────── */
+input:focus {
+  box-shadow: 0 0 0 2px rgba(139,92,246,0.70), 0 0 18px rgba(139,92,246,0.40) !important;
+  border-color: rgba(139,92,246,0.80) !important;
+}
+
+/* ── Purple glow: sidebar brand + ring ───────────────────── */
+.skyline-glow-wrap::after {
+  filter: blur(6px) brightness(2.2);
+}
+
+/* ── Login loading bar animation ───────────────────── */
+@keyframes login-bar-fill {
+  0%   { width: 0%; opacity: 1; }
+  40%  { width: 60%; }
+  70%  { width: 82%; }
+  90%  { width: 94%; }
+  100% { width: 100%; opacity: 1; }
+}
+
+@keyframes login-bar-shimmer {
+  0%   { background-position: -200% center; }
+  100% { background-position: 200% center; }
+}
+
+.login-progress-bar-track {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: rgba(30, 0, 60, 0.5);
+  z-index: 9999;
+}
+
+.login-progress-bar-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #7c3aed, #a855f7, #c084fc, #a855f7, #7c3aed);
+  background-size: 200% auto;
+  animation:
+    login-bar-fill 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards,
+    login-bar-shimmer 1.2s linear infinite;
+  box-shadow:
+    0 0 8px rgba(139, 92, 246, 0.70),
+    0 0 20px rgba(124, 58, 237, 0.50),
+    0 0 40px rgba(124, 58, 237, 0.30);
+  border-radius: 0 2px 2px 0;
+}
+
+/* ── 3D body perspective for full page depth ───────────────────── */
+#root {
+  transform-style: preserve-3d;
+}
+
+/* ── Sidebar glow on active + hover items ───────────────────── */
+[data-sidebar="menu-button"][data-active="true"] {
+  box-shadow: 0 0 12px rgba(139, 92, 246, 0.70), inset 0 0 6px rgba(139, 92, 246, 0.15);
+}
+
+/* ── Primary ring glow ───────────────────── */
+[class*="ring-primary"],
+[class*="ring-violet"],
+[class*="ring-purple"] {
+  box-shadow: 0 0 0 2px rgba(139,92,246,0.70), 0 0 16px rgba(139,92,246,0.40);
+}
+
+/* ── 3D glow on skyline-card hover ───────────────────── */
+.skyline-card:hover {
+  box-shadow:
+    0 2px 0 0 rgba(139,92,246,0.10),
+    0 12px 40px -4px rgba(0,0,0,0.9),
+    0 0 0 1px rgba(139,92,246,0.12),
+    0 28px 72px -12px rgba(124,58,237,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.6);
+  transform: perspective(900px) rotateX(1.5deg) translateY(-2px);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
+}
+
+.skyline-card {
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }

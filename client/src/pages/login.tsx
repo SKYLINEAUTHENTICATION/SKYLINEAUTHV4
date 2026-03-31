@@ -13,6 +13,7 @@ export default function LoginPage() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [isLoading, setIsLoading] = useState(false);
+  const [showProgressBar, setShowProgressBar] = useState(false);
   const errorAudioRef = useRef<HTMLAudioElement | null>(null);
   const successAudioRef = useRef<HTMLAudioElement | null>(null);
 
@@ -50,8 +51,9 @@ export default function LoginPage() {
         return;
       }
       playSuccessSound();
+      setShowProgressBar(true);
       await queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
-      await new Promise((r) => setTimeout(r, 400));
+      await new Promise((r) => setTimeout(r, 1700));
       setLocation("/dashboard");
     } catch {
       playErrorSound();
@@ -67,6 +69,14 @@ export default function LoginPage() {
       minHeight: "100vh",
       backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.18) 0%, transparent 65%), radial-gradient(ellipse at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 50%)",
     }} className="flex flex-col items-center justify-center px-4">
+
+      {/* Post-login horizontal loading bar */}
+      {showProgressBar && (
+        <div className="login-progress-bar-track" data-testid="login-progress-bar">
+          <div className="login-progress-bar-fill" />
+        </div>
+      )}
+
       <div className="w-full" style={{ maxWidth: 380 }}>
         <div className="skyline-glow-wrap">
           <div className="skyline-card" style={{ padding: "40px 32px 36px" }}>
@@ -84,6 +94,8 @@ export default function LoginPage() {
                   background: "conic-gradient(from 0deg, #00bfff, #a855f7, #00bfff)",
                   animation: "spin 3s linear infinite",
                   zIndex: 0,
+                  filter: "blur(1px) brightness(1.4)",
+                  boxShadow: "0 0 20px rgba(139,92,246,0.70), 0 0 40px rgba(124,58,237,0.40)",
                 }} />
                 <img
                   src={logoPath}
@@ -91,7 +103,7 @@ export default function LoginPage() {
                   style={{
                     width: 88, height: 88, borderRadius: "50%",
                     objectFit: "cover", position: "relative", zIndex: 1,
-                    boxShadow: "0 0 30px rgba(0,200,255,0.4), 0 0 12px rgba(124,58,237,0.5)",
+                    boxShadow: "0 0 30px rgba(0,200,255,0.4), 0 0 16px rgba(124,58,237,0.70)",
                   }}
                 />
               </div>
@@ -103,7 +115,10 @@ export default function LoginPage() {
 
             <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px" }}>Username</label>
+                <label style={{
+                  fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px",
+                  textShadow: "0 0 8px rgba(167,139,250,0.70), 0 0 16px rgba(167,139,250,0.40)",
+                }}>Username</label>
                 <Input
                   data-testid="input-username"
                   placeholder="Enter your username"
@@ -116,7 +131,10 @@ export default function LoginPage() {
               </div>
 
               <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
-                <label style={{ fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px" }}>Password</label>
+                <label style={{
+                  fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px",
+                  textShadow: "0 0 8px rgba(167,139,250,0.70), 0 0 16px rgba(167,139,250,0.40)",
+                }}>Password</label>
                 <Input
                   data-testid="input-password"
                   type="password"
@@ -145,11 +163,24 @@ export default function LoginPage() {
                   fontWeight: 700,
                   letterSpacing: "0.5px",
                   cursor: isLoading || !username.trim() || !password ? "not-allowed" : "pointer",
-                  boxShadow: "0 4px 18px rgba(124,58,237,0.35)",
-                  transition: "opacity 0.2s, transform 0.15s",
+                  boxShadow: isLoading || !username.trim() || !password
+                    ? "none"
+                    : "0 0 18px rgba(139,92,246,0.70), 0 0 36px rgba(124,58,237,0.40), 0 4px 18px rgba(124,58,237,0.35)",
+                  transition: "opacity 0.2s, transform 0.15s, box-shadow 0.2s",
+                  transform: "perspective(400px) translateZ(2px)",
                 }}
-                onMouseEnter={(e) => { if (!isLoading) e.currentTarget.style.transform = "translateY(-1px)"; }}
-                onMouseLeave={(e) => { e.currentTarget.style.transform = ""; }}
+                onMouseEnter={(e) => {
+                  if (!isLoading) {
+                    e.currentTarget.style.transform = "perspective(400px) translateZ(4px) translateY(-1px)";
+                    e.currentTarget.style.boxShadow = "0 0 24px rgba(139,92,246,0.80), 0 0 50px rgba(124,58,237,0.50), 0 6px 24px rgba(124,58,237,0.45)";
+                  }
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.transform = "perspective(400px) translateZ(2px)";
+                  e.currentTarget.style.boxShadow = isLoading || !username.trim() || !password
+                    ? "none"
+                    : "0 0 18px rgba(139,92,246,0.70), 0 0 36px rgba(124,58,237,0.40), 0 4px 18px rgba(124,58,237,0.35)";
+                }}
               >
                 {isLoading ? "Signing in..." : "Sign In"}
               </button>

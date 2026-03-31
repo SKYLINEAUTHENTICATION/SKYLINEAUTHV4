@@ -85,11 +85,20 @@ function AppRouter() {
   if (isLoading) {
     return (
       <div style={{ background: "#000" }} className="flex h-screen items-center justify-center">
-        <div className="space-y-4 text-center">
-          <Skeleton className="mx-auto h-12 w-12 rounded-full" style={{ background: "rgba(124,58,237,0.2)" }} />
-          <Skeleton className="mx-auto h-4 w-48" style={{ background: "rgba(124,58,237,0.1)" }} />
-          <p style={{ fontSize: 13, color: "#52525b" }}>Loading...</p>
+        <div className="login-progress-bar-track">
+          <div className="login-progress-bar-fill" />
         </div>
+        <div style={{ display: "flex", flexDirection: "column", alignItems: "center", gap: 20 }}>
+          <div style={{
+            width: 56, height: 56, borderRadius: "50%",
+            background: "conic-gradient(from 0deg, #7c3aed, #a855f7, #c084fc, #7c3aed)",
+            animation: "spin 1.4s linear infinite",
+            boxShadow: "0 0 20px rgba(139,92,246,0.70), 0 0 40px rgba(124,58,237,0.40)",
+          }} />
+          <p style={{ fontSize: 13, color: "#7c3aed", letterSpacing: "1px", fontWeight: 600,
+            textShadow: "0 0 10px rgba(139,92,246,0.70)" }}>Loading...</p>
+        </div>
+        <style>{`@keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }`}</style>
       </div>
     );
   }
