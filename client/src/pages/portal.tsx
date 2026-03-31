@@ -1,6 +1,6 @@
 import { useState } from "react";
 import { Download, FolderOpen, Tag, Shield, ArrowLeft } from "lucide-react";
-import logoPath from "@assets/skyline_1774905086386.png";
+import logoPath from "@assets/skyline_1774963364030.png";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "#22c55e",
@@ -46,7 +46,7 @@ export default function PortalPage() {
           <div className="skyline-card" style={{ padding: "40px 28px 36px" }}>
             <div style={{ textAlign: "center", marginBottom: 28 }}>
               <img src={logoPath} alt="SKYLINE" style={{ width: 72, height: 72, borderRadius: "50%", marginBottom: 14, display: "block", margin: "0 auto 14px" }} />
-              <span className="skyline-brand" style={{ display: "block", fontSize: 26, marginBottom: 4 }}>SKYLINE</span>
+              <span className="skyline-brand" style={{ display: "block", fontSize: 18, marginBottom: 4, letterSpacing: 3 }}>SKYLINE AUTHENTICATION</span>
               <p style={{ margin: 0, fontSize: 12, color: "#4e3d6a" }}>User Portal — Access Your Files</p>
             </div>
 
@@ -99,7 +99,7 @@ export default function PortalPage() {
               </button>
             </form>
             <p style={{ textAlign: "center", marginTop: 20, fontSize: 11, color: "#2a1a3e" }}>
-              &copy; 2025 SKYLINE &mdash; Secure Auth Panel
+              &copy; 2025 SKYLINE AUTHENTICATION &mdash; Secure Auth Panel
             </p>
           </div>
         </div>

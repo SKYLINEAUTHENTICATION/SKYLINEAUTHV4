@@ -27,7 +27,7 @@ import {
   SidebarFooter,
 } from "@/components/ui/sidebar";
 import { useAuth } from "@/hooks/use-auth";
-import logoPath from "@assets/skyline_1774905086386.png";
+import logoPath from "@assets/skyline_1774963364030.png";
 
 const ROLE_LABEL: Record<string, string> = {
   superadmin: "Super Admin",
@@ -76,7 +76,7 @@ export function AppSidebar() {
             <img src={logoPath} alt="SKYLINE" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
           </div>
           <div>
-            <span className="skyline-brand-sidebar" style={{ fontSize: 17, display: "block" }} data-testid="text-logo">SKYLINE</span>
+            <span className="skyline-brand-sidebar" style={{ fontSize: 13, display: "block" }} data-testid="text-logo">SKYLINE AUTHENTICATION</span>
             <span style={{ fontSize: 9, color: "#52525b", letterSpacing: "1px", textTransform: "uppercase", display: "block", marginTop: -2 }}>Auth Panel</span>
           </div>
         </Link>

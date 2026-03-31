@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import logoPath from "@assets/skyline_1774905086386.png";
+import logoPath from "@assets/skyline_1774963364030.png";
 import loginErrorSound from "@assets/login-error_1771588547644.mp3";
 import loginSuccessSound from "@assets/ElevenLabs_2026_02_20T12_28_13_Gojo_Calm,_Clear_and_Measured_p_1771590685418.mp3";
 
@@ -107,7 +107,7 @@ export default function LoginPage() {
                   }}
                 />
               </div>
-              <span className="skyline-brand" data-testid="text-brand">SKYLINE</span>
+              <span className="skyline-brand" data-testid="text-brand" style={{ fontSize: "1.6rem", letterSpacing: 5 }}>SKYLINE AUTHENTICATION</span>
               <p style={{ textAlign: "center", fontSize: 12, color: "#4e3d6a", letterSpacing: "0.5px", marginTop: 5 }}>
                 Secure Auth Panel
               </p>
@@ -187,7 +187,7 @@ export default function LoginPage() {
             </form>
 
             <p style={{ textAlign: "center", fontSize: 11, color: "#2a1a3e", marginTop: 22 }}>
-              &copy; 2025 SKYLINE &mdash; Secure Auth Panel
+              &copy; 2025 SKYLINE AUTHENTICATION &mdash; Secure Auth Panel
             </p>
           </div>
         </div>
