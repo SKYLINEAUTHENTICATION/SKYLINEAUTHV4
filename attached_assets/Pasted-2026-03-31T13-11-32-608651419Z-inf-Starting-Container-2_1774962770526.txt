@@ -1,0 +1,232 @@
+2026-03-31T13:11:32.608651419Z [inf]  Starting Container
+2026-03-31T13:11:33.888758783Z [err]  
+2026-03-31T13:11:33.888771608Z [err]  Node.js v22.22.2
+2026-03-31T13:11:33.889204177Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:33.889209795Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:33.889214505Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:33.889219851Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:33.889225483Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:33.889231193Z [err]                  ^
+2026-03-31T13:11:33.889238907Z [err]  
+2026-03-31T13:11:33.889243870Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:33.889249811Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:33.889255453Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:33.889260530Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:33.889267322Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:33.889273070Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:33.889278797Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:33.889292257Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:33.889297980Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:33.889303666Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:33.889309093Z [err]    [cause]: undefined
+2026-03-31T13:11:33.889315136Z [err]  }
+2026-03-31T13:11:34.994901824Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:34.994907430Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:34.994914160Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:34.994919732Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:34.994926713Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:34.994933098Z [err]                  ^
+2026-03-31T13:11:34.994939859Z [err]  
+2026-03-31T13:11:34.994946500Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:34.994952348Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:34.994958197Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:34.994963989Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:34.994970516Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:34.994977803Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:34.994983970Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:34.994992697Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:34.994998987Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:34.995004729Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:34.995010540Z [err]    [cause]: undefined
+2026-03-31T13:11:34.995016550Z [err]  }
+2026-03-31T13:11:34.995022545Z [err]  
+2026-03-31T13:11:34.995029106Z [err]  Node.js v22.22.2
+2026-03-31T13:11:35.939384612Z [err]  }
+2026-03-31T13:11:35.939391000Z [err]  
+2026-03-31T13:11:35.939396510Z [err]  Node.js v22.22.2
+2026-03-31T13:11:35.939405255Z [err]                  ^
+2026-03-31T13:11:35.939410706Z [err]  
+2026-03-31T13:11:35.939415144Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:35.939419470Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:35.939425722Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:35.939430795Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:35.939435239Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:35.939439998Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:35.939444193Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:35.939522929Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:35.939528806Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:35.939534833Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:35.939540820Z [err]    [cause]: undefined
+2026-03-31T13:11:35.939735397Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:35.939740632Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:35.939745839Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:35.939750981Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:35.939756804Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:37.334182666Z [err]                  ^
+2026-03-31T13:11:37.334189841Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:37.334193049Z [err]  
+2026-03-31T13:11:37.334199901Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:37.334202357Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:37.334208854Z [err]    [cause]: undefined
+2026-03-31T13:11:37.334211290Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:37.334217260Z [err]  }
+2026-03-31T13:11:37.334220393Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:37.334227224Z [err]  
+2026-03-31T13:11:37.334229796Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:37.334236693Z [err]  Node.js v22.22.2
+2026-03-31T13:11:37.334238835Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:37.334244624Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:37.334257084Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:37.334264079Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:37.334277401Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:37.334283250Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:37.334288735Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:37.334295533Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:37.334300994Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:39.422317332Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:39.422323251Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:39.422329060Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:39.422335082Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:39.422341760Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:39.422348289Z [err]                  ^
+2026-03-31T13:11:39.422354776Z [err]  
+2026-03-31T13:11:39.422359823Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:39.422364538Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:39.422369218Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:39.422375236Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:39.422381888Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:39.422387969Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:39.422393796Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:39.422400825Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:39.422407671Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:39.422415432Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:39.422421967Z [err]    [cause]: undefined
+2026-03-31T13:11:39.422428198Z [err]  }
+2026-03-31T13:11:39.422432949Z [err]  
+2026-03-31T13:11:39.422437446Z [err]  Node.js v22.22.2
+2026-03-31T13:11:40.502562365Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:40.502568389Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:40.502572748Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:40.502576936Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:40.502581447Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:40.502585638Z [err]                  ^
+2026-03-31T13:11:40.502590404Z [err]  
+2026-03-31T13:11:40.502594851Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:40.502599100Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:40.502603457Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:40.502608151Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:40.502612735Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:40.502617035Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:40.502621128Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:40.502625631Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:40.502631136Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:40.502635576Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:40.502640058Z [err]    [cause]: undefined
+2026-03-31T13:11:40.502644302Z [err]  }
+2026-03-31T13:11:40.502648914Z [err]  
+2026-03-31T13:11:40.502653291Z [err]  Node.js v22.22.2
+2026-03-31T13:11:42.865953445Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:42.865963977Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:42.865964308Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:42.865970683Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:42.865975971Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:42.865978935Z [err]                  ^
+2026-03-31T13:11:42.865979655Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:42.865984228Z [err]    [cause]: undefined
+2026-03-31T13:11:42.865989282Z [err]  
+2026-03-31T13:11:42.865990074Z [err]  }
+2026-03-31T13:11:42.865996025Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:42.866000445Z [err]  
+2026-03-31T13:11:42.866002228Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:42.866003118Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:42.866005907Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:42.866010353Z [err]  Node.js v22.22.2
+2026-03-31T13:11:42.866014834Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:42.866015752Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:42.866020801Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:42.866023791Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:42.866035822Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:44.089121624Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:44.089122562Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:44.089131980Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:44.089136382Z [err]    [cause]: undefined
+2026-03-31T13:11:44.089139941Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:44.089147578Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:44.089147980Z [err]  }
+2026-03-31T13:11:44.089154472Z [err]                  ^
+2026-03-31T13:11:44.089158047Z [err]  
+2026-03-31T13:11:44.089164684Z [err]  Node.js v22.22.2
+2026-03-31T13:11:44.089198009Z [err]  
+2026-03-31T13:11:44.089205656Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:44.089212875Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:44.089219305Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:44.089225565Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:44.089235744Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:44.089243773Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:44.089259706Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:44.089267801Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:44.089274633Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:44.089382242Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:45.709821142Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:45.709826345Z [err]  Node.js v22.22.2
+2026-03-31T13:11:45.709832235Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:45.709832942Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:45.709835504Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:45.709844970Z [err]    [cause]: undefined
+2026-03-31T13:11:45.709845130Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:45.709848433Z [err]                  ^
+2026-03-31T13:11:45.709850665Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:45.709857655Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:45.709858019Z [err]  
+2026-03-31T13:11:45.709858026Z [err]  }
+2026-03-31T13:11:45.709862130Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:45.709870503Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:45.709870773Z [err]  
+2026-03-31T13:11:45.709872325Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:45.709873021Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:45.709884155Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:45.709884424Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:45.709885911Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:45.709895143Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:47.743969896Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:47.743977357Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:47.743985715Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:47.743994919Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:47.744198546Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:47.744206415Z [err]                  ^
+2026-03-31T13:11:47.744213852Z [err]  
+2026-03-31T13:11:47.744220296Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:47.744226547Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:47.744233246Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:47.744241453Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:47.744247872Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:47.744255843Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:47.744262478Z [err]      at async hv (/app/dist/index.cjs:65:106943)
+2026-03-31T13:11:47.744270579Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:47.744279414Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:47.744287703Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:47.744294652Z [err]    [cause]: undefined
+2026-03-31T13:11:47.744302694Z [err]  }
+2026-03-31T13:11:47.744310147Z [err]  
+2026-03-31T13:11:47.744318365Z [err]  Node.js v22.22.2
+2026-03-31T13:11:49.157113570Z [err]      at async SA (/app/dist/index.cjs:65:133271)
+2026-03-31T13:11:49.157145103Z [err]      at async /app/dist/index.cjs:159:1223 {
+2026-03-31T13:11:49.157156048Z [err]    code: 'ERR_INVALID_ARG_TYPE',
+2026-03-31T13:11:49.157166601Z [err]    [cause]: undefined
+2026-03-31T13:11:49.157200133Z [err]  }
+2026-03-31T13:11:49.157211857Z [err]  
+2026-03-31T13:11:49.157221870Z [err]  Node.js v22.22.2
+2026-03-31T13:11:49.157283115Z [err]  (node:1) [DEP0040] DeprecationWarning: The `punycode` module is deprecated. Please use a userland alternative instead.
+2026-03-31T13:11:49.157292207Z [err]  (Use `node --trace-deprecation ...` to show where the warning was created)
+2026-03-31T13:11:49.157300181Z [inf]  Ed25519 signing initialized. Public key: 096be6b6ec03e846d0e4570a56c77fb1d37ef98b2cc610b31f3e5901334dc0ae
+2026-03-31T13:11:49.157308729Z [err]  file:///app/node_modules/openid-client/build/index.js:89
+2026-03-31T13:11:49.157320401Z [err]      const err = new TypeError(message, { cause });
+2026-03-31T13:11:49.157329572Z [err]                  ^
+2026-03-31T13:11:49.157336590Z [err]  
+2026-03-31T13:11:49.157344126Z [err]  TypeError: "clientId" must be a non-empty string
+2026-03-31T13:11:49.157350540Z [err]      at CodedTypeError (file:///app/node_modules/openid-client/build/index.js:89:17)
+2026-03-31T13:11:49.157357130Z [err]      at new Configuration (file:///app/node_modules/openid-client/build/index.js:463:19)
+2026-03-31T13:11:49.157365155Z [err]      at Object.discovery (file:///app/node_modules/openid-client/build/index.js:244:22)
+2026-03-31T13:11:49.157373802Z [err]      at process.processTicksAndRejections (node:internal/process/task_queues:103:5)
+2026-03-31T13:11:49.157382171Z [err]      at async yA.maxAge (/app/dist/index.cjs:65:106140)
+2026-03-31T13:11:49.157393646Z [err]      at async hv (/app/dist/index.cjs:65:106943)

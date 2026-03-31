@@ -60,8 +60,16 @@ async function upsertUser(claims: any) {
   });
 }
 
+export const isReplitEnvironment = !!process.env.REPL_ID;
+
 export async function setupAuth(app: Express) {
   app.set("trust proxy", 1);
+
+  if (!isReplitEnvironment) {
+    // Not running on Replit — skip OIDC auth entirely
+    return;
+  }
+
   app.use(getSession());
   app.use(passport.initialize());
   app.use(passport.session());
@@ -131,6 +139,10 @@ export async function setupAuth(app: Express) {
 }
 
 export const isAuthenticated: RequestHandler = async (req, res, next) => {
+  if (!isReplitEnvironment) {
+    return res.status(401).json({ message: "Unauthorized" });
+  }
+
   const user = req.user as any;
 
   if (!req.isAuthenticated() || !user.expires_at) {
