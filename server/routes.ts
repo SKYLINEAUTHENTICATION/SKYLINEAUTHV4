@@ -623,9 +623,11 @@ async function seedSuperAdmin() {
       });
       await storage.createAccount(adminUsername, passwordHash, userId, "superadmin");
       console.log(`[seed] Super admin '${adminUsername}' created.`);
-    } else if (existing.role !== "superadmin") {
-      await storage.updateAccount(existing.id, { role: "superadmin" });
-      console.log(`[seed] Updated ${adminUsername} to superadmin role.`);
+    } else {
+      // Always sync password hash and role from env vars on every startup
+      const passwordHash = await bcrypt.hash(adminPassword, 10);
+      await storage.updateAccount(existing.id, { passwordHash, role: "superadmin" });
+      console.log(`[seed] Super admin '${adminUsername}' credentials synced.`);
     }
   } catch (err) {
     console.error("[seed] Failed to seed super admin:", err);
