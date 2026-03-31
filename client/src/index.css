@@ -14,38 +14,38 @@
 
   --background: 0 0% 2%;
   --foreground: 0 0% 96%;
-  --border: 265 45% 14%;
+  --border: 265 45% 10%;
   --card: 270 28% 4%;
   --card-foreground: 0 0% 96%;
-  --card-border: 265 45% 11%;
+  --card-border: 265 45% 9%;
   --sidebar: 0 0% 2%;
   --sidebar-foreground: 0 0% 92%;
-  --sidebar-border: 265 40% 11%;
-  --sidebar-primary: 262 78% 38%;
+  --sidebar-border: 265 40% 9%;
+  --sidebar-primary: 262 80% 28%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 265 50% 12%;
-  --sidebar-accent-foreground: 254 80% 72%;
-  --sidebar-ring: 262 78% 38%;
+  --sidebar-accent: 265 50% 10%;
+  --sidebar-accent-foreground: 254 60% 65%;
+  --sidebar-ring: 262 80% 28%;
   --popover: 270 28% 5%;
   --popover-foreground: 0 0% 96%;
-  --popover-border: 265 45% 14%;
-  --primary: 262 78% 38%;
+  --popover-border: 265 45% 10%;
+  --primary: 262 80% 28%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 265 40% 11%;
+  --secondary: 265 40% 10%;
   --secondary-foreground: 0 0% 90%;
-  --muted: 265 28% 9%;
-  --muted-foreground: 240 5% 64%;
-  --accent: 265 40% 11%;
-  --accent-foreground: 254 80% 72%;
+  --muted: 265 28% 8%;
+  --muted-foreground: 240 5% 60%;
+  --accent: 265 40% 10%;
+  --accent-foreground: 254 60% 65%;
   --destructive: 0 84% 45%;
   --destructive-foreground: 0 0% 100%;
-  --input: 265 28% 10%;
-  --ring: 262 78% 38%;
-  --chart-1: 262 78% 55%;
-  --chart-2: 280 65% 50%;
-  --chart-3: 250 60% 52%;
-  --chart-4: 220 55% 48%;
-  --chart-5: 300 50% 48%;
+  --input: 265 28% 9%;
+  --ring: 262 80% 28%;
+  --chart-1: 262 80% 45%;
+  --chart-2: 280 65% 40%;
+  --chart-3: 250 60% 42%;
+  --chart-4: 220 55% 40%;
+  --chart-5: 300 50% 40%;
   --font-sans: "Inter", system-ui, -apple-system, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
@@ -68,13 +68,6 @@
   --muted-border: hsl(var(--muted));
   --accent-border: hsl(var(--accent));
   --destructive-border: hsl(var(--destructive));
-
-  /* Purple glow tokens */
-  --pg: rgba(139, 92, 246, 0.70);
-  --pg-wide: rgba(124, 58, 237, 0.40);
-  --pg-text: rgba(167, 139, 250, 0.70);
-  --pg-text-soft: rgba(167, 139, 250, 0.45);
-  --pg-border: rgba(139, 92, 246, 0.50);
 }
 
 /* dark class mirrors :root for compatibility */
@@ -87,38 +80,38 @@
 
   --background: 0 0% 2%;
   --foreground: 0 0% 96%;
-  --border: 265 45% 14%;
+  --border: 265 45% 10%;
   --card: 270 28% 4%;
   --card-foreground: 0 0% 96%;
-  --card-border: 265 45% 11%;
+  --card-border: 265 45% 9%;
   --sidebar: 0 0% 2%;
   --sidebar-foreground: 0 0% 92%;
-  --sidebar-border: 265 40% 11%;
-  --sidebar-primary: 262 78% 38%;
+  --sidebar-border: 265 40% 9%;
+  --sidebar-primary: 262 80% 28%;
   --sidebar-primary-foreground: 0 0% 100%;
-  --sidebar-accent: 265 50% 12%;
-  --sidebar-accent-foreground: 254 80% 72%;
-  --sidebar-ring: 262 78% 38%;
+  --sidebar-accent: 265 50% 10%;
+  --sidebar-accent-foreground: 254 60% 65%;
+  --sidebar-ring: 262 80% 28%;
   --popover: 270 28% 5%;
   --popover-foreground: 0 0% 96%;
-  --popover-border: 265 45% 14%;
-  --primary: 262 78% 38%;
+  --popover-border: 265 45% 10%;
+  --primary: 262 80% 28%;
   --primary-foreground: 0 0% 100%;
-  --secondary: 265 40% 11%;
+  --secondary: 265 40% 10%;
   --secondary-foreground: 0 0% 90%;
-  --muted: 265 28% 9%;
-  --muted-foreground: 240 5% 64%;
-  --accent: 265 40% 11%;
-  --accent-foreground: 254 80% 72%;
+  --muted: 265 28% 8%;
+  --muted-foreground: 240 5% 60%;
+  --accent: 265 40% 10%;
+  --accent-foreground: 254 60% 65%;
   --destructive: 0 84% 45%;
   --destructive-foreground: 0 0% 100%;
-  --input: 265 28% 10%;
-  --ring: 262 78% 38%;
-  --chart-1: 262 78% 55%;
-  --chart-2: 280 65% 50%;
-  --chart-3: 250 60% 52%;
-  --chart-4: 220 55% 48%;
-  --chart-5: 300 50% 48%;
+  --input: 265 28% 9%;
+  --ring: 262 80% 28%;
+  --chart-1: 262 80% 45%;
+  --chart-2: 280 65% 40%;
+  --chart-3: 250 60% 42%;
+  --chart-4: 220 55% 40%;
+  --chart-5: 300 50% 40%;
   --shadow-2xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);
   --shadow-xs: 0px 2px 0px 0px hsl(0 0% 0% / 0.00);
   --shadow-sm: 0px 2px 0px 0px hsl(0 0% 0% / 0.00), 0px 1px 2px -1px hsl(0 0% 0% / 0.00);
@@ -135,12 +128,6 @@
   --muted-border: hsl(var(--muted));
   --accent-border: hsl(var(--accent));
   --destructive-border: hsl(var(--destructive));
-
-  --pg: rgba(139, 92, 246, 0.70);
-  --pg-wide: rgba(124, 58, 237, 0.40);
-  --pg-text: rgba(167, 139, 250, 0.70);
-  --pg-text-soft: rgba(167, 139, 250, 0.45);
-  --pg-border: rgba(139, 92, 246, 0.50);
 }
 
 @layer base {
@@ -154,13 +141,13 @@
   }
 
   ::selection {
-    background: hsl(var(--primary) / 0.25);
+    background: hsl(var(--primary) / 0.30);
   }
 
   ::-webkit-scrollbar { width: 5px; }
   ::-webkit-scrollbar-track { background: transparent; }
-  ::-webkit-scrollbar-thumb { background: rgba(139,92,246,0.3); border-radius: 3px; }
-  ::-webkit-scrollbar-thumb:hover { background: rgba(139,92,246,0.5); }
+  ::-webkit-scrollbar-thumb { background: rgba(80,30,160,0.4); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: rgba(80,30,160,0.6); }
 }
 
 @layer utilities {
@@ -270,7 +257,7 @@
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* ── SKYLINE animated glow card border ───────────────────── */
+/* ── SKYLINE animated border (login card) ───────────────────── */
 @property --skyline-angle {
   syntax: '<angle>';
   initial-value: 0deg;
@@ -296,11 +283,11 @@
     from var(--skyline-angle) at 50% 50%,
     transparent 0deg,
     transparent 263deg,
-    #9900ff 269deg,
-    #ee88ff 274deg,
-    #ffffff 277deg,
-    #ee88ff 280deg,
-    #9900ff 285deg,
+    #4a0080 269deg,
+    #8800cc 274deg,
+    #aa44ee 277deg,
+    #8800cc 280deg,
+    #4a0080 285deg,
     transparent 291deg,
     transparent 360deg
   );
@@ -310,29 +297,11 @@
   padding: 2px;
   animation: skyline-spin 2.6s linear infinite;
   z-index: 0;
-  filter: brightness(1.7);
   pointer-events: none;
 }
 
 .skyline-glow-wrap::after {
-  content: '';
-  position: absolute;
-  inset: -6px;
-  border-radius: 4px;
-  background: conic-gradient(
-    from var(--skyline-angle) at 50% 50%,
-    transparent 0deg,
-    transparent 267deg,
-    rgba(180,0,255,0) 272deg,
-    rgba(230,130,255,1) 277deg,
-    rgba(180,0,255,0) 282deg,
-    transparent 287deg,
-    transparent 360deg
-  );
-  filter: blur(6px) brightness(2.2);
-  animation: skyline-spin 2.6s linear infinite;
-  z-index: 0;
-  pointer-events: none;
+  content: none;
 }
 
 .skyline-card {
@@ -340,261 +309,57 @@
   z-index: 1;
   background: linear-gradient(160deg, #0f0a1e 0%, #0a0812 60%, #070510 100%);
   border-radius: 4px;
-  border: 1px solid rgba(100, 30, 180, 0.4);
+  border: 1px solid rgba(70, 15, 120, 0.5);
   width: 100%;
   transform: perspective(900px) rotateX(1.5deg);
   box-shadow:
-    0 2px 0 0 rgba(139,92,246,0.08),
     0 8px 32px -4px rgba(0,0,0,0.8),
-    0 0 0 1px rgba(139,92,246,0.07),
-    0 20px 60px -12px rgba(124,58,237,0.30),
-    inset 0 1px 0 rgba(255,255,255,0.04),
+    inset 0 1px 0 rgba(255,255,255,0.03),
     inset 0 -1px 0 rgba(0,0,0,0.5);
   transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
 .skyline-card:hover {
   box-shadow:
-    0 2px 0 0 rgba(139,92,246,0.10),
     0 12px 40px -4px rgba(0,0,0,0.9),
-    0 0 0 1px rgba(139,92,246,0.12),
-    0 28px 72px -12px rgba(124,58,237,0.45),
-    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 1px 0 rgba(255,255,255,0.04),
     inset 0 -1px 0 rgba(0,0,0,0.6);
   transform: perspective(900px) rotateX(1.5deg) translateY(-2px);
 }
 
-/* ── SKYLINE brand text glows ───────────────────── */
+/* ── SKYLINE brand text ───────────────────── */
 .skyline-brand {
   font-family: 'Rajdhani', sans-serif;
   font-size: 2.4rem;
   font-weight: 700;
   letter-spacing: 8px;
-  background: linear-gradient(90deg, #aa00ff, #dd66ff);
+  background: linear-gradient(90deg, #5b009e, #9922cc);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-align: center;
   display: block;
-  filter: drop-shadow(0 0 12px rgba(170, 0, 255, 0.70)) drop-shadow(0 0 28px rgba(170, 0, 255, 0.45));
 }
 
 .skyline-brand-sidebar {
   font-family: 'Rajdhani', sans-serif;
   font-weight: 700;
   letter-spacing: 4px;
-  background: linear-gradient(135deg, #c4b5fd, #818cf8);
+  background: linear-gradient(135deg, #7c3aed, #5b21b6);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.70)) drop-shadow(0 0 18px rgba(124,58,237,0.45));
 }
 
-/* ═══════════════════════════════════════════════════════════════════
-   COMPREHENSIVE PURPLE GLOW — every purple element in the app glows
-   ═══════════════════════════════════════════════════════════════════ */
-
-/* ── 1. Elements with bg-primary (Tailwind primary = purple) ── */
-.bg-primary {
-  box-shadow: 0 0 16px var(--pg), 0 0 36px var(--pg-wide) !important;
-}
-
-/* ── 2. text-primary icons and text (purple colored text/icons) ── */
-.text-primary {
-  filter: drop-shadow(0 0 5px var(--pg)) drop-shadow(0 0 12px var(--pg-wide));
-}
-
-/* ── 3. Tailwind purple/violet color classes ── */
-.text-purple-400,
-.text-purple-500,
-.text-purple-600,
-.text-violet-400,
-.text-violet-500 {
-  text-shadow: 0 0 8px var(--pg-text), 0 0 18px var(--pg-text-soft);
-  filter: drop-shadow(0 0 5px var(--pg-text));
-}
-
-/* ── 4. Purple/violet background containers ── */
-.bg-purple-500\/10,
-.bg-purple-400\/10,
-[class*="bg-purple-"][class*="10"],
-[class*="bg-violet-"] {
-  box-shadow: 0 0 10px rgba(139,92,246,0.30), inset 0 0 6px rgba(139,92,246,0.15);
-}
-
-/* ── 5. bg-primary/10 icon containers (dashboard stat icons) ── */
-.bg-primary\/10,
-[class*="bg-primary\/"] {
-  box-shadow: 0 0 10px rgba(139,92,246,0.40), inset 0 0 6px rgba(139,92,246,0.20);
-}
-
-/* ── 6. Default Button (bg-primary) ── */
-button.bg-primary,
-a.bg-primary,
-[role="button"].bg-primary {
-  box-shadow: 0 0 18px var(--pg), 0 0 40px var(--pg-wide), 0 4px 16px rgba(124,58,237,0.35) !important;
-}
-button.bg-primary:hover,
-a.bg-primary:hover {
-  box-shadow: 0 0 24px var(--pg), 0 0 52px var(--pg-wide), 0 6px 22px rgba(124,58,237,0.50) !important;
-}
-
-/* ── 7. Default Badge (bg-primary) ── */
-.badge-primary,
-div.bg-primary {
-  box-shadow: 0 0 10px var(--pg), 0 0 22px var(--pg-wide) !important;
-}
-
-/* ── 8. border-primary ── */
-.border-primary,
-[class*="border-primary-"] {
-  box-shadow: 0 0 6px var(--pg-border);
-}
-
-/* ── 9. Input focus glow ── */
+/* ── Input focus ring (no outer glow) ── */
 input:focus,
 textarea:focus {
-  box-shadow:
-    0 0 0 2px rgba(139,92,246,0.70),
-    0 0 16px rgba(139,92,246,0.45),
-    0 0 32px rgba(124,58,237,0.25) !important;
-  border-color: rgba(139,92,246,0.80) !important;
+  box-shadow: 0 0 0 2px hsl(var(--primary) / 0.60) !important;
+  border-color: hsl(var(--primary) / 0.80) !important;
+  outline: none;
 }
 
-/* ── 10. Sidebar active nav button ── */
-[data-sidebar="menu-button"][data-active="true"] {
-  box-shadow: none !important;
-}
-
-/* ── 11. Sidebar active item — icon + text (no glow) ── */
-[data-sidebar="menu-button"][data-active="true"] svg,
-[data-sidebar="menu-button"][data-active="true"] span {
-  filter: none;
-}
-
-/* ── 12. Sidebar hover (no glow on hover) ── */
-[data-sidebar="menu-button"]:not([data-active="true"]):hover svg,
-[data-sidebar="menu-button"]:not([data-active="true"]):hover span {
-  filter: none;
-}
-
-/* ── 13. Sidebar group labels ── */
-[data-sidebar="group-label"] {
-  color: hsl(var(--sidebar-accent-foreground));
-}
-
-/* ── 15. Sidebar logo (no glow) ── */
-[data-slot="sidebar-header"] img {
-  filter: none;
-}
-
-/* ── 16. Sidebar user avatar (no glow) ── */
-[data-slot="sidebar-footer"] [style*="linear-gradient"],
-[data-slot="sidebar-footer"] .rounded-full {
-  box-shadow: none;
-}
-
-/* ── 17. Sidebar trigger (hamburger button) ── */
-[data-sidebar="trigger"] svg {
-  filter: none;
-  color: hsl(var(--primary));
-}
-
-/* ── 18. accent-foreground text ── */
-.text-accent-foreground,
-.text-sidebar-accent-foreground {
-  text-shadow: none;
-}
-
-/* ── 19. ring-ring focus outlines (purple) ── */
-.focus-visible\:ring-ring:focus-visible,
-[class*="focus-visible:ring-ring"],
-[class*="ring-sidebar-ring"] {
-  box-shadow: 0 0 0 1px var(--pg), 0 0 14px var(--pg-wide) !important;
-}
-
-/* ── 20. Scrollbar thumb (purple) ── */
-::-webkit-scrollbar-thumb {
-  background: rgba(139,92,246,0.40) !important;
-  box-shadow: 0 0 6px rgba(139,92,246,0.60);
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(139,92,246,0.65) !important;
-  box-shadow: 0 0 10px rgba(139,92,246,0.80);
-}
-
-/* ── 21. Login labels (purple) ── */
-label[style*="#a78bfa"],
-label[style*="a78bfa"] {
-  text-shadow: 0 0 8px var(--pg-text), 0 0 18px var(--pg-text-soft);
-}
-
-/* ── 22. Login Sign In button (inline gradient purple) ── */
-button[data-testid="button-submit-login"] {
-  box-shadow: 0 0 18px var(--pg), 0 0 36px var(--pg-wide), 0 4px 18px rgba(124,58,237,0.35) !important;
-}
-button[data-testid="button-submit-login"]:not(:disabled):hover {
-  box-shadow: 0 0 26px var(--pg), 0 0 52px var(--pg-wide), 0 6px 24px rgba(124,58,237,0.50) !important;
-}
-
-/* ── 23. Role badge text in sidebar footer ── */
-[data-slot="sidebar-footer"] p[style*="#a78bfa"],
-[data-slot="sidebar-footer"] p[style*="a78bfa"],
-[data-testid="text-user-name"] + p {
-  text-shadow: 0 0 8px var(--pg-text), 0 0 16px var(--pg-text-soft);
-}
-
-/* ── 24. Logout button hover (becomes purple) ── */
-[data-testid="button-logout"]:hover svg {
-  filter: drop-shadow(0 0 6px var(--pg-text));
-}
-
-/* ── 25. Purple inline borders (rgba 139,92,246) — card containers with purple borders ── */
-[style*="rgba(139,92,246"],
-[style*="139,92,246"] {
-  box-shadow: 0 0 8px rgba(139,92,246,0.30);
-}
-
-/* ── 26. Inline gradient buttons (portal, chat, etc.) matching purple gradients ── */
-button[style*="#7c3aed"],
-button[style*="7c3aed"],
-a[style*="#7c3aed"],
-a[style*="7c3aed"] {
-  box-shadow: 0 0 16px var(--pg), 0 0 36px var(--pg-wide), 0 4px 16px rgba(124,58,237,0.35) !important;
-}
-button[style*="#7c3aed"]:hover,
-a[style*="#7c3aed"]:hover {
-  box-shadow: 0 0 24px var(--pg), 0 0 52px var(--pg-wide), 0 6px 22px rgba(124,58,237,0.50) !important;
-}
-
-/* ── 27. Inline purple text elements (color: #a78bfa) ── */
-[style*="color: #a78bfa"],
-[style*="color:#a78bfa"],
-[style*='color: "#a78bfa"'],
-span[style*="a78bfa"],
-p[style*="a78bfa"] {
-  text-shadow: 0 0 8px var(--pg-text), 0 0 18px var(--pg-text-soft);
-}
-
-/* ── 28. Chat — "me" messages (purple gradient bg) ── */
-[style*="linear-gradient(135deg, #7c3aed"],
-[style*="linear-gradient(135deg,#7c3aed"] {
-  box-shadow: 0 0 14px var(--pg), 0 0 30px var(--pg-wide) !important;
-}
-
-/* ── 29. Lock icon in chat header (purple) ── */
-[style*="color: #a78bfa"] svg,
-[style*="color:#a78bfa"] svg {
-  filter: drop-shadow(0 0 5px var(--pg-text));
-}
-
-/* ── 30. Selection (already purple, enhance the glow) ── */
-::selection {
-  background: hsl(var(--primary) / 0.35);
-  text-shadow: 0 0 8px var(--pg-text);
-}
-
-/* ── 31. Login page progress bar ── */
+/* ── Login page progress bar ── */
 @keyframes login-bar-fill {
   0%   { width: 0%; opacity: 1; }
   40%  { width: 60%; }
@@ -614,78 +379,55 @@ p[style*="a78bfa"] {
   left: 0;
   right: 0;
   height: 3px;
-  background: rgba(30, 0, 60, 0.5);
+  background: rgba(20, 0, 40, 0.5);
   z-index: 9999;
 }
 
 .login-progress-bar-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #7c3aed, #a855f7, #c084fc, #a855f7, #7c3aed);
+  background: linear-gradient(90deg, #3b0764, #6d28d9, #4c1d95, #6d28d9, #3b0764);
   background-size: 200% auto;
   animation:
     login-bar-fill 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards,
     login-bar-shimmer 1.2s linear infinite;
-  box-shadow:
-    0 0 8px rgba(139, 92, 246, 0.70),
-    0 0 20px rgba(124, 58, 237, 0.50),
-    0 0 40px rgba(124, 58, 237, 0.30);
   border-radius: 0 2px 2px 0;
 }
 
-/* ── 32. 3D depth for page root ── */
+/* ── 3D depth for page root ── */
 #root {
   transform-style: preserve-3d;
 }
 
-/* ── 33. Landing page text-primary elements ── */
-.from-primary,
-.via-purple-400,
-[class*="from-primary"],
-[class*="via-primary"],
-[class*="to-primary"] {
-  filter: drop-shadow(0 0 4px rgba(139,92,246,0.50));
+/* ── Tab active state ── */
+[role="tab"][data-state="active"],
+[data-state="active"][class*="text-foreground"] {
+  box-shadow: inset 0 -2px 0 hsl(var(--primary));
 }
 
-/* ── 34. Portal/reseller purple buttons & action items ── */
-[style*="background: rgba(139,92,246,0.15)"],
-[style*="background:rgba(139,92,246,0.15)"] {
-  box-shadow: 0 0 10px rgba(139,92,246,0.40), inset 0 0 6px rgba(139,92,246,0.15) !important;
+/* ── Sidebar: clean, no glow ── */
+[data-sidebar="menu-button"][data-active="true"] {
+  box-shadow: none !important;
 }
-
-/* ── 35. Portal active contact highlight ── */
-[style*="background: rgba(139,92,246,0.15)"],
-[style*="background: rgba(139,92,246,0.07)"] {
-  box-shadow: inset 0 0 12px rgba(139,92,246,0.20);
+[data-sidebar="menu-button"][data-active="true"] svg,
+[data-sidebar="menu-button"][data-active="true"] span,
+[data-sidebar="menu-button"]:not([data-active="true"]):hover svg,
+[data-sidebar="menu-button"]:not([data-active="true"]):hover span,
+[data-slot="sidebar-header"] img,
+[data-sidebar="trigger"] svg {
+  filter: none;
 }
-
-/* ── 36. Sidebar trigger hover ── */
+[data-slot="sidebar-footer"] [style*="linear-gradient"],
+[data-slot="sidebar-footer"] .rounded-full {
+  box-shadow: none;
+}
 [data-sidebar="trigger"]:hover {
   box-shadow: none;
 }
-
-/* ── 37. Chart colors (chart-1 and chart-2 are purple range) ── */
-.text-chart-1,
-.bg-chart-1,
-.text-chart-2,
-.bg-chart-2 {
-  filter: drop-shadow(0 0 5px rgba(167,139,250,0.55));
+[data-sidebar="group-label"] {
+  color: hsl(var(--sidebar-accent-foreground));
 }
-
-/* ── 38. Switch component (uses primary color when checked) ── */
-[role="switch"][data-state="checked"],
-[data-state="checked"][class*="bg-primary"] {
-  box-shadow: 0 0 10px var(--pg), 0 0 22px var(--pg-wide) !important;
-}
-
-/* ── 39. Checkbox (uses primary ring when checked) ── */
-[role="checkbox"][data-state="checked"] {
-  box-shadow: 0 0 8px var(--pg), 0 0 16px var(--pg-wide) !important;
-}
-
-/* ── 40. Tab active state (uses primary colors) ── */
-[role="tab"][data-state="active"],
-[data-state="active"][class*="text-foreground"] {
-  text-shadow: 0 0 8px rgba(167,139,250,0.40);
-  box-shadow: inset 0 -2px 0 hsl(var(--primary)), 0 0 8px rgba(139,92,246,0.30);
+.text-accent-foreground,
+.text-sidebar-accent-foreground {
+  text-shadow: none;
 }
