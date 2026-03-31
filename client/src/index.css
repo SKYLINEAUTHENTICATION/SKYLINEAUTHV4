@@ -69,10 +69,12 @@
   --accent-border: hsl(var(--accent));
   --destructive-border: hsl(var(--destructive));
 
-  /* Purple glow strength (70%) */
-  --purple-glow-color: rgba(139, 92, 246, 0.70);
-  --purple-glow-spread: rgba(124, 58, 237, 0.70);
-  --purple-glow-text: rgba(167, 139, 250, 0.70);
+  /* Purple glow tokens */
+  --pg: rgba(139, 92, 246, 0.70);
+  --pg-wide: rgba(124, 58, 237, 0.40);
+  --pg-text: rgba(167, 139, 250, 0.70);
+  --pg-text-soft: rgba(167, 139, 250, 0.45);
+  --pg-border: rgba(139, 92, 246, 0.50);
 }
 
 /* dark class mirrors :root for compatibility */
@@ -134,9 +136,11 @@
   --accent-border: hsl(var(--accent));
   --destructive-border: hsl(var(--destructive));
 
-  --purple-glow-color: rgba(139, 92, 246, 0.70);
-  --purple-glow-spread: rgba(124, 58, 237, 0.70);
-  --purple-glow-text: rgba(167, 139, 250, 0.70);
+  --pg: rgba(139, 92, 246, 0.70);
+  --pg-wide: rgba(124, 58, 237, 0.40);
+  --pg-text: rgba(167, 139, 250, 0.70);
+  --pg-text-soft: rgba(167, 139, 250, 0.45);
+  --pg-border: rgba(139, 92, 246, 0.50);
 }
 
 @layer base {
@@ -325,7 +329,7 @@
     transparent 287deg,
     transparent 360deg
   );
-  filter: blur(6px) brightness(2.0);
+  filter: blur(6px) brightness(2.2);
   animation: skyline-spin 2.6s linear infinite;
   z-index: 0;
   pointer-events: none;
@@ -346,8 +350,21 @@
     0 20px 60px -12px rgba(124,58,237,0.30),
     inset 0 1px 0 rgba(255,255,255,0.04),
     inset 0 -1px 0 rgba(0,0,0,0.5);
+  transition: box-shadow 0.3s ease, transform 0.3s ease;
 }
 
+.skyline-card:hover {
+  box-shadow:
+    0 2px 0 0 rgba(139,92,246,0.10),
+    0 12px 40px -4px rgba(0,0,0,0.9),
+    0 0 0 1px rgba(139,92,246,0.12),
+    0 28px 72px -12px rgba(124,58,237,0.45),
+    inset 0 1px 0 rgba(255,255,255,0.06),
+    inset 0 -1px 0 rgba(0,0,0,0.6);
+  transform: perspective(900px) rotateX(1.5deg) translateY(-2px);
+}
+
+/* ── SKYLINE brand text glows ───────────────────── */
 .skyline-brand {
   font-family: 'Rajdhani', sans-serif;
   font-size: 2.4rem;
@@ -359,7 +376,7 @@
   background-clip: text;
   text-align: center;
   display: block;
-  filter: drop-shadow(0 0 12px rgba(170, 0, 255, 0.70)) drop-shadow(0 0 24px rgba(170, 0, 255, 0.40));
+  filter: drop-shadow(0 0 12px rgba(170, 0, 255, 0.70)) drop-shadow(0 0 28px rgba(170, 0, 255, 0.45));
 }
 
 .skyline-brand-sidebar {
@@ -370,58 +387,224 @@
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
-  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.70));
+  filter: drop-shadow(0 0 8px rgba(139, 92, 246, 0.70)) drop-shadow(0 0 18px rgba(124,58,237,0.45));
 }
 
-/* ── 3D depth for cards ───────────────────── */
-.card, [class*="card"] {
-  transform-style: preserve-3d;
+/* ═══════════════════════════════════════════════════════════════════
+   COMPREHENSIVE PURPLE GLOW — every purple element in the app glows
+   ═══════════════════════════════════════════════════════════════════ */
+
+/* ── 1. Elements with bg-primary (Tailwind primary = purple) ── */
+.bg-primary {
+  box-shadow: 0 0 16px var(--pg), 0 0 36px var(--pg-wide) !important;
 }
 
-/* ── Purple glow: buttons ───────────────────── */
-button[class*="bg-primary"],
-button[style*="7c3aed"],
-button[style*="linear-gradient(135deg, #7c3aed"],
-.btn-primary {
+/* ── 2. text-primary icons and text (purple colored text/icons) ── */
+.text-primary {
+  filter: drop-shadow(0 0 5px var(--pg)) drop-shadow(0 0 12px var(--pg-wide));
+}
+
+/* ── 3. Tailwind purple/violet color classes ── */
+.text-purple-400,
+.text-purple-500,
+.text-purple-600,
+.text-violet-400,
+.text-violet-500 {
+  text-shadow: 0 0 8px var(--pg-text), 0 0 18px var(--pg-text-soft);
+  filter: drop-shadow(0 0 5px var(--pg-text));
+}
+
+/* ── 4. Purple/violet background containers ── */
+.bg-purple-500\/10,
+.bg-purple-400\/10,
+[class*="bg-purple-"][class*="10"],
+[class*="bg-violet-"] {
+  box-shadow: 0 0 10px rgba(139,92,246,0.30), inset 0 0 6px rgba(139,92,246,0.15);
+}
+
+/* ── 5. bg-primary/10 icon containers (dashboard stat icons) ── */
+.bg-primary\/10,
+[class*="bg-primary\/"] {
+  box-shadow: 0 0 10px rgba(139,92,246,0.40), inset 0 0 6px rgba(139,92,246,0.20);
+}
+
+/* ── 6. Default Button (bg-primary) ── */
+button.bg-primary,
+a.bg-primary,
+[role="button"].bg-primary {
+  box-shadow: 0 0 18px var(--pg), 0 0 40px var(--pg-wide), 0 4px 16px rgba(124,58,237,0.35) !important;
+}
+button.bg-primary:hover,
+a.bg-primary:hover {
+  box-shadow: 0 0 24px var(--pg), 0 0 52px var(--pg-wide), 0 6px 22px rgba(124,58,237,0.50) !important;
+}
+
+/* ── 7. Default Badge (bg-primary) ── */
+.badge-primary,
+div.bg-primary {
+  box-shadow: 0 0 10px var(--pg), 0 0 22px var(--pg-wide) !important;
+}
+
+/* ── 8. border-primary ── */
+.border-primary,
+[class*="border-primary-"] {
+  box-shadow: 0 0 6px var(--pg-border);
+}
+
+/* ── 9. Input focus glow ── */
+input:focus,
+textarea:focus {
   box-shadow:
-    0 0 18px var(--purple-glow-color),
-    0 0 40px rgba(124, 58, 237, 0.35),
-    0 4px 18px rgba(124,58,237,0.35) !important;
-}
-
-/* ── Purple glow: sidebar active items ───────────────────── */
-[data-active="true"] {
-  box-shadow: 0 0 14px var(--purple-glow-color), inset 0 0 8px rgba(139,92,246,0.15);
-}
-
-/* ── Purple glow: badges & status indicators ───────────────────── */
-.badge-purple,
-[class*="bg-primary"][class*="badge"],
-[class*="bg-violet"],
-[class*="bg-purple"] {
-  box-shadow: 0 0 10px var(--purple-glow-color), 0 0 20px rgba(124,58,237,0.35);
-}
-
-/* ── Purple glow: purple-colored labels/text ───────────────────── */
-label[style*="#a78bfa"],
-label[style*="a78bfa"],
-[style*="color: #a78bfa"],
-[style*="color:#a78bfa"] {
-  text-shadow: 0 0 8px var(--purple-glow-text), 0 0 16px rgba(167,139,250,0.40);
-}
-
-/* ── Purple glow: input focus ring ───────────────────── */
-input:focus {
-  box-shadow: 0 0 0 2px rgba(139,92,246,0.70), 0 0 18px rgba(139,92,246,0.40) !important;
+    0 0 0 2px rgba(139,92,246,0.70),
+    0 0 16px rgba(139,92,246,0.45),
+    0 0 32px rgba(124,58,237,0.25) !important;
   border-color: rgba(139,92,246,0.80) !important;
 }
 
-/* ── Purple glow: sidebar brand + ring ───────────────────── */
-.skyline-glow-wrap::after {
-  filter: blur(6px) brightness(2.2);
+/* ── 10. Sidebar active nav button ── */
+[data-sidebar="menu-button"][data-active="true"] {
+  box-shadow:
+    0 0 12px rgba(139,92,246,0.60),
+    0 0 28px rgba(124,58,237,0.35),
+    inset 0 0 10px rgba(139,92,246,0.15) !important;
 }
 
-/* ── Login loading bar animation ───────────────────── */
+/* ── 11. Sidebar active item — icon + text glow ── */
+[data-sidebar="menu-button"][data-active="true"] svg,
+[data-sidebar="menu-button"][data-active="true"] span {
+  filter: drop-shadow(0 0 5px var(--pg-text)) drop-shadow(0 0 10px var(--pg-text-soft));
+}
+
+/* ── 12. Sidebar hover (non-active items on hover) ── */
+[data-sidebar="menu-button"]:not([data-active="true"]):hover svg,
+[data-sidebar="menu-button"]:not([data-active="true"]):hover span {
+  filter: drop-shadow(0 0 3px rgba(167,139,250,0.50));
+}
+
+/* ── 13. Sidebar group labels ── */
+[data-sidebar="group-label"] {
+  text-shadow: 0 0 8px rgba(139,92,246,0.40);
+  color: hsl(var(--sidebar-accent-foreground));
+}
+
+/* ── 14. Sidebar header/footer borders (purple) ── */
+[data-slot="sidebar-header"],
+[data-slot="sidebar-footer"] {
+  --border-glow: 0 1px 0 rgba(139,92,246,0.35);
+}
+
+/* ── 15. Sidebar logo box-shadow enhancement ── */
+[data-slot="sidebar-header"] img {
+  filter: drop-shadow(0 0 8px rgba(139,92,246,0.60));
+}
+
+/* ── 16. Sidebar user avatar (gradient circle) ── */
+[data-slot="sidebar-footer"] [style*="linear-gradient"],
+[data-slot="sidebar-footer"] .rounded-full {
+  box-shadow: 0 0 14px var(--pg), 0 0 28px var(--pg-wide);
+}
+
+/* ── 17. Sidebar trigger (hamburger button) ── */
+[data-sidebar="trigger"] svg {
+  filter: drop-shadow(0 0 5px var(--pg));
+  color: hsl(var(--primary));
+}
+
+/* ── 18. accent-foreground text (light purple on active/hover elements) ── */
+.text-accent-foreground,
+.text-sidebar-accent-foreground {
+  text-shadow: 0 0 8px var(--pg-text), 0 0 18px var(--pg-text-soft);
+}
+
+/* ── 19. ring-ring focus outlines (purple) ── */
+.focus-visible\:ring-ring:focus-visible,
+[class*="focus-visible:ring-ring"],
+[class*="ring-sidebar-ring"] {
+  box-shadow: 0 0 0 1px var(--pg), 0 0 14px var(--pg-wide) !important;
+}
+
+/* ── 20. Scrollbar thumb (purple) ── */
+::-webkit-scrollbar-thumb {
+  background: rgba(139,92,246,0.40) !important;
+  box-shadow: 0 0 6px rgba(139,92,246,0.60);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: rgba(139,92,246,0.65) !important;
+  box-shadow: 0 0 10px rgba(139,92,246,0.80);
+}
+
+/* ── 21. Login labels (purple) ── */
+label[style*="#a78bfa"],
+label[style*="a78bfa"] {
+  text-shadow: 0 0 8px var(--pg-text), 0 0 18px var(--pg-text-soft);
+}
+
+/* ── 22. Login Sign In button (inline gradient purple) ── */
+button[data-testid="button-submit-login"] {
+  box-shadow: 0 0 18px var(--pg), 0 0 36px var(--pg-wide), 0 4px 18px rgba(124,58,237,0.35) !important;
+}
+button[data-testid="button-submit-login"]:not(:disabled):hover {
+  box-shadow: 0 0 26px var(--pg), 0 0 52px var(--pg-wide), 0 6px 24px rgba(124,58,237,0.50) !important;
+}
+
+/* ── 23. Role badge text in sidebar footer ── */
+[data-slot="sidebar-footer"] p[style*="#a78bfa"],
+[data-slot="sidebar-footer"] p[style*="a78bfa"],
+[data-testid="text-user-name"] + p {
+  text-shadow: 0 0 8px var(--pg-text), 0 0 16px var(--pg-text-soft);
+}
+
+/* ── 24. Logout button hover (becomes purple) ── */
+[data-testid="button-logout"]:hover svg {
+  filter: drop-shadow(0 0 6px var(--pg-text));
+}
+
+/* ── 25. Purple inline borders (rgba 139,92,246) — card containers with purple borders ── */
+[style*="rgba(139,92,246"],
+[style*="139,92,246"] {
+  box-shadow: 0 0 8px rgba(139,92,246,0.30);
+}
+
+/* ── 26. Inline gradient buttons (portal, chat, etc.) matching purple gradients ── */
+button[style*="#7c3aed"],
+button[style*="7c3aed"],
+a[style*="#7c3aed"],
+a[style*="7c3aed"] {
+  box-shadow: 0 0 16px var(--pg), 0 0 36px var(--pg-wide), 0 4px 16px rgba(124,58,237,0.35) !important;
+}
+button[style*="#7c3aed"]:hover,
+a[style*="#7c3aed"]:hover {
+  box-shadow: 0 0 24px var(--pg), 0 0 52px var(--pg-wide), 0 6px 22px rgba(124,58,237,0.50) !important;
+}
+
+/* ── 27. Inline purple text elements (color: #a78bfa) ── */
+[style*="color: #a78bfa"],
+[style*="color:#a78bfa"],
+[style*='color: "#a78bfa"'],
+span[style*="a78bfa"],
+p[style*="a78bfa"] {
+  text-shadow: 0 0 8px var(--pg-text), 0 0 18px var(--pg-text-soft);
+}
+
+/* ── 28. Chat — "me" messages (purple gradient bg) ── */
+[style*="linear-gradient(135deg, #7c3aed"],
+[style*="linear-gradient(135deg,#7c3aed"] {
+  box-shadow: 0 0 14px var(--pg), 0 0 30px var(--pg-wide) !important;
+}
+
+/* ── 29. Lock icon in chat header (purple) ── */
+[style*="color: #a78bfa"] svg,
+[style*="color:#a78bfa"] svg {
+  filter: drop-shadow(0 0 5px var(--pg-text));
+}
+
+/* ── 30. Selection (already purple, enhance the glow) ── */
+::selection {
+  background: hsl(var(--primary) / 0.35);
+  text-shadow: 0 0 8px var(--pg-text);
+}
+
+/* ── 31. Login page progress bar ── */
 @keyframes login-bar-fill {
   0%   { width: 0%; opacity: 1; }
   40%  { width: 60%; }
@@ -460,36 +643,59 @@ input:focus {
   border-radius: 0 2px 2px 0;
 }
 
-/* ── 3D body perspective for full page depth ───────────────────── */
+/* ── 32. 3D depth for page root ── */
 #root {
   transform-style: preserve-3d;
 }
 
-/* ── Sidebar glow on active + hover items ───────────────────── */
-[data-sidebar="menu-button"][data-active="true"] {
-  box-shadow: 0 0 12px rgba(139, 92, 246, 0.70), inset 0 0 6px rgba(139, 92, 246, 0.15);
+/* ── 33. Landing page text-primary elements ── */
+.from-primary,
+.via-purple-400,
+[class*="from-primary"],
+[class*="via-primary"],
+[class*="to-primary"] {
+  filter: drop-shadow(0 0 4px rgba(139,92,246,0.50));
 }
 
-/* ── Primary ring glow ───────────────────── */
-[class*="ring-primary"],
-[class*="ring-violet"],
-[class*="ring-purple"] {
-  box-shadow: 0 0 0 2px rgba(139,92,246,0.70), 0 0 16px rgba(139,92,246,0.40);
+/* ── 34. Portal/reseller purple buttons & action items ── */
+[style*="background: rgba(139,92,246,0.15)"],
+[style*="background:rgba(139,92,246,0.15)"] {
+  box-shadow: 0 0 10px rgba(139,92,246,0.40), inset 0 0 6px rgba(139,92,246,0.15) !important;
 }
 
-/* ── 3D glow on skyline-card hover ───────────────────── */
-.skyline-card:hover {
-  box-shadow:
-    0 2px 0 0 rgba(139,92,246,0.10),
-    0 12px 40px -4px rgba(0,0,0,0.9),
-    0 0 0 1px rgba(139,92,246,0.12),
-    0 28px 72px -12px rgba(124,58,237,0.45),
-    inset 0 1px 0 rgba(255,255,255,0.06),
-    inset 0 -1px 0 rgba(0,0,0,0.6);
-  transform: perspective(900px) rotateX(1.5deg) translateY(-2px);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+/* ── 35. Portal active contact highlight ── */
+[style*="background: rgba(139,92,246,0.15)"],
+[style*="background: rgba(139,92,246,0.07)"] {
+  box-shadow: inset 0 0 12px rgba(139,92,246,0.20);
 }
 
-.skyline-card {
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+/* ── 36. Sidebar trigger hover ── */
+[data-sidebar="trigger"]:hover {
+  box-shadow: 0 0 12px var(--pg);
+}
+
+/* ── 37. Chart colors (chart-1 and chart-2 are purple range) ── */
+.text-chart-1,
+.bg-chart-1,
+.text-chart-2,
+.bg-chart-2 {
+  filter: drop-shadow(0 0 5px rgba(167,139,250,0.55));
+}
+
+/* ── 38. Switch component (uses primary color when checked) ── */
+[role="switch"][data-state="checked"],
+[data-state="checked"][class*="bg-primary"] {
+  box-shadow: 0 0 10px var(--pg), 0 0 22px var(--pg-wide) !important;
+}
+
+/* ── 39. Checkbox (uses primary ring when checked) ── */
+[role="checkbox"][data-state="checked"] {
+  box-shadow: 0 0 8px var(--pg), 0 0 16px var(--pg-wide) !important;
+}
+
+/* ── 40. Tab active state (uses primary colors) ── */
+[role="tab"][data-state="active"],
+[data-state="active"][class*="text-foreground"] {
+  text-shadow: 0 0 8px rgba(167,139,250,0.40);
+  box-shadow: inset 0 -2px 0 hsl(var(--primary)), 0 0 8px rgba(139,92,246,0.30);
 }
