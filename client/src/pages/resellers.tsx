@@ -297,7 +297,7 @@ export default function ResellersPage() {
                     color: "#a78bfa", fontSize: 12, cursor: "pointer", display: "flex", justifyContent: "space-between",
                   }}>
                     <span>{p.label}</span>
-                    <span style={{ color: "#fbbf24", fontWeight: 700 }}>+{p.credits}cr</span>
+                    <span style={{ color: "#fbbf24", fontWeight: 700 }}>+{p.credits} {p.credits === 1 ? "credit" : "credits"}</span>
                   </button>
                 ))}
               </div>
@@ -480,7 +480,7 @@ export default function ResellersPage() {
               <span style={{ fontWeight: 700 }}>{p.label}</span>
               <span style={{ color: "#52525b" }}>→</span>
               <Coins size={11} style={{ color: "#fbbf24" }} />
-              <span style={{ color: "#fbbf24", fontWeight: 700 }}>{p.credits} cr</span>
+              <span style={{ color: "#fbbf24", fontWeight: 700 }}>{p.credits} {p.credits === 1 ? "credit" : "credits"}</span>
             </div>
           ))}
         </div>

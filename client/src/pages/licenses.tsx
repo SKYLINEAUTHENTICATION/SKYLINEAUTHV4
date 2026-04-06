@@ -684,7 +684,7 @@ export default function LicensesPage() {
                       >
                         <span style={{ fontWeight: 700, color: "#fff", fontSize: 13 }}>{p.label}</span>
                         <span style={{ fontSize: 11, color: canAfford ? "#fbbf24" : "#ef4444", fontWeight: 600 }}>
-                          {p.credits} cr × {count || 1} = {totalCost.toFixed(1)} cr
+                          {p.credits} {p.credits === 1 ? "credit" : "credits"} × {count || 1} = {totalCost.toFixed(1)} {totalCost === 1 ? "credit" : "credits"}
                         </span>
                       </button>
                     );
