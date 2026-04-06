@@ -621,7 +621,10 @@ async function isLocalAuth(req: any, res: any, next: any) {
   if (!session) return res.status(401).json({ message: "Session expired" });
   const account = await storage.getAccountByUserId(session.userId);
   if (!account) return res.status(401).json({ message: "User not found" });
-  req.localUser = { username: account.username, role: account.role, userId: session.userId };
+  if (account.role === "reseller" && account.expiryDate && new Date(account.expiryDate) < new Date()) {
+    return res.status(403).json({ message: "Your reseller account has expired. Contact your admin." });
+  }
+  req.localUser = { username: account.username, role: account.role, userId: session.userId, accountId: account.id, credits: account.credits };
   next();
 }
 
@@ -672,6 +675,9 @@ function registerLocalAuth(app: Express) {
       if (!valid) {
         return res.status(401).json({ message: "Invalid username or password." });
       }
+      if (account.role === "reseller" && account.expiryDate && new Date(account.expiryDate) < new Date()) {
+        return res.status(403).json({ message: "Your reseller account has expired. Contact your admin." });
+      }
       const sessionId = randomUUID();
       localSessions.set(sessionId, { userId: account.userId!, createdAt: Date.now() });
       res.cookie("kv_session", sessionId, {
@@ -701,7 +707,15 @@ function registerLocalAuth(app: Express) {
       }
       const account = await storage.getAccountByUserId(session.userId);
       const numericId = await storage.ensureNumericId(user.id);
-      return res.json({ ...user, numericId, role: account?.role || "admin", username: account?.username || user.firstName });
+      return res.json({
+        ...user,
+        numericId,
+        role: account?.role || "admin",
+        username: account?.username || user.firstName,
+        credits: account?.credits ?? 0,
+        expiryDate: account?.expiryDate ?? null,
+        accountId: account?.id,
+      });
     } catch (error) {
       console.error("Get user error:", error);
       return res.status(500).json({ message: "Failed to get user" });
@@ -961,10 +975,17 @@ export async function registerRoutes(
     }
   });
 
+  const PLANS: Record<string, { days: number; credits: number }> = {
+    "5d": { days: 5, credits: 0.5 },
+    "10d": { days: 10, credits: 1 },
+    "20d": { days: 20, credits: 2 },
+    "30d": { days: 30, credits: 4 },
+  };
+
   app.post("/api/licenses", isAuthenticatedCombined, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { appId, count, duration, durationUnit, level, maxUses, note, mask, useLowercase, useUppercase } = req.body;
+      const { appId, count, duration, durationUnit, level, maxUses, note, mask, useLowercase, useUppercase, plan } = req.body;
       if (!appId) return res.status(400).json({ message: "Application is required" });
       const existing = await storage.getApplication(appId);
       if (!existing) return res.status(404).json({ message: "Application not found" });
@@ -972,6 +993,22 @@ export async function registerRoutes(
         return res.status(403).json({ message: "Access denied" });
       }
       const licCount = Math.min(count || 1, 100);
+      const account = await getAccountForUser(userId);
+      if (account?.role === "reseller") {
+        if (!plan || !PLANS[plan]) return res.status(400).json({ message: "Resellers must select a plan." });
+        const planInfo = PLANS[plan];
+        const totalCredits = planInfo.credits * licCount;
+        if ((account.credits ?? 0) < totalCredits) {
+          return res.status(400).json({ message: `Insufficient credits. Need ${totalCredits}, have ${account.credits ?? 0}.` });
+        }
+        await storage.spendCredits(account.id, totalCredits);
+        const lics = await storage.createLicenses(
+          { appId, duration: planInfo.days, durationUnit: "day", level: level || 1, maxUses: maxUses || 1, note: note || null, enabled: true, expiresAt: null },
+          licCount, mask || undefined, useLowercase || false, useUppercase !== false
+        );
+        await storage.createTokens(appId, licCount);
+        return res.json(lics);
+      }
       const lics = await storage.createLicenses(
         {
           appId,
@@ -1831,20 +1868,34 @@ export async function registerRoutes(
     try {
       if (!["superadmin", "admin"].includes(req.localUser.role)) return res.status(403).json({ message: "Forbidden" });
       const resellers = await storage.getResellerAccounts();
-      res.json(resellers.map((r) => ({ id: r.id, username: r.username, credits: r.credits, createdAt: r.createdAt })));
+      const now = new Date();
+      res.json(resellers.map((r) => ({
+        id: r.id,
+        username: r.username,
+        credits: r.credits,
+        expiryDate: r.expiryDate,
+        status: r.expiryDate && new Date(r.expiryDate) < now ? "expired" : "active",
+        createdAt: r.createdAt,
+      })));
     } catch { res.status(500).json({ message: "Failed to load resellers" }); }
   });
 
   app.post("/api/resellers", isLocalAuth, async (req: any, res) => {
     try {
       if (!["superadmin", "admin"].includes(req.localUser.role)) return res.status(403).json({ message: "Forbidden" });
-      const { username, password, credits } = req.body;
+      const { username, password, credits, expiryDays } = req.body;
       if (!username?.trim() || !password) return res.status(400).json({ message: "Username and password required" });
       const existing = await storage.getAccountByUsername(username.trim());
       if (existing) return res.status(409).json({ message: "Username already taken" });
       const hash = await bcrypt.hash(password, 10);
+      let expiryDate: Date | null = null;
+      if (expiryDays && expiryDays > 0) {
+        expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + Number(expiryDays));
+      }
       const account = await storage.createAccount(username.trim(), hash, "", "reseller");
       if (credits && credits > 0) await storage.addCredits(account.id, credits);
+      if (expiryDate) await storage.updateAccount(account.id, { expiryDate });
       res.json({ success: true });
     } catch { res.status(500).json({ message: "Failed to create reseller" }); }
   });
@@ -1859,10 +1910,29 @@ export async function registerRoutes(
     } catch { res.status(500).json({ message: "Failed to update credits" }); }
   });
 
+  app.patch("/api/resellers/:id/expiry", isLocalAuth, async (req: any, res) => {
+    try {
+      if (!["superadmin", "admin"].includes(req.localUser.role)) return res.status(403).json({ message: "Forbidden" });
+      const { expiryDays } = req.body;
+      let expiryDate: Date | null = null;
+      if (expiryDays && expiryDays > 0) {
+        expiryDate = new Date();
+        expiryDate.setDate(expiryDate.getDate() + Number(expiryDays));
+      }
+      const updated = await storage.updateAccount(req.params.id, { expiryDate });
+      res.json(updated);
+    } catch { res.status(500).json({ message: "Failed to update expiry" }); }
+  });
+
   app.get("/api/resellers/me", isLocalAuth, async (req: any, res) => {
     try {
       const account = await storage.getAccountByUsername(req.localUser.username);
-      res.json({ credits: account?.credits ?? 0 });
+      const now = new Date();
+      res.json({
+        credits: account?.credits ?? 0,
+        expiryDate: account?.expiryDate ?? null,
+        status: account?.expiryDate && new Date(account.expiryDate) < now ? "expired" : "active",
+      });
     } catch { res.status(500).json({ message: "Failed to get credits" }); }
   });
 
@@ -1877,6 +1947,37 @@ export async function registerRoutes(
       await storage.spendCredits(account.id, credits);
       res.json({ success: true, creditsSpent: credits });
     } catch { res.status(500).json({ message: "Failed to spend credits" }); }
+  });
+
+  // ─── PROFILE ROUTES ────────────────────────────────────────
+  app.patch("/api/profile", isLocalAuth, async (req: any, res) => {
+    try {
+      const { email, profileImageUrl } = req.body;
+      const account = await storage.getAccountByUsername(req.localUser.username);
+      if (!account) return res.status(404).json({ message: "Account not found" });
+      if (email !== undefined) {
+        await storage.updateAccount(account.id, { email: email || null });
+      }
+      if (profileImageUrl !== undefined && account.userId) {
+        await db.update(users).set({ profileImageUrl: profileImageUrl || null }).where(eq(users.id, account.userId));
+      }
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to update profile" }); }
+  });
+
+  app.patch("/api/profile/password", isLocalAuth, async (req: any, res) => {
+    try {
+      const { currentPassword, newPassword } = req.body;
+      if (!currentPassword || !newPassword) return res.status(400).json({ message: "Current and new password required" });
+      if (newPassword.length < 4) return res.status(400).json({ message: "New password too short (min 4 chars)" });
+      const account = await storage.getAccountByUsername(req.localUser.username);
+      if (!account) return res.status(404).json({ message: "Account not found" });
+      const valid = await bcrypt.compare(currentPassword, account.passwordHash);
+      if (!valid) return res.status(401).json({ message: "Current password is incorrect" });
+      const hash = await bcrypt.hash(newPassword, 10);
+      await storage.updateAccount(account.id, { passwordHash: hash });
+      res.json({ success: true });
+    } catch { res.status(500).json({ message: "Failed to update password" }); }
   });
 
   app.get("/api/download/telegram-bot", (req, res) => {

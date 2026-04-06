@@ -3,6 +3,15 @@
 ## Overview
 A software licensing and authentication management panel with SKYLINE UI. Features role-based access control (Super Admin, Admin, Reseller). No public registration — accounts are created by Super Admin only. Includes a public client API compatible with KeyAuth-style client libraries.
 
+## Recent Major Changes (April 2026)
+- **New logo**: Rebranded to SKY/SKYLINE logo across login page and sidebar
+- **Expiry System**: Reseller accounts now have an expiry date field. Expired resellers are blocked from login and API access.
+- **Credits System**: Credits changed from integer to real (float) to support 0.5-credit plans
+- **Plans System**: 5d=0.5cr, 10d=1cr, 20d=2cr, 30d=4cr — resellers must select a plan when generating licenses; credits are automatically deducted
+- **Auto-logout**: 3-minute inactivity timer shown in header with visual countdown
+- **Profile Page**: All users can update email, profile picture URL, and password at /dashboard/profile
+- **Reseller UI**: Updated reseller page with expiry date, status badges, and plan quick-add buttons
+
 ## Credentials
 - **Super Admin**: username `SKY-SR`, password `vc3yge5f` (seeded on startup)
 

@@ -11,6 +11,9 @@ export type PanelUser = {
   updatedAt?: string;
   role: string;
   username: string;
+  credits?: number;
+  expiryDate?: string | null;
+  accountId?: string;
 };
 
 async function fetchUser(): Promise<PanelUser | null> {

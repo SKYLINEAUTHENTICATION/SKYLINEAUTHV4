@@ -8,6 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 import LoginPage from "@/pages/login";
 import DashboardPage from "@/pages/dashboard";
@@ -23,9 +24,95 @@ import AnnouncementsPage from "@/pages/announcements";
 import FilesPage from "@/pages/files";
 import ResellersPage from "@/pages/resellers";
 import PortalPage from "@/pages/portal";
+import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
+const IDLE_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
+
+function IdleTimerBar({ onLogout }: { onLogout: () => void }) {
+  const [secondsLeft, setSecondsLeft] = useState(180);
+  const lastActivityRef = useRef<number>(Date.now());
+  const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+
+  const resetTimer = useCallback(() => {
+    lastActivityRef.current = Date.now();
+  }, []);
+
+  useEffect(() => {
+    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
+    events.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
+
+    intervalRef.current = setInterval(() => {
+      const elapsed = Date.now() - lastActivityRef.current;
+      const remaining = Math.max(0, IDLE_TIMEOUT_MS - elapsed);
+      const secs = Math.ceil(remaining / 1000);
+      setSecondsLeft(secs);
+      if (remaining <= 0) {
+        if (intervalRef.current) clearInterval(intervalRef.current);
+        onLogout();
+      }
+    }, 1000);
+
+    return () => {
+      events.forEach((e) => window.removeEventListener(e, resetTimer));
+      if (intervalRef.current) clearInterval(intervalRef.current);
+    };
+  }, [onLogout, resetTimer]);
+
+  const mins = Math.floor(secondsLeft / 60);
+  const secs = secondsLeft % 60;
+  const pct = (secondsLeft / 180) * 100;
+  const isWarning = secondsLeft <= 30;
+
+  return (
+    <div
+      data-testid="idle-timer-bar"
+      style={{
+        display: "flex", alignItems: "center", gap: 8,
+        padding: "3px 12px",
+        background: isWarning ? "rgba(239,68,68,0.08)" : "rgba(124,58,237,0.06)",
+        border: `1px solid ${isWarning ? "rgba(239,68,68,0.3)" : "rgba(139,92,246,0.18)"}`,
+        borderRadius: 20,
+        transition: "all 0.4s",
+      }}
+    >
+      <div style={{
+        width: 6, height: 6, borderRadius: "50%",
+        background: isWarning ? "#ef4444" : "#a78bfa",
+        animation: isWarning ? "pulse-dot 1s ease-in-out infinite" : "none",
+      }} />
+      <span style={{
+        fontSize: 11, fontWeight: 600,
+        color: isWarning ? "#ef4444" : "#71717a",
+        fontFamily: "monospace",
+        minWidth: 36,
+      }} data-testid="text-idle-timer">
+        {String(mins).padStart(2, "0")}:{String(secs).padStart(2, "0")}
+      </span>
+      <div style={{
+        width: 60, height: 3, borderRadius: 2,
+        background: "rgba(255,255,255,0.06)",
+        overflow: "hidden",
+      }}>
+        <div style={{
+          height: "100%", borderRadius: 2,
+          background: isWarning ? "#ef4444" : "linear-gradient(90deg,#7c3aed,#a78bfa)",
+          width: `${pct}%`,
+          transition: "width 1s linear, background 0.4s",
+        }} />
+      </div>
+      <style>{`
+        @keyframes pulse-dot {
+          0%, 100% { opacity: 1; transform: scale(1); }
+          50% { opacity: 0.4; transform: scale(1.4); }
+        }
+      `}</style>
+    </div>
+  );
+}
+
 function DashboardLayout({ children }: { children: React.ReactNode }) {
+  const { logout } = useAuth();
   const style = {
     "--sidebar-width": "15rem",
     "--sidebar-width-icon": "3rem",
@@ -42,9 +129,11 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
               background: "rgba(0,0,0,0.85)",
               borderBottom: "1px solid rgba(139,92,246,0.18)",
               backdropFilter: "blur(12px)",
+              justifyContent: "space-between",
             }}
           >
             <SidebarTrigger data-testid="button-sidebar-toggle" />
+            <IdleTimerBar onLogout={() => logout()} />
           </header>
           <main className="flex-1 overflow-auto">{children}</main>
         </div>
@@ -69,6 +158,7 @@ function AuthenticatedApp() {
         <Route path="/dashboard/announcements" component={AnnouncementsPage} />
         <Route path="/dashboard/files" component={FilesPage} />
         <Route path="/dashboard/resellers" component={ResellersPage} />
+        <Route path="/dashboard/profile" component={ProfilePage} />
         <Route path="/">
           <Redirect to="/dashboard" />
         </Route>

@@ -3,7 +3,7 @@ import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
-import logoPath from "@assets/skyline_1774963364030.png";
+import logoPath from "@assets/IMG_20260404_161801_895_1775474263643.webp";
 import loginErrorSound from "@assets/login-error_1771588547644.mp3";
 import loginSuccessSound from "@assets/ElevenLabs_2026_02_20T12_28_13_Gojo_Calm,_Clear_and_Measured_p_1771590685418.mp3";
 

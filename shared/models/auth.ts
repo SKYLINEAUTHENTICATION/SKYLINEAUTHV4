@@ -1,5 +1,5 @@
 import { sql } from "drizzle-orm";
-import { index, integer, jsonb, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
+import { index, integer, real, jsonb, pgTable, timestamp, varchar } from "drizzle-orm/pg-core";
 
 export const sessions = pgTable(
   "sessions",
@@ -29,7 +29,8 @@ export const accounts = pgTable("accounts", {
   userId: varchar("user_id").references(() => users.id),
   role: varchar("role", { length: 20 }).notNull().default("admin"),
   email: varchar("email", { length: 255 }),
-  credits: integer("credits").notNull().default(0),
+  credits: real("credits").notNull().default(0),
+  expiryDate: timestamp("expiry_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });
 

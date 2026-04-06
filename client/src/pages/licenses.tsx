@@ -73,9 +73,16 @@ type SortBy = "created" | "key" | "status" | "expires";
 type SortOrder = "asc" | "desc";
 type StatusFilter = "all" | "used" | "unused";
 
+const LICENSE_PLANS = [
+  { id: "5d", label: "5 Days", days: 5, credits: 0.5 },
+  { id: "10d", label: "10 Days", days: 10, credits: 1 },
+  { id: "20d", label: "20 Days", days: 20, credits: 2 },
+  { id: "30d", label: "30 Days", days: 30, credits: 4 },
+];
+
 export default function LicensesPage() {
   const { toast } = useToast();
-  const { user } = useAuth();
+  const { user, isReseller } = useAuth();
 
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("table");
@@ -97,6 +104,8 @@ export default function LicensesPage() {
   const [mask, setMask] = useState("");
   const [useLowercase, setUseLowercase] = useState(true);
   const [useUppercase, setUseUppercase] = useState(false);
+
+  const [selectedPlan, setSelectedPlan] = useState<string>("10d");
 
   const [extendOpen, setExtendOpen] = useState(false);
   const [extendUnit, setExtendUnit] = useState("day");
@@ -159,11 +168,14 @@ export default function LicensesPage() {
         mask: mask || undefined,
         useLowercase,
         useUppercase,
+        plan: user?.role === "reseller" ? selectedPlan : undefined,
       });
       return res.json();
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/licenses"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/resellers/me"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
       setGenerateOpen(false);
       setNote("");
       setCount("1");
@@ -624,6 +636,18 @@ export default function LicensesPage() {
             <DialogTitle>Generate Licenses</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
+            {isReseller && (
+              <div style={{
+                padding: "12px 14px", borderRadius: 10,
+                background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+                display: "flex", alignItems: "center", justifyContent: "space-between",
+              }}>
+                <span style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600 }}>Your Credits</span>
+                <span style={{ fontSize: 18, fontWeight: 800, color: "#fbbf24" }}>
+                  {typeof user?.credits === "number" ? user.credits.toFixed(1) : "0.0"}
+                </span>
+              </div>
+            )}
             <div>
               <label className="mb-1.5 block text-sm font-medium">Application</label>
               <Select value={selectedAppId} onValueChange={setSelectedAppId}>
@@ -637,6 +661,37 @@ export default function LicensesPage() {
                 </SelectContent>
               </Select>
             </div>
+            {isReseller && (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Plan</label>
+                <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8 }}>
+                  {LICENSE_PLANS.map((p) => {
+                    const totalCost = p.credits * parseInt(count || "1");
+                    const isSelected = selectedPlan === p.id;
+                    const canAfford = (user?.credits ?? 0) >= totalCost;
+                    return (
+                      <button
+                        key={p.id}
+                        onClick={() => setSelectedPlan(p.id)}
+                        data-testid={`button-plan-${p.id}`}
+                        style={{
+                          padding: "10px 14px", borderRadius: 9, cursor: "pointer",
+                          border: `1px solid ${isSelected ? "rgba(139,92,246,0.7)" : "rgba(139,92,246,0.2)"}`,
+                          background: isSelected ? "rgba(124,58,237,0.2)" : "rgba(124,58,237,0.06)",
+                          display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2,
+                          transition: "all 0.15s",
+                        }}
+                      >
+                        <span style={{ fontWeight: 700, color: "#fff", fontSize: 13 }}>{p.label}</span>
+                        <span style={{ fontSize: 11, color: canAfford ? "#fbbf24" : "#ef4444", fontWeight: 600 }}>
+                          {p.credits} cr × {count || 1} = {totalCost.toFixed(1)} cr
+                        </span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
             <div>
               <label className="mb-1.5 block text-sm font-medium">Count</label>
               <Input type="number" min="1" max="100" value={count} onChange={(e) => setCount(e.target.value)} data-testid="input-license-count" />
