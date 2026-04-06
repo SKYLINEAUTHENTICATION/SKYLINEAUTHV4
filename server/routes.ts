@@ -597,6 +597,23 @@ setInterval(() => {
   }
 }, 600000);
 
+const portalSessions = new Map<string, { username: string; appUserId: string; createdAt: number }>();
+
+setInterval(() => {
+  const now = Date.now();
+  for (const [id, session] of portalSessions) {
+    if (now - session.createdAt > 86400000) {
+      portalSessions.delete(id);
+    }
+  }
+}, 600000);
+
+function getPortalSession(req: any) {
+  const sessionId = req.cookies?.portal_session;
+  if (!sessionId) return null;
+  return portalSessions.get(sessionId) || null;
+}
+
 async function isLocalAuth(req: any, res: any, next: any) {
   const sessionId = req.cookies?.kv_session;
   if (!sessionId) return res.status(401).json({ message: "Not authenticated" });
@@ -1728,21 +1745,85 @@ export async function registerRoutes(
     } catch { res.status(500).json({ message: "Failed to delete file" }); }
   });
 
-  // ─── PORTAL (app-user file access) ───────────────────────────
+  // ─── PORTAL (app-user access) ────────────────────────────────
   app.post("/api/portal/login", async (req, res) => {
     try {
       const { username, password } = req.body;
       if (!username || !password) return res.status(400).json({ message: "Credentials required" });
       const allApps = await db.select().from(applicationsTable);
       let appUser = null;
-      for (const app of allApps) {
-        const u = await storage.getAppUserByUsername(username, app.id);
+      for (const a of allApps) {
+        const u = await storage.getAppUserByUsername(username, a.id);
         if (u && (u.password === password || u.password === null)) { appUser = u; break; }
       }
       if (!appUser) return res.status(401).json({ message: "Invalid credentials" });
+      if (appUser.banned) return res.status(403).json({ message: "Your account has been banned." });
+      if (appUser.expiresAt && new Date(appUser.expiresAt) < new Date()) {
+        return res.status(403).json({ message: "Your subscription has expired." });
+      }
+      const sessionId = randomUUID();
+      portalSessions.set(sessionId, { username: appUser.username, appUserId: appUser.id, createdAt: Date.now() });
+      res.cookie("portal_session", sessionId, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "lax",
+        maxAge: 86400000,
+        path: "/",
+      });
       const files = await storage.getAppFiles();
-      res.json({ success: true, files });
+      res.json({ success: true, username: appUser.username, files });
     } catch { res.status(500).json({ message: "Portal login failed" }); }
+  });
+
+  app.post("/api/portal/logout", async (req, res) => {
+    const sessionId = req.cookies?.portal_session;
+    if (sessionId) portalSessions.delete(sessionId);
+    res.clearCookie("portal_session", { path: "/" });
+    res.json({ success: true });
+  });
+
+  app.get("/api/portal/me", async (req, res) => {
+    const session = getPortalSession(req);
+    if (!session) return res.status(401).json({ message: "Not authenticated" });
+    res.json({ username: session.username });
+  });
+
+  app.get("/api/portal/files", async (req, res) => {
+    try {
+      const session = getPortalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const files = await storage.getAppFiles();
+      res.json(files);
+    } catch { res.status(500).json({ message: "Failed to load files" }); }
+  });
+
+  app.get("/api/portal/announcements", async (req, res) => {
+    try {
+      const session = getPortalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const list = await storage.getAnnouncements();
+      res.json(list);
+    } catch { res.status(500).json({ message: "Failed to load announcements" }); }
+  });
+
+  app.get("/api/portal/chat", async (req, res) => {
+    try {
+      const session = getPortalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const msgs = await storage.getPublicChatMessages();
+      res.json(msgs.reverse());
+    } catch { res.status(500).json({ message: "Failed to load chat" }); }
+  });
+
+  app.post("/api/portal/chat", async (req, res) => {
+    try {
+      const session = getPortalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const { message } = req.body;
+      if (!message?.trim()) return res.status(400).json({ message: "Message required" });
+      const msg = await storage.createChatMessage(session.username, "user", message.trim());
+      res.json(msg);
+    } catch { res.status(500).json({ message: "Failed to send message" }); }
   });
 
   // ─── RESELLERS ROUTES ────────────────────────────────────────
