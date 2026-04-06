@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
@@ -10,8 +10,17 @@ export default function ProfilePage() {
   const { toast } = useToast();
   const queryClient = useQueryClient();
 
-  const [profileImageUrl, setProfileImageUrl] = useState(user?.profileImageUrl || "");
-  const [email, setEmail] = useState(user?.email || "");
+  const [profileImageUrl, setProfileImageUrl] = useState("");
+  const [email, setEmail] = useState("");
+
+  // Sync form state once user data loads (user is null on first render)
+  useEffect(() => {
+    if (user) {
+      setProfileImageUrl(user.profileImageUrl || "");
+      setEmail(user.email || "");
+    }
+  }, [user?.id]);
+
   const [currentPassword, setCurrentPassword] = useState("");
   const [newPassword, setNewPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");

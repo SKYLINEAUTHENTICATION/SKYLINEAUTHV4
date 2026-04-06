@@ -180,9 +180,26 @@ export default function AnnouncementsPage() {
                     <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>{ann.title}</h2>
                   </div>
                   <p style={{ margin: "0 0 12px", fontSize: 14, color: "#a1a1aa", lineHeight: 1.6 }}>{ann.content}</p>
-                  <p style={{ margin: 0, fontSize: 11, color: "#3f3f46" }}>
-                    Posted by <span style={{ color: "#fbbf24" }}>{ann.authorUsername}</span> &mdash; {new Date(ann.createdAt).toLocaleString()}
-                  </p>
+                  <div style={{ display: "flex", alignItems: "center", gap: 8, marginTop: 4 }}>
+                    {ann.authorProfileImageUrl ? (
+                      <img
+                        src={ann.authorProfileImageUrl}
+                        alt={ann.authorUsername}
+                        style={{ width: 20, height: 20, borderRadius: "50%", objectFit: "cover", border: "1px solid rgba(251,191,36,0.4)" }}
+                        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+                      />
+                    ) : (
+                      <div style={{
+                        width: 20, height: 20, borderRadius: "50%",
+                        background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                        display: "flex", alignItems: "center", justifyContent: "center",
+                        fontSize: 8, fontWeight: 700, color: "#fff",
+                      }}>{ann.authorUsername?.slice(0, 2).toUpperCase()}</div>
+                    )}
+                    <p style={{ margin: 0, fontSize: 11, color: "#3f3f46" }}>
+                      Posted by <span style={{ color: "#fbbf24" }}>{ann.authorUsername}</span> &mdash; {new Date(ann.createdAt).toLocaleString()}
+                    </p>
+                  </div>
                 </div>
                 {isSuperAdmin && (
                   <button

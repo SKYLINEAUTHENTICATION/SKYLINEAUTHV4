@@ -62,6 +62,25 @@ export default function ChatPage() {
 
   const getInitials = (name: string) => name.slice(0, 2).toUpperCase();
 
+  const Avatar = ({ username, profileImageUrl, size = 32, borderColor }: { username: string; profileImageUrl?: string | null; size?: number; borderColor?: string }) => (
+    profileImageUrl ? (
+      <img
+        src={profileImageUrl}
+        alt={username}
+        style={{ width: size, height: size, borderRadius: "50%", objectFit: "cover", flexShrink: 0, border: borderColor ? `2px solid ${borderColor}` : undefined }}
+        onError={(e) => { (e.currentTarget as HTMLImageElement).style.display = "none"; }}
+      />
+    ) : (
+      <div style={{
+        width: size, height: size, borderRadius: "50%", flexShrink: 0,
+        background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+        border: borderColor ? `2px solid ${borderColor}` : undefined,
+        display: "flex", alignItems: "center", justifyContent: "center",
+        fontSize: size * 0.34, fontWeight: 700, color: "#fff",
+      }}>{getInitials(username)}</div>
+    )
+  );
+
   return (
     <div style={{ display: "flex", height: "calc(100vh - 52px)", background: "#000" }}>
       {/* Sidebar */}
@@ -101,12 +120,7 @@ export default function ChatPage() {
               onMouseEnter={(e) => { if (activeContact !== c.username) e.currentTarget.style.background = "rgba(139,92,246,0.07)"; }}
               onMouseLeave={(e) => { if (activeContact !== c.username) e.currentTarget.style.background = "transparent"; }}
             >
-              <div style={{
-                width: 28, height: 28, borderRadius: "50%", flexShrink: 0,
-                background: "linear-gradient(135deg, #7c3aed, #6366f1)",
-                display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 10, fontWeight: 700, color: "#fff",
-              }}>{getInitials(c.username)}</div>
+              <Avatar username={c.username} profileImageUrl={c.profileImageUrl} size={28} />
               <div>
                 <p style={{ margin: 0, fontSize: 12, fontWeight: 500 }}>{c.username}</p>
                 <p style={{ margin: 0, fontSize: 10, color: ROLE_COLOR[c.role] || "#52525b" }}>{ROLE_LABEL[c.role] || c.role}</p>
@@ -144,13 +158,12 @@ export default function ChatPage() {
             const isMe = msg.senderUsername === user?.username;
             return (
               <div key={msg.id} style={{ display: "flex", gap: 10, alignItems: "flex-start", flexDirection: isMe ? "row-reverse" : "row" }}>
-                <div style={{
-                  width: 32, height: 32, borderRadius: "50%", flexShrink: 0,
-                  background: isMe ? "linear-gradient(135deg, #7c3aed, #6366f1)" : "linear-gradient(135deg, #1e1b4b, #312e81)",
-                  border: `2px solid ${ROLE_COLOR[msg.senderRole] || "#52525b"}`,
-                  display: "flex", alignItems: "center", justifyContent: "center",
-                  fontSize: 11, fontWeight: 700, color: "#fff",
-                }}>{getInitials(msg.senderUsername)}</div>
+                <Avatar
+                  username={msg.senderUsername}
+                  profileImageUrl={isMe ? user?.profileImageUrl : msg.senderProfileImageUrl}
+                  size={32}
+                  borderColor={ROLE_COLOR[msg.senderRole] || "#52525b"}
+                />
                 <div style={{ maxWidth: "65%", display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start" }}>
                   <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 3, flexDirection: isMe ? "row-reverse" : "row" }}>
                     <span style={{ fontSize: 12, fontWeight: 600, color: ROLE_COLOR[msg.senderRole] || "#a78bfa" }}>{msg.senderUsername}</span>

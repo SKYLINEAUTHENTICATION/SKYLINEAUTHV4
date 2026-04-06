@@ -2,7 +2,7 @@ import type { Express } from "express";
 import { createServer, type Server } from "http";
 import { randomUUID, createHash, createHmac } from "crypto";
 import bcrypt from "bcryptjs";
-import { eq } from "drizzle-orm";
+import { eq, inArray } from "drizzle-orm";
 import sodium from "libsodium-wrappers";
 import archiver from "archiver";
 import path from "path";
@@ -1682,9 +1682,15 @@ export async function registerRoutes(
   app.get("/api/chat/contacts", isLocalAuth, async (req: any, res) => {
     try {
       const accounts = await storage.getAllAccounts();
+      const userIds = accounts.map((a) => a.userId).filter(Boolean) as string[];
+      const userRows = userIds.length
+        ? await db.select({ id: users.id, profileImageUrl: users.profileImageUrl }).from(users).where(inArray(users.id, userIds))
+        : [];
+      const imageMap: Record<string, string | null> = {};
+      userRows.forEach((u) => { imageMap[u.id] = u.profileImageUrl ?? null; });
       const contacts = accounts
         .filter((a) => a.username !== req.localUser.username)
-        .map((a) => ({ id: a.id, username: a.username, role: a.role }));
+        .map((a) => ({ id: a.id, username: a.username, role: a.role, profileImageUrl: a.userId ? imageMap[a.userId] ?? null : null }));
       res.json(contacts);
     } catch { res.status(500).json({ message: "Failed to load contacts" }); }
   });
@@ -1698,7 +1704,18 @@ export async function registerRoutes(
       } else {
         msgs = await storage.getPublicChatMessages();
       }
-      res.json(msgs.reverse());
+      // Attach senderProfileImageUrl via accounts -> users join
+      const allAccounts = await storage.getAllAccounts();
+      const userIds = allAccounts.map((a) => a.userId).filter(Boolean) as string[];
+      const userRows = userIds.length
+        ? await db.select({ id: users.id, profileImageUrl: users.profileImageUrl }).from(users).where(inArray(users.id, userIds))
+        : [];
+      const imageByUserId: Record<string, string | null> = {};
+      userRows.forEach((u) => { imageByUserId[u.id] = u.profileImageUrl ?? null; });
+      const imageByUsername: Record<string, string | null> = {};
+      allAccounts.forEach((a) => { if (a.userId) imageByUsername[a.username] = imageByUserId[a.userId] ?? null; });
+      const enriched = msgs.map((m: any) => ({ ...m, senderProfileImageUrl: imageByUsername[m.senderUsername] ?? null }));
+      res.json(enriched.reverse());
     } catch { res.status(500).json({ message: "Failed to load messages" }); }
   });
 
@@ -1720,7 +1737,18 @@ export async function registerRoutes(
   app.get("/api/announcements", isLocalAuth, async (req: any, res) => {
     try {
       const list = await storage.getAnnouncements();
-      res.json(list);
+      // Attach authorProfileImageUrl
+      const allAccounts = await storage.getAllAccounts();
+      const userIds = allAccounts.map((a) => a.userId).filter(Boolean) as string[];
+      const userRows = userIds.length
+        ? await db.select({ id: users.id, profileImageUrl: users.profileImageUrl }).from(users).where(inArray(users.id, userIds))
+        : [];
+      const imageByUserId: Record<string, string | null> = {};
+      userRows.forEach((u) => { imageByUserId[u.id] = u.profileImageUrl ?? null; });
+      const imageByUsername: Record<string, string | null> = {};
+      allAccounts.forEach((a) => { if (a.userId) imageByUsername[a.username] = imageByUserId[a.userId] ?? null; });
+      const enriched = list.map((a: any) => ({ ...a, authorProfileImageUrl: imageByUsername[a.authorUsername] ?? null }));
+      res.json(enriched);
     } catch { res.status(500).json({ message: "Failed to load announcements" }); }
   });
 
