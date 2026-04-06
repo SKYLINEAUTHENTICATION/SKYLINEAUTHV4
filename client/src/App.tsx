@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState } from "react";
 
 import LoginPage from "@/pages/login";
 import DashboardPage from "@/pages/dashboard";
@@ -27,37 +27,26 @@ import PortalPage from "@/pages/portal";
 import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 
-const IDLE_TIMEOUT_MS = 3 * 60 * 1000; // 3 minutes
-
 function IdleTimerBar({ onLogout }: { onLogout: () => void }) {
   const [secondsLeft, setSecondsLeft] = useState(180);
-  const lastActivityRef = useRef<number>(Date.now());
   const intervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
-  const resetTimer = useCallback(() => {
-    lastActivityRef.current = Date.now();
-  }, []);
-
   useEffect(() => {
-    const events = ["mousemove", "keydown", "click", "scroll", "touchstart"];
-    events.forEach((e) => window.addEventListener(e, resetTimer, { passive: true }));
-
     intervalRef.current = setInterval(() => {
-      const elapsed = Date.now() - lastActivityRef.current;
-      const remaining = Math.max(0, IDLE_TIMEOUT_MS - elapsed);
-      const secs = Math.ceil(remaining / 1000);
-      setSecondsLeft(secs);
-      if (remaining <= 0) {
-        if (intervalRef.current) clearInterval(intervalRef.current);
-        onLogout();
-      }
+      setSecondsLeft((prev) => {
+        if (prev <= 1) {
+          if (intervalRef.current) clearInterval(intervalRef.current);
+          onLogout();
+          return 0;
+        }
+        return prev - 1;
+      });
     }, 1000);
 
     return () => {
-      events.forEach((e) => window.removeEventListener(e, resetTimer));
       if (intervalRef.current) clearInterval(intervalRef.current);
     };
-  }, [onLogout, resetTimer]);
+  }, [onLogout]);
 
   const mins = Math.floor(secondsLeft / 60);
   const secs = secondsLeft % 60;
