@@ -644,10 +644,9 @@ async function seedSuperAdmin() {
       await storage.createAccount(adminUsername, passwordHash, userId, "superadmin");
       console.log(`[seed] Super admin '${adminUsername}' created.`);
     } else {
-      // Always sync password hash and role from env vars on every startup
-      const passwordHash = await bcrypt.hash(adminPassword, 10);
-      await storage.updateAccount(existing.id, { passwordHash, role: "superadmin" });
-      console.log(`[seed] Super admin '${adminUsername}' credentials synced.`);
+      // Only enforce role; never overwrite a manually changed password
+      await storage.updateAccount(existing.id, { role: "superadmin" });
+      console.log(`[seed] Super admin '${adminUsername}' role synced.`);
     }
   } catch (err) {
     console.error("[seed] Failed to seed super admin:", err);
