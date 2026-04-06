@@ -73,6 +73,7 @@ function generateToken(): string {
 }
 
 export interface IStorage {
+  getAllApplications(): Promise<Application[]>;
   getApplicationsByOwner(ownerId: string): Promise<Application[]>;
   getApplication(id: string): Promise<Application | undefined>;
   getApplicationByNameAndOwner(name: string, ownerId: string): Promise<Application | undefined>;
@@ -142,6 +143,10 @@ export interface IStorage {
 }
 
 export class DatabaseStorage implements IStorage {
+  async getAllApplications(): Promise<Application[]> {
+    return db.select().from(applications);
+  }
+
   async getApplicationsByOwner(ownerId: string): Promise<Application[]> {
     return db.select().from(applications).where(eq(applications.ownerId, ownerId));
   }

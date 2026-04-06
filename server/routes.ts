@@ -817,6 +817,27 @@ function isAuthenticatedCombined(req: any, res: any, next: any) {
   return isAuthenticated(req, res, next);
 }
 
+async function getAccountForUser(userId: string) {
+  return storage.getAccountByUserId(userId);
+}
+
+async function getAccessibleApps(userId: string) {
+  const account = await getAccountForUser(userId);
+  if (!account) return [];
+  if (account.role === "superadmin" || account.role === "admin" || account.role === "reseller") {
+    return storage.getAllApplications();
+  }
+  return storage.getApplicationsByOwner(userId);
+}
+
+async function canManageApp(userId: string, appId: string): Promise<boolean> {
+  const account = await getAccountForUser(userId);
+  if (!account) return false;
+  if (account.role === "superadmin" || account.role === "admin") return true;
+  const app = await storage.getApplication(appId);
+  return !!(app && app.ownerId === userId);
+}
+
 export async function registerRoutes(
   httpServer: Server,
   app: Express
@@ -832,7 +853,7 @@ export async function registerRoutes(
   app.get("/api/applications", isAuthenticatedCombined, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const apps = await storage.getApplicationsByOwner(userId);
+      const apps = await getAccessibleApps(userId);
       res.json(apps);
     } catch (error) {
       console.error("Error fetching applications:", error);
@@ -863,8 +884,9 @@ export async function registerRoutes(
     try {
       const userId = req.user.claims.sub;
       const existing = await storage.getApplication(req.params.id);
-      if (!existing || existing.ownerId !== userId) {
-        return res.status(404).json({ message: "Application not found" });
+      if (!existing) return res.status(404).json({ message: "Application not found" });
+      if (!(await canManageApp(userId, req.params.id))) {
+        return res.status(403).json({ message: "Access denied" });
       }
       const updated = await storage.updateApplication(req.params.id, req.body);
       res.json(updated);
@@ -878,8 +900,9 @@ export async function registerRoutes(
     try {
       const userId = req.user.claims.sub;
       const existing = await storage.getApplication(req.params.id);
-      if (!existing || existing.ownerId !== userId) {
-        return res.status(404).json({ message: "Application not found" });
+      if (!existing) return res.status(404).json({ message: "Application not found" });
+      if (!(await canManageApp(userId, req.params.id))) {
+        return res.status(403).json({ message: "Access denied" });
       }
       await storage.deleteApplication(req.params.id);
       res.json({ success: true });
@@ -893,8 +916,9 @@ export async function registerRoutes(
     try {
       const userId = req.user.claims.sub;
       const existing = await storage.getApplication(req.params.id);
-      if (!existing || existing.ownerId !== userId) {
-        return res.status(404).json({ message: "Application not found" });
+      if (!existing) return res.status(404).json({ message: "Application not found" });
+      if (!(await canManageApp(userId, req.params.id))) {
+        return res.status(403).json({ message: "Access denied" });
       }
       const updated = await storage.resetApplicationSecret(req.params.id);
       res.json(updated);
@@ -907,8 +931,13 @@ export async function registerRoutes(
   app.get("/api/licenses", isAuthenticatedCombined, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const lics = await storage.getLicensesByOwner(userId);
-      res.json(lics);
+      const apps = await getAccessibleApps(userId);
+      const allLicenses: any[] = [];
+      for (const a of apps) {
+        const lics = await storage.getLicensesByApp(a.id);
+        allLicenses.push(...lics);
+      }
+      res.json(allLicenses);
     } catch (error) {
       console.error("Error fetching licenses:", error);
       res.status(500).json({ message: "Failed to fetch licenses" });
@@ -921,8 +950,9 @@ export async function registerRoutes(
       const { appId, count, duration, durationUnit, level, maxUses, note, mask, useLowercase, useUppercase } = req.body;
       if (!appId) return res.status(400).json({ message: "Application is required" });
       const existing = await storage.getApplication(appId);
-      if (!existing || existing.ownerId !== userId) {
-        return res.status(404).json({ message: "Application not found" });
+      if (!existing) return res.status(404).json({ message: "Application not found" });
+      if (!(await canManageApp(userId, appId))) {
+        return res.status(403).json({ message: "Access denied" });
       }
       const licCount = Math.min(count || 1, 100);
       const lics = await storage.createLicenses(
@@ -954,8 +984,7 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const lic = await storage.getLicense(req.params.id);
       if (!lic) return res.status(404).json({ message: "License not found" });
-      const app = await storage.getApplication(lic.appId);
-      if (!app || app.ownerId !== userId) return res.status(404).json({ message: "License not found" });
+      if (!(await canManageApp(userId, lic.appId))) return res.status(403).json({ message: "Access denied" });
       const updated = await storage.updateLicense(req.params.id, req.body);
       res.json(updated);
     } catch (error) {
@@ -969,8 +998,7 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const lic = await storage.getLicense(req.params.id);
       if (!lic) return res.status(404).json({ message: "License not found" });
-      const app = await storage.getApplication(lic.appId);
-      if (!app || app.ownerId !== userId) return res.status(404).json({ message: "License not found" });
+      if (!(await canManageApp(userId, lic.appId))) return res.status(403).json({ message: "Access denied" });
       await storage.deleteLicense(req.params.id);
       res.json({ success: true });
     } catch (error) {
@@ -983,7 +1011,12 @@ export async function registerRoutes(
     try {
       const userId = req.user.claims.sub;
       const { mode } = req.body;
-      const allLicenses = await storage.getLicensesByOwner(userId);
+      const apps = await getAccessibleApps(userId);
+      const allLicenses: any[] = [];
+      for (const a of apps) {
+        const lics = await storage.getLicensesByApp(a.id);
+        allLicenses.push(...lics);
+      }
       let toDelete: typeof allLicenses = [];
       if (mode === "all") {
         toDelete = allLicenses;
@@ -1008,7 +1041,12 @@ export async function registerRoutes(
     try {
       const userId = req.user.claims.sub;
       const { unit, duration } = req.body;
-      const allLicenses = await storage.getLicensesByOwner(userId);
+      const apps = await getAccessibleApps(userId);
+      const allLicenses: any[] = [];
+      for (const a of apps) {
+        const lics = await storage.getLicensesByApp(a.id);
+        allLicenses.push(...lics);
+      }
       const unused = allLicenses.filter((l) => (l.usedCount ?? 0) === 0);
       let count = 0;
       for (const lic of unused) {
@@ -1026,8 +1064,13 @@ export async function registerRoutes(
   app.get("/api/app-users", isAuthenticatedCombined, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const users = await storage.getAppUsersByOwner(userId);
-      res.json(users);
+      const apps = await getAccessibleApps(userId);
+      const allUsers: any[] = [];
+      for (const a of apps) {
+        const u = await storage.getAppUsersByApp(a.id);
+        allUsers.push(...u);
+      }
+      res.json(allUsers);
     } catch (error) {
       console.error("Error fetching app users:", error);
       res.status(500).json({ message: "Failed to fetch users" });
@@ -1042,8 +1085,9 @@ export async function registerRoutes(
         return res.status(400).json({ message: "Application and username are required" });
       }
       const existing = await storage.getApplication(appId);
-      if (!existing || existing.ownerId !== userId) {
-        return res.status(404).json({ message: "Application not found" });
+      if (!existing) return res.status(404).json({ message: "Application not found" });
+      if (!(await canManageApp(userId, appId))) {
+        return res.status(403).json({ message: "Access denied" });
       }
       const user = await storage.createAppUser({
         appId,
@@ -1067,8 +1111,7 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const appUser = await storage.getAppUser(req.params.id);
       if (!appUser) return res.status(404).json({ message: "User not found" });
-      const app = await storage.getApplication(appUser.appId);
-      if (!app || app.ownerId !== userId) return res.status(404).json({ message: "User not found" });
+      if (!(await canManageApp(userId, appUser.appId))) return res.status(403).json({ message: "Access denied" });
       const updated = await storage.updateAppUser(req.params.id, req.body);
       res.json(updated);
     } catch (error) {
@@ -1082,8 +1125,7 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const appUser = await storage.getAppUser(req.params.id);
       if (!appUser) return res.status(404).json({ message: "User not found" });
-      const app = await storage.getApplication(appUser.appId);
-      if (!app || app.ownerId !== userId) return res.status(404).json({ message: "User not found" });
+      if (!(await canManageApp(userId, appUser.appId))) return res.status(403).json({ message: "Access denied" });
       await storage.deleteAppUser(req.params.id);
       res.json({ success: true });
     } catch (error) {
@@ -1096,7 +1138,12 @@ export async function registerRoutes(
     try {
       const userId = req.user.claims.sub;
       const { mode, ids } = req.body;
-      const allUsers = await storage.getAppUsersByOwner(userId);
+      const apps = await getAccessibleApps(userId);
+      const allUsers: any[] = [];
+      for (const a of apps) {
+        const u = await storage.getAppUsersByApp(a.id);
+        allUsers.push(...u);
+      }
       let toDelete: typeof allUsers = [];
       if (mode === "all") {
         toDelete = allUsers;
@@ -1121,7 +1168,12 @@ export async function registerRoutes(
     try {
       const userId = req.user.claims.sub;
       const { mode, ids } = req.body;
-      const allUsers = await storage.getAppUsersByOwner(userId);
+      const apps = await getAccessibleApps(userId);
+      const allUsers: any[] = [];
+      for (const a of apps) {
+        const u = await storage.getAppUsersByApp(a.id);
+        allUsers.push(...u);
+      }
       let toReset: typeof allUsers = [];
       if (mode === "all") {
         toReset = allUsers;
@@ -1145,8 +1197,13 @@ export async function registerRoutes(
   app.get("/api/tokens", isAuthenticatedCombined, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const toks = await storage.getTokensByOwner(userId);
-      res.json(toks);
+      const apps = await getAccessibleApps(userId);
+      const allTokens: any[] = [];
+      for (const a of apps) {
+        const t = await storage.getTokensByApp(a.id);
+        allTokens.push(...t);
+      }
+      res.json(allTokens);
     } catch (error) {
       console.error("Error fetching tokens:", error);
       res.status(500).json({ message: "Failed to fetch tokens" });
@@ -1159,8 +1216,9 @@ export async function registerRoutes(
       const { appId, count } = req.body;
       if (!appId) return res.status(400).json({ message: "Application is required" });
       const existing = await storage.getApplication(appId);
-      if (!existing || existing.ownerId !== userId) {
-        return res.status(404).json({ message: "Application not found" });
+      if (!existing) return res.status(404).json({ message: "Application not found" });
+      if (!(await canManageApp(userId, appId))) {
+        return res.status(403).json({ message: "Access denied" });
       }
       const toks = await storage.createTokens(appId, Math.min(count || 1, 100));
       res.json(toks);
@@ -1174,10 +1232,10 @@ export async function registerRoutes(
   app.get("/api/sellers", isAuthenticatedCombined, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const apps = await storage.getApplicationsByOwner(userId);
+      const apps = await getAccessibleApps(userId);
       const allSellers: any[] = [];
-      for (const app of apps) {
-        const s = await storage.getSellersByApp(app.id);
+      for (const a of apps) {
+        const s = await storage.getSellersByApp(a.id);
         allSellers.push(...s);
       }
       res.json(allSellers);
@@ -1193,7 +1251,8 @@ export async function registerRoutes(
       const { appId, name, canCreateLicenses, canDeleteLicenses, canCreateUsers, canDeleteUsers, canResetUserHwid, canBanUsers } = req.body;
       if (!appId || !name) return res.status(400).json({ message: "Application and name are required" });
       const app = await storage.getApplication(appId);
-      if (!app || app.ownerId !== userId) return res.status(404).json({ message: "Application not found" });
+      if (!app) return res.status(404).json({ message: "Application not found" });
+      if (!(await canManageApp(userId, appId))) return res.status(403).json({ message: "Access denied" });
       const seller = await storage.createSeller({
         appId,
         name,
@@ -1216,8 +1275,7 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const seller = await storage.getSeller(req.params.id);
       if (!seller) return res.status(404).json({ message: "Seller not found" });
-      const app = await storage.getApplication(seller.appId);
-      if (!app || app.ownerId !== userId) return res.status(404).json({ message: "Seller not found" });
+      if (!(await canManageApp(userId, seller.appId))) return res.status(403).json({ message: "Access denied" });
       const updated = await storage.updateSeller(req.params.id, req.body);
       res.json(updated);
     } catch (error) {
@@ -1231,8 +1289,7 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const seller = await storage.getSeller(req.params.id);
       if (!seller) return res.status(404).json({ message: "Seller not found" });
-      const app = await storage.getApplication(seller.appId);
-      if (!app || app.ownerId !== userId) return res.status(404).json({ message: "Seller not found" });
+      if (!(await canManageApp(userId, seller.appId))) return res.status(403).json({ message: "Access denied" });
       await storage.deleteSeller(req.params.id);
       res.json({ success: true });
     } catch (error) {
@@ -1450,10 +1507,15 @@ export async function registerRoutes(
   app.get("/api/statistics", isAuthenticatedCombined, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const apps = await storage.getApplicationsByOwner(userId);
-      const allLicenses = await storage.getLicensesByOwner(userId);
-      const allUsers = await storage.getAppUsersByOwner(userId);
-      const allTokens = await storage.getTokensByOwner(userId);
+      const apps = await getAccessibleApps(userId);
+      const allLicenses: any[] = [];
+      const allUsers: any[] = [];
+      const allTokens: any[] = [];
+      for (const a of apps) {
+        allLicenses.push(...await storage.getLicensesByApp(a.id));
+        allUsers.push(...await storage.getAppUsersByApp(a.id));
+        allTokens.push(...await storage.getTokensByApp(a.id));
+      }
 
       const activeLicenses = allLicenses.filter((l) => l.enabled);
       const usedLicenses = allLicenses.filter((l) => l.usedBy);
@@ -1524,7 +1586,11 @@ export async function registerRoutes(
     try {
       const userId = req.user.claims.sub;
       const { mode, ids } = req.body;
-      const allTokens = await storage.getTokensByOwner(userId);
+      const apps = await getAccessibleApps(userId);
+      const allTokens: any[] = [];
+      for (const a of apps) {
+        allTokens.push(...await storage.getTokensByApp(a.id));
+      }
       let toDelete: typeof allTokens = [];
       if (mode === "all") {
         toDelete = allTokens;
@@ -1550,8 +1616,7 @@ export async function registerRoutes(
       const userId = req.user.claims.sub;
       const tok = await storage.getToken(req.params.id);
       if (!tok) return res.status(404).json({ message: "Token not found" });
-      const app = await storage.getApplication(tok.appId);
-      if (!app || app.ownerId !== userId) return res.status(404).json({ message: "Token not found" });
+      if (!(await canManageApp(userId, tok.appId))) return res.status(403).json({ message: "Access denied" });
       await storage.deleteToken(req.params.id);
       res.json({ success: true });
     } catch (error) {
