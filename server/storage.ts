@@ -115,7 +115,7 @@ export interface IStorage {
 
   getAccountByUsername(username: string): Promise<Account | undefined>;
   getAccountByUserId(userId: string): Promise<Account | undefined>;
-  createAccount(username: string, passwordHash: string, userId: string, role?: string, email?: string): Promise<Account>;
+  createAccount(username: string, passwordHash: string, userId: string | null, role?: string, email?: string): Promise<Account>;
   getAllAccounts(): Promise<Account[]>;
   deleteAccount(id: string): Promise<void>;
   updateAccount(id: string, data: Partial<Account>): Promise<Account | undefined>;
@@ -397,10 +397,10 @@ export class DatabaseStorage implements IStorage {
     return account;
   }
 
-  async createAccount(username: string, passwordHash: string, userId: string, role = "admin", email?: string): Promise<Account> {
+  async createAccount(username: string, passwordHash: string, userId: string | null, role = "admin", email?: string): Promise<Account> {
     const [account] = await db
       .insert(accounts)
-      .values({ username, passwordHash, userId, role, email })
+      .values({ username, passwordHash, userId: userId || null, role, email })
       .returning();
     return account;
   }

@@ -1920,11 +1920,17 @@ export async function registerRoutes(
         expiryDate = new Date();
         expiryDate.setDate(expiryDate.getDate() + Number(expiryDays));
       }
-      const account = await storage.createAccount(username.trim(), hash, "", "reseller");
+      // Create a user row first so the FK constraint is satisfied and profile images work
+      const userId = randomUUID();
+      await db.insert(users).values({ id: userId, firstName: username.trim(), email: null });
+      const account = await storage.createAccount(username.trim(), hash, userId, "reseller");
       if (credits && credits > 0) await storage.addCredits(account.id, credits);
       if (expiryDate) await storage.updateAccount(account.id, { expiryDate });
       res.json({ success: true });
-    } catch { res.status(500).json({ message: "Failed to create reseller" }); }
+    } catch (err) {
+      console.error("Create reseller error:", err);
+      res.status(500).json({ message: "Failed to create reseller" });
+    }
   });
 
   app.post("/api/resellers/:id/credits", isLocalAuth, async (req: any, res) => {
