@@ -36,12 +36,14 @@ const ROLE_LABEL: Record<string, string> = {
   superadmin: "Super Admin",
   admin: "Admin",
   reseller: "Reseller",
+  user: "App User",
 };
 
 const ROLE_COLOR: Record<string, string> = {
   superadmin: "#fbbf24",
   admin: "#a78bfa",
   reseller: "#60a5fa",
+  user: "#34d399",
 };
 
 function ExpiryCountdown({ expiryDate }: { expiryDate: string | null | undefined }) {
@@ -77,7 +79,7 @@ function ExpiryCountdown({ expiryDate }: { expiryDate: string | null | undefined
 
 export function AppSidebar() {
   const [location] = useLocation();
-  const { user, logout, isSuperAdmin, isAdmin, isReseller } = useAuth();
+  const { user, logout, isSuperAdmin, isAdmin, isReseller, isUser } = useAuth();
 
   const { data: resellerMe } = useQuery<{ credits: number; expiryDate: string | null; status: string }>({
     queryKey: ["/api/resellers/me"],
@@ -124,14 +126,16 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        <SidebarGroup>
-          <SidebarGroupLabel>Overview</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {renderItem("Dashboard", "/dashboard", LayoutDashboard)}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {!isUser && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Overview</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {renderItem("Dashboard", "/dashboard", LayoutDashboard)}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {isAdmin && (
           <SidebarGroup>
@@ -163,8 +167,8 @@ export function AppSidebar() {
           <SidebarGroupLabel>Community</SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
-              {renderItem("Chat", "/dashboard/chat", MessageCircle)}
               {renderItem("Announcements", "/dashboard/announcements", Megaphone)}
+              {renderItem("Chat", "/dashboard/chat", MessageCircle)}
               {renderItem("Files", "/dashboard/files", FolderOpen)}
               {(isAdmin || isReseller) && renderItem("Resellers", "/dashboard/resellers", ShoppingBag)}
             </SidebarMenu>
@@ -182,16 +186,29 @@ export function AppSidebar() {
           </SidebarGroup>
         )}
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Insights</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {renderItem("Statistics", "/dashboard/statistics", BarChart3)}
-              {isAdmin && renderItem("Settings", "/dashboard/settings", Settings)}
-              {renderItem("Profile", "/dashboard/profile", UserCircle)}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+        {!isUser && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Insights</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {renderItem("Statistics", "/dashboard/statistics", BarChart3)}
+                {isAdmin && renderItem("Settings", "/dashboard/settings", Settings)}
+                {renderItem("Profile", "/dashboard/profile", UserCircle)}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
+
+        {isUser && (
+          <SidebarGroup>
+            <SidebarGroupLabel>Account</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {renderItem("Profile", "/dashboard/profile", UserCircle)}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
       </SidebarContent>
 
       <SidebarFooter className="p-3" style={{ borderTop: "1px solid rgba(139,92,246,0.18)" }}>

@@ -1,4 +1,4 @@
-import { useState, useRef } from "react";
+import { useState, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
@@ -16,6 +16,19 @@ export default function LoginPage() {
   const [showProgressBar, setShowProgressBar] = useState(false);
   const errorAudioRef = useRef<HTMLAudioElement | null>(null);
   const successAudioRef = useRef<HTMLAudioElement | null>(null);
+
+  // Parallax state
+  const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = containerRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setMouse({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+    });
+  }, []);
 
   function playErrorSound() {
     try {
@@ -63,12 +76,55 @@ export default function LoginPage() {
     }
   }
 
+  // Parallax offsets for orbs and card tilt
+  const orb1X = (mouse.x - 0.5) * -60;
+  const orb1Y = (mouse.y - 0.5) * -60;
+  const orb2X = (mouse.x - 0.5) * 40;
+  const orb2Y = (mouse.y - 0.5) * 40;
+  const cardTiltX = (mouse.y - 0.5) * -8;
+  const cardTiltY = (mouse.x - 0.5) * 8;
+
   return (
-    <div style={{
-      background: "#000",
-      minHeight: "100vh",
-      backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.18) 0%, transparent 65%), radial-gradient(ellipse at 80% 80%, rgba(99,102,241,0.08) 0%, transparent 50%)",
-    }} className="flex flex-col items-center justify-center px-4">
+    <div
+      ref={containerRef}
+      onMouseMove={handleMouseMove}
+      style={{
+        background: "#000",
+        minHeight: "100vh",
+        position: "relative",
+        overflow: "hidden",
+      }}
+      className="flex flex-col items-center justify-center px-4"
+    >
+      {/* Parallax background orbs */}
+      <div style={{
+        position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
+        transition: "none",
+      }}>
+        <div style={{
+          position: "absolute", width: "70vw", height: "70vw",
+          top: `calc(-10% + ${orb1Y}px)`, left: `calc(20% + ${orb1X}px)`,
+          background: "radial-gradient(ellipse, rgba(124,58,237,0.22) 0%, transparent 70%)",
+          borderRadius: "50%",
+          transition: "top 0.1s ease-out, left 0.1s ease-out",
+          willChange: "top, left",
+        }} />
+        <div style={{
+          position: "absolute", width: "50vw", height: "50vw",
+          bottom: `calc(-5% + ${-orb2Y}px)`, right: `calc(5% + ${-orb2X}px)`,
+          background: "radial-gradient(ellipse, rgba(99,102,241,0.14) 0%, transparent 70%)",
+          borderRadius: "50%",
+          transition: "bottom 0.15s ease-out, right 0.15s ease-out",
+          willChange: "bottom, right",
+        }} />
+        <div style={{
+          position: "absolute", width: "30vw", height: "30vw",
+          top: `calc(60% + ${orb1Y * 0.4}px)`, left: `calc(5% + ${orb1X * 0.4}px)`,
+          background: "radial-gradient(ellipse, rgba(168,85,247,0.08) 0%, transparent 70%)",
+          borderRadius: "50%",
+          transition: "top 0.2s ease-out, left 0.2s ease-out",
+        }} />
+      </div>
 
       {/* Post-login horizontal loading bar */}
       {showProgressBar && (
@@ -77,8 +133,15 @@ export default function LoginPage() {
         </div>
       )}
 
-      <div className="w-full" style={{ maxWidth: 380 }}>
-        <div className="skyline-glow-wrap">
+      <div className="w-full" style={{ maxWidth: 380, position: "relative", zIndex: 1 }}>
+        <div
+          className="skyline-glow-wrap"
+          style={{
+            transform: `perspective(1000px) rotateX(${cardTiltX}deg) rotateY(${cardTiltY}deg)`,
+            transition: "transform 0.15s ease-out",
+            willChange: "transform",
+          }}
+        >
           <div className="skyline-card" style={{ padding: "40px 32px 36px" }}>
 
             {/* Logo + Brand */}

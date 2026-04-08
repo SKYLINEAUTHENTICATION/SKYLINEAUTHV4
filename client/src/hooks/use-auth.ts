@@ -70,5 +70,6 @@ export function useAuth() {
     isSuperAdmin: user?.role === "superadmin",
     isAdmin: user?.role === "admin" || user?.role === "superadmin",
     isReseller: user?.role === "reseller",
+    isUser: user?.role === "user",
   };
 }

@@ -10,7 +10,7 @@ import fs from "fs";
 import { setupAuth, registerAuthRoutes, isAuthenticated } from "./replit_integrations/auth";
 import { storage } from "./storage";
 import { users } from "@shared/models/auth";
-import { licenses as licensesTable, applications as applicationsTable } from "@shared/schema";
+import { licenses as licensesTable, applications as applicationsTable, appUsers as appUsersTable } from "@shared/schema";
 import { db } from "./db";
 
 let signingKeyPair: { publicKey: Uint8Array; privateKey: Uint8Array; keyType: string };
@@ -586,7 +586,8 @@ function registerClientApi(app: Express) {
   });
 }
 
-const localSessions = new Map<string, { userId: string; createdAt: number }>();
+interface LocalSession { userId: string; createdAt: number; isAppUser?: boolean; username?: string; }
+const localSessions = new Map<string, LocalSession>();
 
 setInterval(() => {
   const now = Date.now();
@@ -619,6 +620,14 @@ async function isLocalAuth(req: any, res: any, next: any) {
   if (!sessionId) return res.status(401).json({ message: "Not authenticated" });
   const session = localSessions.get(sessionId);
   if (!session) return res.status(401).json({ message: "Session expired" });
+  // App user session — no account row needed
+  if (session.isAppUser) {
+    const [appUser] = await db.select().from(appUsersTable).where(eq(appUsersTable.id, session.userId));
+    if (!appUser) return res.status(401).json({ message: "User not found" });
+    if (appUser.banned) return res.status(403).json({ message: "Your account has been banned." });
+    req.localUser = { username: appUser.username, role: "user", userId: session.userId, accountId: session.userId, credits: 0 };
+    return next();
+  }
   const account = await storage.getAccountByUserId(session.userId);
   if (!account) return res.status(401).json({ message: "User not found" });
   if (account.role === "reseller" && account.expiryDate && new Date(account.expiryDate) < new Date()) {
@@ -666,28 +675,38 @@ function registerLocalAuth(app: Express) {
       if (!username || !password) {
         return res.status(400).json({ message: "Username and password are required." });
       }
+      // Try panel account first
       const account = await storage.getAccountByUsername(username);
-      if (!account) {
-        return res.status(401).json({ message: "Invalid username or password." });
+      if (account) {
+        const valid = await bcrypt.compare(password, account.passwordHash);
+        if (!valid) return res.status(401).json({ message: "Invalid username or password." });
+        if (account.role === "reseller" && account.expiryDate && new Date(account.expiryDate) < new Date()) {
+          return res.status(403).json({ message: "Your reseller account has expired. Contact your admin." });
+        }
+        const sessionId = randomUUID();
+        localSessions.set(sessionId, { userId: account.userId!, createdAt: Date.now() });
+        res.cookie("kv_session", sessionId, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 86400000, path: "/" });
+        const [user] = await db.select().from(users).where(eq(users.id, account.userId!));
+        return res.json({ success: true, user: { ...user, role: account.role, username: account.username } });
       }
-      const valid = await bcrypt.compare(password, account.passwordHash);
-      if (!valid) {
-        return res.status(401).json({ message: "Invalid username or password." });
+      // Fallback: try app users (allows app users to log in with role "user")
+      const appUserRows = await db.select().from(appUsersTable).where(eq(appUsersTable.username, username));
+      for (const appUser of appUserRows) {
+        if (!appUser.password) continue;
+        let valid = false;
+        if (appUser.password.startsWith("$2b$") || appUser.password.startsWith("$2a$")) {
+          valid = await bcrypt.compare(password, appUser.password);
+        } else {
+          valid = appUser.password === password;
+        }
+        if (!valid) continue;
+        if (appUser.banned) return res.status(403).json({ message: "Your account has been banned." });
+        const sessionId = randomUUID();
+        localSessions.set(sessionId, { userId: appUser.id, isAppUser: true, username: appUser.username, createdAt: Date.now() });
+        res.cookie("kv_session", sessionId, { httpOnly: true, secure: process.env.NODE_ENV === "production", sameSite: "lax", maxAge: 86400000, path: "/" });
+        return res.json({ success: true, user: { username: appUser.username, role: "user" } });
       }
-      if (account.role === "reseller" && account.expiryDate && new Date(account.expiryDate) < new Date()) {
-        return res.status(403).json({ message: "Your reseller account has expired. Contact your admin." });
-      }
-      const sessionId = randomUUID();
-      localSessions.set(sessionId, { userId: account.userId!, createdAt: Date.now() });
-      res.cookie("kv_session", sessionId, {
-        httpOnly: true,
-        secure: process.env.NODE_ENV === "production",
-        sameSite: "lax",
-        maxAge: 86400000,
-        path: "/",
-      });
-      const [user] = await db.select().from(users).where(eq(users.id, account.userId!));
-      return res.json({ success: true, user: { ...user, role: account.role, username: account.username } });
+      return res.status(401).json({ message: "Invalid username or password." });
     } catch (error) {
       console.error("Login error:", error);
       return res.status(500).json({ message: "Login failed." });
@@ -697,13 +716,25 @@ function registerLocalAuth(app: Express) {
   app.get("/api/local/user", async (req, res) => {
     try {
       const session = getLocalSession(req);
-      if (!session) {
-        return res.status(401).json({ message: "Not authenticated" });
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      // App user session
+      if (session.isAppUser) {
+        const [appUser] = await db.select().from(appUsersTable).where(eq(appUsersTable.id, session.userId));
+        if (!appUser) return res.status(401).json({ message: "User not found" });
+        return res.json({
+          id: appUser.id,
+          username: appUser.username,
+          role: "user",
+          email: appUser.email ?? null,
+          profileImageUrl: null,
+          credits: 0,
+          expiryDate: null,
+          accountId: appUser.id,
+        });
       }
+      // Panel user session
       const [user] = await db.select().from(users).where(eq(users.id, session.userId));
-      if (!user) {
-        return res.status(401).json({ message: "User not found" });
-      }
+      if (!user) return res.status(401).json({ message: "User not found" });
       const account = await storage.getAccountByUserId(session.userId);
       const numericId = await storage.ensureNumericId(user.id);
       return res.json({

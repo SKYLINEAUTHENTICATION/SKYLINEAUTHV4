@@ -132,25 +132,44 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
 }
 
 function AuthenticatedApp() {
+  const { isUser } = useAuth();
   return (
     <DashboardLayout>
       <Switch>
-        <Route path="/dashboard" component={DashboardPage} />
-        <Route path="/dashboard/apps" component={ManageAppsPage} />
-        <Route path="/dashboard/licenses" component={LicensesPage} />
-        <Route path="/dashboard/users" component={AppUsersPage} />
-        <Route path="/dashboard/tokens" component={TokensPage} />
-        <Route path="/dashboard/settings" component={AppSettingsPage} />
-        <Route path="/dashboard/statistics" component={StatisticsPage} />
-        <Route path="/dashboard/panel-users" component={PanelUsersPage} />
-        <Route path="/dashboard/chat" component={ChatPage} />
-        <Route path="/dashboard/announcements" component={AnnouncementsPage} />
-        <Route path="/dashboard/files" component={FilesPage} />
-        <Route path="/dashboard/resellers" component={ResellersPage} />
-        <Route path="/dashboard/profile" component={ProfilePage} />
-        <Route path="/">
-          <Redirect to="/dashboard" />
-        </Route>
+        {/* App users (role=user) get community-only access */}
+        {isUser ? (
+          <>
+            <Route path="/dashboard/announcements" component={AnnouncementsPage} />
+            <Route path="/dashboard/chat" component={ChatPage} />
+            <Route path="/dashboard/files" component={FilesPage} />
+            <Route path="/dashboard/profile" component={ProfilePage} />
+            <Route path="/dashboard">
+              <Redirect to="/dashboard/announcements" />
+            </Route>
+            <Route path="/">
+              <Redirect to="/dashboard/announcements" />
+            </Route>
+          </>
+        ) : (
+          <>
+            <Route path="/dashboard" component={DashboardPage} />
+            <Route path="/dashboard/apps" component={ManageAppsPage} />
+            <Route path="/dashboard/licenses" component={LicensesPage} />
+            <Route path="/dashboard/users" component={AppUsersPage} />
+            <Route path="/dashboard/tokens" component={TokensPage} />
+            <Route path="/dashboard/settings" component={AppSettingsPage} />
+            <Route path="/dashboard/statistics" component={StatisticsPage} />
+            <Route path="/dashboard/panel-users" component={PanelUsersPage} />
+            <Route path="/dashboard/chat" component={ChatPage} />
+            <Route path="/dashboard/announcements" component={AnnouncementsPage} />
+            <Route path="/dashboard/files" component={FilesPage} />
+            <Route path="/dashboard/resellers" component={ResellersPage} />
+            <Route path="/dashboard/profile" component={ProfilePage} />
+            <Route path="/">
+              <Redirect to="/dashboard" />
+            </Route>
+          </>
+        )}
         <Route component={NotFound} />
       </Switch>
     </DashboardLayout>
