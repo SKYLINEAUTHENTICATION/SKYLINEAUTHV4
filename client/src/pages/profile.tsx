@@ -54,28 +54,28 @@ export default function ProfilePage() {
 
   const inputStyle = {
     width: "100%", padding: "10px 14px", boxSizing: "border-box" as const,
-    background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+    background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)",
     borderRadius: 8, color: "#fff", fontSize: 13, outline: "none",
   };
 
-  const labelStyle = { fontSize: 12, color: "#a78bfa", fontWeight: 600 as const, display: "block" as const, marginBottom: 6 };
+  const labelStyle = { fontSize: 12, color: "#aa44ff", fontWeight: 600 as const, display: "block" as const, marginBottom: 6 };
 
   const cardStyle = {
-    background: "rgba(255,255,255,0.02)", border: "1px solid rgba(139,92,246,0.18)",
+    background: "rgba(255,255,255,0.02)", border: "1px solid rgba(102,0,255,0.18)",
     borderRadius: 16, padding: "28px 28px",
   };
 
   const btnStyle = {
     display: "flex" as const, alignItems: "center" as const, gap: 7, padding: "10px 20px",
-    background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+    background: "linear-gradient(135deg, #6600ff, #7722ff)",
     border: "none", borderRadius: 9, color: "#fff", fontSize: 13, fontWeight: 600 as const,
-    cursor: "pointer", boxShadow: "0 4px 16px rgba(124,58,237,0.35)", transition: "transform 0.15s",
+    cursor: "pointer", boxShadow: "0 4px 16px rgba(102,0,255,0.35)", transition: "transform 0.15s",
   };
 
   return (
     <div style={{ padding: "28px 32px", background: "#000", minHeight: "100%" }}>
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Rajdhani, sans-serif" }}>Profile Settings</h1>
+        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif" }}>Profile Settings</h1>
         <p style={{ margin: "4px 0 0", fontSize: 13, color: "#52525b" }}>Manage your account information</p>
       </div>
 
@@ -88,13 +88,13 @@ export default function ProfilePage() {
                 src={profileImageUrl}
                 alt="Profile"
                 data-testid="img-profile-avatar"
-                style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(139,92,246,0.4)" }}
+                style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(102,0,255,0.4)" }}
                 onError={(e) => { (e.currentTarget as any).style.display = "none"; }}
               />
             ) : (
               <div style={{
                 width: 80, height: 80, borderRadius: "50%",
-                background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                background: "linear-gradient(135deg, #6600ff, #7722ff)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 28, fontWeight: 800, color: "#fff",
               }} data-testid="text-avatar-initials">{getInitials()}</div>
@@ -102,7 +102,7 @@ export default function ProfilePage() {
           </div>
           <div>
             <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#fff" }} data-testid="text-profile-username">{user?.username}</p>
-            <p style={{ margin: "4px 0 0", fontSize: 12, color: "#a78bfa", textTransform: "uppercase", letterSpacing: 1 }}>{user?.role}</p>
+            <p style={{ margin: "4px 0 0", fontSize: 12, color: "#aa44ff", textTransform: "uppercase", letterSpacing: 1 }}>{user?.role}</p>
             <p style={{ margin: "4px 0 0", fontSize: 12, color: "#52525b" }}>{user?.email || "No email set"}</p>
           </div>
         </div>
@@ -110,7 +110,7 @@ export default function ProfilePage() {
         {/* Profile Info */}
         <div style={cardStyle}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-            <User size={16} style={{ color: "#a78bfa" }} />
+            <User size={16} style={{ color: "#aa44ff" }} />
             <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff" }}>Profile Information</h2>
           </div>
 
@@ -145,7 +145,7 @@ export default function ProfilePage() {
               <img
                 src={profileImageUrl}
                 alt="Preview"
-                style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(139,92,246,0.4)" }}
+                style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(102,0,255,0.4)" }}
                 onError={(e) => { (e.currentTarget as any).style.opacity = "0.3"; }}
               />
             </div>
@@ -165,7 +165,7 @@ export default function ProfilePage() {
         {/* Password */}
         <div style={cardStyle}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
-            <Lock size={16} style={{ color: "#a78bfa" }} />
+            <Lock size={16} style={{ color: "#aa44ff" }} />
             <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff" }}>Change Password</h2>
           </div>
 

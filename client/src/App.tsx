@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useCallback } from "react";
 
 import LoginPage from "@/pages/login";
 import DashboardPage from "@/pages/dashboard";
@@ -59,15 +59,15 @@ function IdleTimerBar({ onLogout }: { onLogout: () => void }) {
       style={{
         display: "flex", alignItems: "center", gap: 8,
         padding: "3px 12px",
-        background: isWarning ? "rgba(239,68,68,0.08)" : "rgba(124,58,237,0.06)",
-        border: `1px solid ${isWarning ? "rgba(239,68,68,0.3)" : "rgba(139,92,246,0.18)"}`,
+        background: isWarning ? "rgba(239,68,68,0.08)" : "rgba(102,0,255,0.06)",
+        border: `1px solid ${isWarning ? "rgba(239,68,68,0.3)" : "rgba(102,0,255,0.22)"}`,
         borderRadius: 20,
         transition: "all 0.4s",
       }}
     >
       <div style={{
         width: 6, height: 6, borderRadius: "50%",
-        background: isWarning ? "#ef4444" : "#a78bfa",
+        background: isWarning ? "#ef4444" : "#aa00ff",
         animation: isWarning ? "pulse-dot 1s ease-in-out infinite" : "none",
       }} />
       <span style={{
@@ -85,7 +85,7 @@ function IdleTimerBar({ onLogout }: { onLogout: () => void }) {
       }}>
         <div style={{
           height: "100%", borderRadius: 2,
-          background: isWarning ? "#ef4444" : "linear-gradient(90deg,#7c3aed,#a78bfa)",
+          background: isWarning ? "#ef4444" : "linear-gradient(90deg,#6600ff,#aa00ff)",
           width: `${pct}%`,
           transition: "width 1s linear, background 0.4s",
         }} />
@@ -102,6 +102,23 @@ function IdleTimerBar({ onLogout }: { onLogout: () => void }) {
 
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
+  const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
+  const layoutRef = useRef<HTMLDivElement>(null);
+
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    const rect = layoutRef.current?.getBoundingClientRect();
+    if (!rect) return;
+    setMouse({
+      x: (e.clientX - rect.left) / rect.width,
+      y: (e.clientY - rect.top) / rect.height,
+    });
+  }, []);
+
+  const orb1X = (mouse.x - 0.5) * -40;
+  const orb1Y = (mouse.y - 0.5) * -40;
+  const orb2X = (mouse.x - 0.5) * 30;
+  const orb2Y = (mouse.y - 0.5) * 30;
+
   const style = {
     "--sidebar-width": "15rem",
     "--sidebar-width-icon": "3rem",
@@ -109,14 +126,46 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
 
   return (
     <SidebarProvider style={style as React.CSSProperties}>
-      <div className="flex h-screen w-full">
+      <div
+        ref={layoutRef}
+        onMouseMove={handleMouseMove}
+        className="flex h-screen w-full"
+        style={{ position: "relative", overflow: "hidden" }}
+      >
+        {/* Parallax background orbs */}
+        <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
+          <div style={{
+            position: "absolute", width: "60vw", height: "60vw",
+            top: `calc(-15% + ${orb1Y}px)`, left: `calc(25% + ${orb1X}px)`,
+            background: "radial-gradient(ellipse, rgba(153,0,255,0.12) 0%, transparent 70%)",
+            borderRadius: "50%",
+            transition: "top 0.12s ease-out, left 0.12s ease-out",
+            willChange: "top, left",
+          }} />
+          <div style={{
+            position: "absolute", width: "45vw", height: "45vw",
+            bottom: `calc(-10% + ${-orb2Y}px)`, right: `calc(10% + ${-orb2X}px)`,
+            background: "radial-gradient(ellipse, rgba(102,0,255,0.09) 0%, transparent 70%)",
+            borderRadius: "50%",
+            transition: "bottom 0.15s ease-out, right 0.15s ease-out",
+            willChange: "bottom, right",
+          }} />
+          <div style={{
+            position: "absolute", width: "25vw", height: "25vw",
+            top: `calc(55% + ${orb1Y * 0.3}px)`, left: `calc(3% + ${orb1X * 0.3}px)`,
+            background: "radial-gradient(ellipse, rgba(170,0,255,0.06) 0%, transparent 70%)",
+            borderRadius: "50%",
+            transition: "top 0.2s ease-out, left 0.2s ease-out",
+          }} />
+        </div>
+
         <AppSidebar />
-        <div className="flex flex-1 flex-col overflow-hidden">
+        <div className="flex flex-1 flex-col overflow-hidden" style={{ position: "relative", zIndex: 1 }}>
           <header
             className="sticky top-0 z-50 flex items-center gap-4 px-4 py-2"
             style={{
               background: "rgba(0,0,0,0.85)",
-              borderBottom: "1px solid rgba(139,92,246,0.18)",
+              borderBottom: "1px solid rgba(102,0,255,0.22)",
               backdropFilter: "blur(12px)",
               justifyContent: "space-between",
             }}
@@ -192,10 +241,10 @@ function AppRouter() {
         }}>
           <div style={{
             height: "100%",
-            background: "linear-gradient(90deg, #4c1d95, #7c3aed, #a855f7, #7c3aed, #4c1d95)",
+            background: "linear-gradient(90deg, #4400cc, #6600ff, #9900ff, #6600ff, #4400cc)",
             backgroundSize: "200% auto",
             animation: "loading-bar-fill 1.8s cubic-bezier(0.4,0,0.2,1) forwards, loading-bar-shimmer 1.2s linear infinite",
-            boxShadow: "0 0 8px rgba(124,58,237,0.70), 0 0 20px rgba(124,58,237,0.40)",
+            boxShadow: "0 0 8px rgba(102,0,255,0.70), 0 0 20px rgba(153,0,255,0.40)",
             borderRadius: 2,
           }} />
         </div>

@@ -6,7 +6,7 @@ import { MessageCircle, Send, Globe, Lock } from "lucide-react";
 
 const ROLE_COLOR: Record<string, string> = {
   superadmin: "#fbbf24",
-  admin: "#a78bfa",
+  admin: "#aa44ff",
   reseller: "#60a5fa",
 };
 
@@ -73,7 +73,7 @@ export default function ChatPage() {
     ) : (
       <div style={{
         width: size, height: size, borderRadius: "50%", flexShrink: 0,
-        background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+        background: "linear-gradient(135deg, #6600ff, #7722ff)",
         border: borderColor ? `2px solid ${borderColor}` : undefined,
         display: "flex", alignItems: "center", justifyContent: "center",
         fontSize: size * 0.34, fontWeight: 700, color: "#fff",
@@ -85,17 +85,17 @@ export default function ChatPage() {
     <div style={{ display: "flex", height: "calc(100vh - 52px)", background: "#000" }}>
       {/* Sidebar */}
       <div style={{
-        width: 240, borderRight: "1px solid rgba(139,92,246,0.18)",
+        width: 240, borderRight: "1px solid rgba(102,0,255,0.18)",
         background: "rgba(10,0,20,0.95)", display: "flex", flexDirection: "column",
       }}>
-        <div style={{ padding: "16px 16px 10px", borderBottom: "1px solid rgba(139,92,246,0.12)" }}>
+        <div style={{ padding: "16px 16px 10px", borderBottom: "1px solid rgba(102,0,255,0.12)" }}>
           <p style={{ fontSize: 11, color: "#52525b", letterSpacing: "1px", textTransform: "uppercase", marginBottom: 8 }}>Channels</p>
           <button
             onClick={() => setActiveContact(null)}
             style={{
               width: "100%", textAlign: "left", padding: "8px 12px", borderRadius: 8, border: "none",
-              background: !activeContact ? "rgba(139,92,246,0.15)" : "transparent",
-              color: !activeContact ? "#a78bfa" : "#71717a", cursor: "pointer", fontSize: 13, fontWeight: 600,
+              background: !activeContact ? "rgba(102,0,255,0.15)" : "transparent",
+              color: !activeContact ? "#aa44ff" : "#71717a", cursor: "pointer", fontSize: 13, fontWeight: 600,
               display: "flex", alignItems: "center", gap: 8, transition: "all 0.2s",
             }}
           >
@@ -112,12 +112,12 @@ export default function ChatPage() {
               data-testid={`contact-${c.username}`}
               style={{
                 width: "100%", textAlign: "left", padding: "8px 12px", borderRadius: 8, border: "none",
-                background: activeContact === c.username ? "rgba(139,92,246,0.15)" : "transparent",
-                color: activeContact === c.username ? "#a78bfa" : "#a1a1aa",
+                background: activeContact === c.username ? "rgba(102,0,255,0.15)" : "transparent",
+                color: activeContact === c.username ? "#aa44ff" : "#a1a1aa",
                 cursor: "pointer", fontSize: 13, display: "flex", alignItems: "center", gap: 8,
                 transition: "all 0.2s", marginBottom: 2,
               }}
-              onMouseEnter={(e) => { if (activeContact !== c.username) e.currentTarget.style.background = "rgba(139,92,246,0.07)"; }}
+              onMouseEnter={(e) => { if (activeContact !== c.username) e.currentTarget.style.background = "rgba(102,0,255,0.07)"; }}
               onMouseLeave={(e) => { if (activeContact !== c.username) e.currentTarget.style.background = "transparent"; }}
             >
               <Avatar username={c.username} profileImageUrl={c.profileImageUrl} size={28} />
@@ -134,10 +134,10 @@ export default function ChatPage() {
       <div style={{ flex: 1, display: "flex", flexDirection: "column" }}>
         {/* Header */}
         <div style={{
-          padding: "14px 20px", borderBottom: "1px solid rgba(139,92,246,0.18)",
+          padding: "14px 20px", borderBottom: "1px solid rgba(102,0,255,0.18)",
           background: "rgba(10,0,20,0.9)", display: "flex", alignItems: "center", gap: 10,
         }}>
-          {activeContact ? <Lock size={16} style={{ color: "#a78bfa" }} /> : <Globe size={16} style={{ color: "#a78bfa" }} />}
+          {activeContact ? <Lock size={16} style={{ color: "#aa44ff" }} /> : <Globe size={16} style={{ color: "#aa44ff" }} />}
           <span style={{ fontWeight: 700, color: "#fff", fontSize: 15 }}>
             {activeContact ? `@${activeContact}` : "# global"}
           </span>
@@ -166,15 +166,15 @@ export default function ChatPage() {
                 />
                 <div style={{ maxWidth: "65%", display: "flex", flexDirection: "column", alignItems: isMe ? "flex-end" : "flex-start" }}>
                   <div style={{ display: "flex", gap: 6, alignItems: "center", marginBottom: 3, flexDirection: isMe ? "row-reverse" : "row" }}>
-                    <span style={{ fontSize: 12, fontWeight: 600, color: ROLE_COLOR[msg.senderRole] || "#a78bfa" }}>{msg.senderUsername}</span>
+                    <span style={{ fontSize: 12, fontWeight: 600, color: ROLE_COLOR[msg.senderRole] || "#aa44ff" }}>{msg.senderUsername}</span>
                     <span style={{ fontSize: 10, color: "#3f3f46" }}>{new Date(msg.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}</span>
                   </div>
                   <div style={{
                     padding: "8px 14px", borderRadius: isMe ? "16px 4px 16px 16px" : "4px 16px 16px 16px",
-                    background: isMe ? "linear-gradient(135deg, rgba(124,58,237,0.4), rgba(99,102,241,0.3))" : "rgba(255,255,255,0.05)",
-                    border: isMe ? "1px solid rgba(139,92,246,0.35)" : "1px solid rgba(255,255,255,0.07)",
+                    background: isMe ? "linear-gradient(135deg, rgba(102,0,255,0.4), rgba(99,102,241,0.3))" : "rgba(255,255,255,0.05)",
+                    border: isMe ? "1px solid rgba(102,0,255,0.35)" : "1px solid rgba(255,255,255,0.07)",
                     color: "#e4e4e7", fontSize: 13, lineHeight: 1.5,
-                    boxShadow: isMe ? "0 4px 20px rgba(124,58,237,0.15)" : "0 2px 8px rgba(0,0,0,0.3)",
+                    boxShadow: isMe ? "0 4px 20px rgba(102,0,255,0.15)" : "0 2px 8px rgba(0,0,0,0.3)",
                   }}>{msg.message}</div>
                 </div>
               </div>
@@ -185,12 +185,12 @@ export default function ChatPage() {
 
         {/* Input */}
         <div style={{
-          padding: "12px 20px", borderTop: "1px solid rgba(139,92,246,0.18)",
+          padding: "12px 20px", borderTop: "1px solid rgba(102,0,255,0.18)",
           background: "rgba(10,0,20,0.9)",
         }}>
           <div style={{
             display: "flex", gap: 10, alignItems: "center",
-            background: "rgba(139,92,246,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+            background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)",
             borderRadius: 12, padding: "6px 8px 6px 14px",
           }}>
             <input
@@ -210,11 +210,11 @@ export default function ChatPage() {
               data-testid="button-send-message"
               style={{
                 width: 36, height: 36, borderRadius: 8, border: "none",
-                background: draft.trim() ? "linear-gradient(135deg, #7c3aed, #6366f1)" : "rgba(139,92,246,0.2)",
+                background: draft.trim() ? "linear-gradient(135deg, #6600ff, #7722ff)" : "rgba(102,0,255,0.2)",
                 color: "#fff", cursor: draft.trim() ? "pointer" : "not-allowed", display: "flex",
                 alignItems: "center", justifyContent: "center",
                 transition: "all 0.2s",
-                boxShadow: draft.trim() ? "0 4px 12px rgba(124,58,237,0.4)" : "none",
+                boxShadow: draft.trim() ? "0 4px 12px rgba(102,0,255,0.4)" : "none",
               }}
             >
               <Send size={15} />

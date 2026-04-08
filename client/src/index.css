@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
 
 @tailwind base;
 @tailwind components;
@@ -21,26 +21,26 @@
   --sidebar: 0 0% 2%;
   --sidebar-foreground: 0 0% 92%;
   --sidebar-border: 265 40% 9%;
-  --sidebar-primary: 262 80% 28%;
+  --sidebar-primary: 270 100% 50%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 265 50% 10%;
-  --sidebar-accent-foreground: 254 60% 65%;
-  --sidebar-ring: 262 80% 28%;
+  --sidebar-accent-foreground: 270 100% 70%;
+  --sidebar-ring: 270 100% 50%;
   --popover: 270 28% 5%;
   --popover-foreground: 0 0% 96%;
   --popover-border: 265 45% 10%;
-  --primary: 262 80% 28%;
+  --primary: 270 100% 50%;
   --primary-foreground: 0 0% 100%;
   --secondary: 265 40% 10%;
   --secondary-foreground: 0 0% 90%;
   --muted: 265 28% 8%;
   --muted-foreground: 240 5% 60%;
   --accent: 265 40% 10%;
-  --accent-foreground: 254 60% 65%;
+  --accent-foreground: 270 100% 70%;
   --destructive: 0 84% 45%;
   --destructive-foreground: 0 0% 100%;
   --input: 265 28% 9%;
-  --ring: 262 80% 28%;
+  --ring: 270 100% 50%;
   --chart-1: 262 80% 45%;
   --chart-2: 280 65% 40%;
   --chart-3: 250 60% 42%;
@@ -87,26 +87,26 @@
   --sidebar: 0 0% 2%;
   --sidebar-foreground: 0 0% 92%;
   --sidebar-border: 265 40% 9%;
-  --sidebar-primary: 262 80% 28%;
+  --sidebar-primary: 270 100% 50%;
   --sidebar-primary-foreground: 0 0% 100%;
   --sidebar-accent: 265 50% 10%;
-  --sidebar-accent-foreground: 254 60% 65%;
-  --sidebar-ring: 262 80% 28%;
+  --sidebar-accent-foreground: 270 100% 70%;
+  --sidebar-ring: 270 100% 50%;
   --popover: 270 28% 5%;
   --popover-foreground: 0 0% 96%;
   --popover-border: 265 45% 10%;
-  --primary: 262 80% 28%;
+  --primary: 270 100% 50%;
   --primary-foreground: 0 0% 100%;
   --secondary: 265 40% 10%;
   --secondary-foreground: 0 0% 90%;
   --muted: 265 28% 8%;
   --muted-foreground: 240 5% 60%;
   --accent: 265 40% 10%;
-  --accent-foreground: 254 60% 65%;
+  --accent-foreground: 270 100% 70%;
   --destructive: 0 84% 45%;
   --destructive-foreground: 0 0% 100%;
   --input: 265 28% 9%;
-  --ring: 262 80% 28%;
+  --ring: 270 100% 50%;
   --chart-1: 262 80% 45%;
   --chart-2: 280 65% 40%;
   --chart-3: 250 60% 42%;
@@ -278,16 +278,16 @@
   content: '';
   position: absolute;
   inset: -2px;
-  border-radius: 4px;
+  border-radius: 2px;
   background: conic-gradient(
     from var(--skyline-angle) at 50% 50%,
     transparent 0deg,
     transparent 263deg,
-    #4a0080 269deg,
-    #8800cc 274deg,
-    #aa44ee 277deg,
-    #8800cc 280deg,
-    #4a0080 285deg,
+    #9900ff 269deg,
+    #ee88ff 274deg,
+    #ffffff 277deg,
+    #ee88ff 280deg,
+    #9900ff 285deg,
     transparent 291deg,
     transparent 360deg
   );
@@ -298,25 +298,42 @@
   animation: skyline-spin 2.6s linear infinite;
   z-index: 0;
   pointer-events: none;
+  filter: brightness(1.7);
 }
 
 .skyline-glow-wrap::after {
-  content: none;
+  content: '';
+  position: absolute;
+  inset: -5px;
+  border-radius: 2px;
+  background: conic-gradient(
+    from var(--skyline-angle) at 50% 50%,
+    transparent 0deg,
+    transparent 267deg,
+    rgba(180,0,255,0) 272deg,
+    rgba(230,130,255,1) 277deg,
+    rgba(180,0,255,0) 282deg,
+    transparent 287deg,
+    transparent 360deg
+  );
+  filter: blur(6px) brightness(2.0);
+  animation: skyline-spin 2.6s linear infinite;
+  z-index: 0;
+  pointer-events: none;
 }
 
 .skyline-card {
   position: relative;
   z-index: 1;
-  background: linear-gradient(160deg, #0f0a1e 0%, #0a0812 60%, #070510 100%);
-  border-radius: 4px;
-  border: 1px solid rgba(70, 15, 120, 0.5);
+  background: #0a0812;
+  border-radius: 2px;
+  border: 1px solid rgba(100, 30, 180, 0.4);
   width: 100%;
-  transform: perspective(900px) rotateX(1.5deg);
   box-shadow:
     0 8px 32px -4px rgba(0,0,0,0.8),
     inset 0 1px 0 rgba(255,255,255,0.03),
     inset 0 -1px 0 rgba(0,0,0,0.5);
-  transition: box-shadow 0.3s ease, transform 0.3s ease;
+  transition: box-shadow 0.3s ease;
 }
 
 .skyline-card:hover {
@@ -324,16 +341,15 @@
     0 12px 40px -4px rgba(0,0,0,0.9),
     inset 0 1px 0 rgba(255,255,255,0.04),
     inset 0 -1px 0 rgba(0,0,0,0.6);
-  transform: perspective(900px) rotateX(1.5deg) translateY(-2px);
 }
 
 /* ── SKYLINE brand text ───────────────────── */
 .skyline-brand {
-  font-family: 'Rajdhani', sans-serif;
-  font-size: 2.4rem;
-  font-weight: 700;
-  letter-spacing: 8px;
-  background: linear-gradient(90deg, #5b009e, #9922cc);
+  font-family: 'Inter', sans-serif;
+  font-size: 38px;
+  font-weight: 900;
+  letter-spacing: 7px;
+  background: linear-gradient(90deg, #aa00ff, #dd66ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
@@ -342,13 +358,78 @@
 }
 
 .skyline-brand-sidebar {
-  font-family: 'Rajdhani', sans-serif;
-  font-weight: 700;
-  letter-spacing: 4px;
-  background: linear-gradient(135deg, #7c3aed, #5b21b6);
+  font-family: 'Inter', sans-serif;
+  font-weight: 800;
+  letter-spacing: 3px;
+  background: linear-gradient(135deg, #aa00ff, #9900ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+}
+
+/* ── Login page inputs & button ───────────── */
+.login-inp-wrap {
+  display: flex;
+  align-items: center;
+  background: #0c0918;
+  border: 1px solid #221a3a;
+  border-radius: 2px;
+  padding: 0 14px;
+  gap: 11px;
+  transition: border-color 0.15s, box-shadow 0.15s;
+}
+
+.login-inp-wrap:focus-within {
+  border-color: #8800ff;
+  box-shadow: 0 0 0 2px rgba(136,0,255,0.22), 0 0 14px rgba(136,0,255,0.15);
+}
+
+.login-inp {
+  flex: 1;
+  background: transparent;
+  border: none;
+  outline: none;
+  padding: 14px 0;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  color: #cdbff0;
+  caret-color: #aa44ff;
+}
+
+.login-inp::placeholder {
+  color: #2e2350;
+}
+
+.login-btn {
+  width: 100%;
+  padding: 15px;
+  border: none;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #4400cc, #6600ff, #9922ff);
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  cursor: pointer;
+  box-shadow: 0 4px 30px rgba(102,0,255,0.65), inset 0 1px 0 rgba(255,255,255,0.08);
+  transition: opacity 0.16s, transform 0.12s;
+  margin-top: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 9px;
+}
+
+.login-btn:hover:not(:disabled) {
+  opacity: 0.86;
+  transform: translateY(-1px);
+}
+
+.login-btn:active:not(:disabled) {
+  opacity: 1;
+  transform: none;
 }
 
 /* ── Input focus ring (no outer glow) ── */
@@ -386,7 +467,7 @@ textarea:focus {
 .login-progress-bar-fill {
   height: 100%;
   width: 0%;
-  background: linear-gradient(90deg, #3b0764, #6d28d9, #4c1d95, #6d28d9, #3b0764);
+  background: linear-gradient(90deg, #4400cc, #6600ff, #9900ff, #6600ff, #4400cc);
   background-size: 200% auto;
   animation:
     login-bar-fill 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards,

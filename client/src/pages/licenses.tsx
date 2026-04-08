@@ -639,10 +639,10 @@ export default function LicensesPage() {
             {isReseller && (
               <div style={{
                 padding: "12px 14px", borderRadius: 10,
-                background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+                background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)",
                 display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
-                <span style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600 }}>Your Credits</span>
+                <span style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600 }}>Your Credits</span>
                 <span style={{ fontSize: 18, fontWeight: 800, color: "#fbbf24" }}>
                   {typeof user?.credits === "number" ? user.credits.toFixed(1) : "0.0"}
                 </span>
@@ -676,8 +676,8 @@ export default function LicensesPage() {
                         data-testid={`button-plan-${p.id}`}
                         style={{
                           padding: "10px 14px", borderRadius: 9, cursor: "pointer",
-                          border: `1px solid ${isSelected ? "rgba(139,92,246,0.7)" : "rgba(139,92,246,0.2)"}`,
-                          background: isSelected ? "rgba(124,58,237,0.2)" : "rgba(124,58,237,0.06)",
+                          border: `1px solid ${isSelected ? "rgba(102,0,255,0.7)" : "rgba(102,0,255,0.2)"}`,
+                          background: isSelected ? "rgba(102,0,255,0.2)" : "rgba(102,0,255,0.06)",
                           display: "flex", flexDirection: "column", alignItems: "flex-start", gap: 2,
                           transition: "all 0.15s",
                         }}

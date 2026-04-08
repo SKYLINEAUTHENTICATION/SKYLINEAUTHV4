@@ -41,7 +41,7 @@ const ROLE_LABEL: Record<string, string> = {
 
 const ROLE_COLOR: Record<string, string> = {
   superadmin: "#fbbf24",
-  admin: "#a78bfa",
+  admin: "#aa44ff",
   reseller: "#60a5fa",
   user: "#34d399",
 };
@@ -66,8 +66,8 @@ function ExpiryCountdown({ expiryDate }: { expiryDate: string | null | undefined
   return (
     <div style={{
       marginTop: 6, padding: "4px 8px", borderRadius: 6,
-      background: isUrgent ? "rgba(239,68,68,0.1)" : "rgba(139,92,246,0.1)",
-      border: `1px solid ${isUrgent ? "rgba(239,68,68,0.25)" : "rgba(139,92,246,0.2)"}`,
+      background: isUrgent ? "rgba(239,68,68,0.1)" : "rgba(102,0,255,0.1)",
+      border: `1px solid ${isUrgent ? "rgba(239,68,68,0.25)" : "rgba(102,0,255,0.2)"}`,
     }}>
       <p style={{ margin: 0, fontSize: 10, color: isUrgent ? "#ef4444" : "#71717a", fontWeight: 600, display: "flex", alignItems: "center", gap: 4 }}>
         <Clock size={9} />
@@ -109,11 +109,11 @@ export function AppSidebar() {
 
   return (
     <Sidebar>
-      <SidebarHeader className="p-4" style={{ borderBottom: "1px solid rgba(139,92,246,0.18)" }}>
+      <SidebarHeader className="p-4" style={{ borderBottom: "1px solid rgba(102,0,255,0.18)" }}>
         <Link href="/dashboard" className="flex items-center gap-3">
           <div style={{
             width: 38, height: 38, borderRadius: 6, flexShrink: 0,
-            boxShadow: "0 0 18px rgba(0,200,255,0.3), 0 0 6px rgba(124,58,237,0.4)",
+            boxShadow: "0 0 18px rgba(0,200,255,0.3), 0 0 6px rgba(102,0,255,0.4)",
             overflow: "hidden", background: "#000",
           }}>
             <img src={newLogoPath} alt="SKYLINE" style={{ width: "100%", height: "100%", objectFit: "cover" }} />
@@ -211,7 +211,7 @@ export function AppSidebar() {
         )}
       </SidebarContent>
 
-      <SidebarFooter className="p-3" style={{ borderTop: "1px solid rgba(139,92,246,0.18)" }}>
+      <SidebarFooter className="p-3" style={{ borderTop: "1px solid rgba(102,0,255,0.18)" }}>
         {isReseller && resellerMe && (
           <div style={{
             padding: "10px 12px", marginBottom: 8,
@@ -234,8 +234,8 @@ export function AppSidebar() {
         <div style={{
           display: "flex", alignItems: "center", gap: 10,
           padding: "10px 12px",
-          background: "rgba(139,92,246,0.06)",
-          border: "1px solid rgba(139,92,246,0.18)",
+          background: "rgba(102,0,255,0.06)",
+          border: "1px solid rgba(102,0,255,0.18)",
           borderRadius: 10, marginBottom: 8,
         }}>
           <div style={{ width: 32, height: 32, borderRadius: "50%", flexShrink: 0, overflow: "hidden" }}>
@@ -244,7 +244,7 @@ export function AppSidebar() {
             ) : (
               <div style={{
                 width: "100%", height: "100%",
-                background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                background: "linear-gradient(135deg, #6600ff, #7722ff)",
                 display: "flex", alignItems: "center", justifyContent: "center",
                 fontSize: 12, fontWeight: 700, color: "#fff",
               }}>
@@ -256,7 +256,7 @@ export function AppSidebar() {
             <p style={{ fontSize: 13, fontWeight: 600, color: "#fff", whiteSpace: "nowrap", overflow: "hidden", textOverflow: "ellipsis" }} data-testid="text-user-name">
               {user?.username || "User"}
             </p>
-            <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.5px", color: ROLE_COLOR[user?.role || "admin"] || "#a78bfa" }}>
+            <p style={{ fontSize: 10, textTransform: "uppercase", letterSpacing: "0.5px", color: ROLE_COLOR[user?.role || "admin"] || "#aa44ff" }}>
               {ROLE_LABEL[user?.role || "admin"] || user?.role || "Admin"}
             </p>
           </div>
@@ -264,7 +264,7 @@ export function AppSidebar() {
             onClick={() => logout()}
             data-testid="button-logout"
             style={{ background: "transparent", border: "none", cursor: "pointer", color: "#52525b", padding: 4, display: "flex", alignItems: "center", borderRadius: 4, transition: "color 0.2s" }}
-            onMouseEnter={(e) => (e.currentTarget.style.color = "#a78bfa")}
+            onMouseEnter={(e) => (e.currentTarget.style.color = "#aa44ff")}
             onMouseLeave={(e) => (e.currentTarget.style.color = "#52525b")}
           >
             <LogOut size={15} />

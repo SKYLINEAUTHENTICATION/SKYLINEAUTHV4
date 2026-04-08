@@ -37,7 +37,7 @@ export default function AnnouncementsPage() {
       {/* Header */}
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Rajdhani, sans-serif", letterSpacing: 1 }}>
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif", letterSpacing: 1 }}>
             Announcements
           </h1>
           <p style={{ margin: "4px 0 0", fontSize: 13, color: "#52525b" }}>
@@ -50,13 +50,13 @@ export default function AnnouncementsPage() {
             data-testid="button-new-announcement"
             style={{
               display: "flex", alignItems: "center", gap: 8, padding: "10px 18px",
-              background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+              background: "linear-gradient(135deg, #6600ff, #7722ff)",
               border: "none", borderRadius: 10, color: "#fff", fontSize: 13, fontWeight: 600,
-              cursor: "pointer", boxShadow: "0 4px 20px rgba(124,58,237,0.4)",
+              cursor: "pointer", boxShadow: "0 4px 20px rgba(102,0,255,0.4)",
               transition: "transform 0.15s, box-shadow 0.15s",
             }}
-            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(124,58,237,0.5)"; }}
-            onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 20px rgba(124,58,237,0.4)"; }}
+            onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-1px)"; e.currentTarget.style.boxShadow = "0 8px 28px rgba(102,0,255,0.5)"; }}
+            onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = "0 4px 20px rgba(102,0,255,0.4)"; }}
           >
             <Plus size={15} /> New Announcement
           </button>
@@ -70,9 +70,9 @@ export default function AnnouncementsPage() {
           display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
         }}>
           <div style={{
-            background: "linear-gradient(145deg, #0d0015, #0a0010)", border: "1px solid rgba(139,92,246,0.35)",
+            background: "linear-gradient(145deg, #0d0015, #0a0010)", border: "1px solid rgba(102,0,255,0.35)",
             borderRadius: 16, padding: 32, width: "100%", maxWidth: 540,
-            boxShadow: "0 24px 80px rgba(124,58,237,0.3), 0 0 0 1px rgba(139,92,246,0.1)",
+            boxShadow: "0 24px 80px rgba(102,0,255,0.3), 0 0 0 1px rgba(102,0,255,0.1)",
           }}>
             <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
               <h2 style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#fff" }}>New Announcement</h2>
@@ -82,7 +82,7 @@ export default function AnnouncementsPage() {
             </div>
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
-                <label style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600, letterSpacing: "0.5px" }}>Title</label>
+                <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600, letterSpacing: "0.5px" }}>Title</label>
                 <input
                   value={title}
                   onChange={(e) => setTitle(e.target.value)}
@@ -90,14 +90,14 @@ export default function AnnouncementsPage() {
                   data-testid="input-ann-title"
                   style={{
                     width: "100%", marginTop: 6, padding: "10px 14px",
-                    background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+                    background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)",
                     borderRadius: 8, color: "#fff", fontSize: 13, outline: "none",
                     boxSizing: "border-box",
                   }}
                 />
               </div>
               <div>
-                <label style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600, letterSpacing: "0.5px" }}>Content</label>
+                <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600, letterSpacing: "0.5px" }}>Content</label>
                 <textarea
                   value={content}
                   onChange={(e) => setContent(e.target.value)}
@@ -106,7 +106,7 @@ export default function AnnouncementsPage() {
                   data-testid="input-ann-content"
                   style={{
                     width: "100%", marginTop: 6, padding: "10px 14px",
-                    background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+                    background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)",
                     borderRadius: 8, color: "#fff", fontSize: 13, outline: "none", resize: "vertical",
                     fontFamily: "inherit", boxSizing: "border-box",
                   }}
@@ -114,7 +114,7 @@ export default function AnnouncementsPage() {
               </div>
               <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 6 }}>
                 <button onClick={() => setShowCreate(false)} style={{
-                  padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.25)",
+                  padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(102,0,255,0.25)",
                   background: "transparent", color: "#71717a", fontSize: 13, cursor: "pointer",
                 }}>
                   Cancel
@@ -125,9 +125,9 @@ export default function AnnouncementsPage() {
                   data-testid="button-submit-announcement"
                   style={{
                     padding: "9px 20px", borderRadius: 8, border: "none",
-                    background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                    background: "linear-gradient(135deg, #6600ff, #7722ff)",
                     color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer",
-                    boxShadow: "0 4px 16px rgba(124,58,237,0.35)",
+                    boxShadow: "0 4px 16px rgba(102,0,255,0.35)",
                   }}
                 >
                   {createMutation.isPending ? "Posting..." : "Post Announcement"}
@@ -144,8 +144,8 @@ export default function AnnouncementsPage() {
       ) : announcements.length === 0 ? (
         <div style={{
           textAlign: "center", padding: "80px 0",
-          border: "1px solid rgba(139,92,246,0.1)", borderRadius: 16,
-          background: "rgba(139,92,246,0.03)",
+          border: "1px solid rgba(102,0,255,0.1)", borderRadius: 16,
+          background: "rgba(102,0,255,0.03)",
         }}>
           <Megaphone size={48} style={{ color: "#27272a", margin: "0 auto 16px", display: "block" }} />
           <p style={{ color: "#3f3f46", fontSize: 15 }}>No announcements yet</p>
@@ -159,12 +159,12 @@ export default function AnnouncementsPage() {
               style={{
                 padding: "22px 26px",
                 background: i === 0
-                  ? "linear-gradient(145deg, rgba(124,58,237,0.12), rgba(99,102,241,0.06))"
+                  ? "linear-gradient(145deg, rgba(102,0,255,0.12), rgba(99,102,241,0.06))"
                   : "rgba(255,255,255,0.02)",
-                border: i === 0 ? "1px solid rgba(139,92,246,0.4)" : "1px solid rgba(139,92,246,0.12)",
+                border: i === 0 ? "1px solid rgba(102,0,255,0.4)" : "1px solid rgba(102,0,255,0.12)",
                 borderRadius: 14,
                 transition: "transform 0.2s, box-shadow 0.2s",
-                boxShadow: i === 0 ? "0 8px 32px rgba(124,58,237,0.15)" : "none",
+                boxShadow: i === 0 ? "0 8px 32px rgba(102,0,255,0.15)" : "none",
               }}
             >
               <div style={{ display: "flex", justifyContent: "space-between", alignItems: "flex-start" }}>
@@ -173,10 +173,10 @@ export default function AnnouncementsPage() {
                     {i === 0 && (
                       <span style={{
                         fontSize: 10, fontWeight: 700, padding: "2px 8px", borderRadius: 4,
-                        background: "rgba(124,58,237,0.3)", color: "#a78bfa", letterSpacing: "0.5px",
+                        background: "rgba(102,0,255,0.3)", color: "#aa44ff", letterSpacing: "0.5px",
                       }}>LATEST</span>
                     )}
-                    <Megaphone size={14} style={{ color: "#a78bfa" }} />
+                    <Megaphone size={14} style={{ color: "#aa44ff" }} />
                     <h2 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#fff" }}>{ann.title}</h2>
                   </div>
                   <p style={{ margin: "0 0 12px", fontSize: 14, color: "#a1a1aa", lineHeight: 1.6 }}>{ann.content}</p>
@@ -191,7 +191,7 @@ export default function AnnouncementsPage() {
                     ) : (
                       <div style={{
                         width: 20, height: 20, borderRadius: "50%",
-                        background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                        background: "linear-gradient(135deg, #6600ff, #7722ff)",
                         display: "flex", alignItems: "center", justifyContent: "center",
                         fontSize: 8, fontWeight: 700, color: "#fff",
                       }}>{ann.authorUsername?.slice(0, 2).toUpperCase()}</div>

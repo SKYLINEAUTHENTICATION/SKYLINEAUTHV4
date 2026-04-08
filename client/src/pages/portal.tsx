@@ -10,7 +10,7 @@ const STATUS_COLORS: Record<string, string> = {
 
 const inputStyle: React.CSSProperties = {
   width: "100%", padding: "10px 14px", boxSizing: "border-box",
-  background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+  background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)",
   borderRadius: 8, color: "#fff", fontSize: 13, outline: "none",
 };
 
@@ -158,7 +158,7 @@ export default function PortalPage() {
         minHeight: "100vh", background: "#000",
         display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
         padding: 20,
-        backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.15) 0%, transparent 60%)",
+        backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(102,0,255,0.15) 0%, transparent 60%)",
       }}>
         <div className="skyline-glow-wrap" style={{ width: "100%", maxWidth: 400 }}>
           <div className="skyline-card" style={{ padding: "40px 28px 36px" }}>
@@ -170,7 +170,7 @@ export default function PortalPage() {
 
             <form onSubmit={handleLogin} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               <div>
-                <label style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600, display: "block", marginBottom: 6 }}>App Username</label>
+                <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600, display: "block", marginBottom: 6 }}>App Username</label>
                 <input
                   value={username}
                   onChange={(e) => setUsername(e.target.value)}
@@ -181,7 +181,7 @@ export default function PortalPage() {
                 />
               </div>
               <div>
-                <label style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600, display: "block", marginBottom: 6 }}>Password</label>
+                <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600, display: "block", marginBottom: 6 }}>Password</label>
                 <input
                   type="password"
                   value={password}
@@ -198,10 +198,10 @@ export default function PortalPage() {
                 data-testid="button-portal-login"
                 style={{
                   marginTop: 6, padding: "12px 0",
-                  background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                  background: "linear-gradient(135deg, #6600ff, #7722ff)",
                   border: "none", borderRadius: 8, color: "#fff",
                   fontSize: 14, fontWeight: 700, cursor: "pointer",
-                  boxShadow: "0 4px 18px rgba(124,58,237,0.35)",
+                  boxShadow: "0 4px 18px rgba(102,0,255,0.35)",
                   opacity: isLoading || !username || !password ? 0.6 : 1,
                 }}
               >
@@ -220,7 +220,7 @@ export default function PortalPage() {
   return (
     <div style={{
       minHeight: "100vh", background: "#000",
-      backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(124,58,237,0.12) 0%, transparent 55%)",
+      backgroundImage: "radial-gradient(ellipse at 50% 0%, rgba(102,0,255,0.12) 0%, transparent 55%)",
       display: "flex", flexDirection: "column",
     }}>
       {/* Header */}
@@ -228,15 +228,15 @@ export default function PortalPage() {
         display: "flex", alignItems: "center", justifyContent: "space-between",
         padding: "14px 28px",
         background: "rgba(0,0,0,0.85)",
-        borderBottom: "1px solid rgba(139,92,246,0.18)",
+        borderBottom: "1px solid rgba(102,0,255,0.18)",
         backdropFilter: "blur(12px)",
         position: "sticky", top: 0, zIndex: 50,
       }}>
         <div style={{ display: "flex", alignItems: "center", gap: 12 }}>
           <img src={logoPath} alt="SKYLINE" style={{ width: 36, height: 36, borderRadius: "50%" }} />
           <div>
-            <span style={{ fontFamily: "Rajdhani, sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: 2 }}>SKYLINE</span>
-            <span style={{ display: "block", fontSize: 10, color: "#52525b" }}>Logged in as <span style={{ color: "#a78bfa" }}>{loggedInAs}</span></span>
+            <span style={{ fontFamily: "Inter, sans-serif", fontWeight: 800, fontSize: 16, color: "#fff", letterSpacing: 2 }}>SKYLINE</span>
+            <span style={{ display: "block", fontSize: 10, color: "#52525b" }}>Logged in as <span style={{ color: "#aa44ff" }}>{loggedInAs}</span></span>
           </div>
         </div>
         <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
@@ -246,7 +246,7 @@ export default function PortalPage() {
             data-testid="button-portal-refresh"
             style={{
               display: "flex", alignItems: "center", gap: 5, padding: "7px 12px",
-              background: "rgba(139,92,246,0.1)", border: "1px solid rgba(139,92,246,0.2)",
+              background: "rgba(102,0,255,0.1)", border: "1px solid rgba(102,0,255,0.2)",
               borderRadius: 8, color: "#71717a", fontSize: 12, cursor: "pointer",
               opacity: isRefreshing ? 0.5 : 1,
             }}
@@ -270,7 +270,7 @@ export default function PortalPage() {
       {/* Tab bar */}
       <div style={{
         display: "flex", gap: 0,
-        borderBottom: "1px solid rgba(139,92,246,0.15)",
+        borderBottom: "1px solid rgba(102,0,255,0.15)",
         padding: "0 28px",
         background: "rgba(0,0,0,0.5)",
       }}>
@@ -283,8 +283,8 @@ export default function PortalPage() {
               display: "flex", alignItems: "center", gap: 7,
               padding: "12px 18px",
               background: "none", border: "none",
-              borderBottom: tab === t.id ? "2px solid #7c3aed" : "2px solid transparent",
-              color: tab === t.id ? "#a78bfa" : "#52525b",
+              borderBottom: tab === t.id ? "2px solid #6600ff" : "2px solid transparent",
+              color: tab === t.id ? "#aa44ff" : "#52525b",
               fontSize: 13, fontWeight: tab === t.id ? 700 : 500,
               cursor: "pointer", transition: "color 0.15s",
             }}
@@ -308,17 +308,17 @@ export default function PortalPage() {
             <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fill, minmax(280px, 1fr))", gap: 18 }}>
               {files.map((file: any) => (
                 <div key={file.id} data-testid={`card-file-${file.id}`} style={{
-                  background: "linear-gradient(145deg, rgba(255,255,255,0.03), rgba(139,92,246,0.05))",
-                  border: "1px solid rgba(139,92,246,0.2)", borderRadius: 16, padding: 22,
+                  background: "linear-gradient(145deg, rgba(255,255,255,0.03), rgba(102,0,255,0.05))",
+                  border: "1px solid rgba(102,0,255,0.2)", borderRadius: 16, padding: 22,
                   transition: "transform 0.2s, box-shadow 0.2s",
                 }}
-                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 16px 48px rgba(124,58,237,0.2)"; }}
+                  onMouseEnter={(e) => { e.currentTarget.style.transform = "translateY(-4px)"; e.currentTarget.style.boxShadow = "0 16px 48px rgba(102,0,255,0.2)"; }}
                   onMouseLeave={(e) => { e.currentTarget.style.transform = ""; e.currentTarget.style.boxShadow = ""; }}
                 >
                   <div style={{ display: "flex", alignItems: "center", gap: 12, marginBottom: 12 }}>
                     <div style={{
                       width: 40, height: 40, borderRadius: 10,
-                      background: "linear-gradient(135deg, #7c3aed, #4338ca)",
+                      background: "linear-gradient(135deg, #6600ff, #4338ca)",
                       display: "flex", alignItems: "center", justifyContent: "center",
                       flexShrink: 0,
                     }}>
@@ -346,7 +346,7 @@ export default function PortalPage() {
                     style={{
                       display: "flex", alignItems: "center", justifyContent: "center", gap: 6,
                       padding: "9px 0", borderRadius: 8, textDecoration: "none",
-                      background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                      background: "linear-gradient(135deg, #6600ff, #7722ff)",
                       color: "#fff", fontSize: 12, fontWeight: 600,
                     }}
                   >
@@ -369,8 +369,8 @@ export default function PortalPage() {
             <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
               {announcements.map((ann: any) => (
                 <div key={ann.id} data-testid={`card-announcement-${ann.id}`} style={{
-                  background: "linear-gradient(145deg, rgba(255,255,255,0.02), rgba(139,92,246,0.06))",
-                  border: "1px solid rgba(139,92,246,0.18)", borderRadius: 14, padding: "20px 24px",
+                  background: "linear-gradient(145deg, rgba(255,255,255,0.02), rgba(102,0,255,0.06))",
+                  border: "1px solid rgba(102,0,255,0.18)", borderRadius: 14, padding: "20px 24px",
                 }}>
                   <div style={{ display: "flex", alignItems: "flex-start", justifyContent: "space-between", gap: 12, marginBottom: 10 }}>
                     <h3 style={{ margin: 0, fontSize: 16, fontWeight: 700, color: "#e2e8f0" }}>{ann.title}</h3>
@@ -380,7 +380,7 @@ export default function PortalPage() {
                   <div style={{ marginTop: 10, display: "flex", alignItems: "center", gap: 6 }}>
                     <span style={{
                       fontSize: 10, padding: "2px 8px", borderRadius: 99,
-                      background: "rgba(124,58,237,0.15)", color: "#a78bfa", fontWeight: 600,
+                      background: "rgba(102,0,255,0.15)", color: "#aa44ff", fontWeight: 600,
                     }}>by {ann.authorUsername}</span>
                   </div>
                 </div>
@@ -405,7 +405,7 @@ export default function PortalPage() {
                 chatMessages.map((msg: any) => {
                   const isOwn = msg.senderUsername === loggedInAs;
                   const roleColor: Record<string, string> = {
-                    superadmin: "#a78bfa",
+                    superadmin: "#aa44ff",
                     admin: "#60a5fa",
                     reseller: "#34d399",
                     user: "#f59e0b",
@@ -416,13 +416,13 @@ export default function PortalPage() {
                       alignItems: isOwn ? "flex-end" : "flex-start",
                     }}>
                       <div style={{ display: "flex", alignItems: "center", gap: 6, marginBottom: 3 }}>
-                        <span style={{ fontSize: 11, fontWeight: 700, color: roleColor[msg.senderRole] || "#a78bfa" }}>
+                        <span style={{ fontSize: 11, fontWeight: 700, color: roleColor[msg.senderRole] || "#aa44ff" }}>
                           {msg.senderUsername}
                         </span>
                         <span style={{
                           fontSize: 9, padding: "1px 5px", borderRadius: 4, fontWeight: 600,
-                          background: `${roleColor[msg.senderRole] || "#a78bfa"}20`,
-                          color: roleColor[msg.senderRole] || "#a78bfa",
+                          background: `${roleColor[msg.senderRole] || "#aa44ff"}20`,
+                          color: roleColor[msg.senderRole] || "#aa44ff",
                           textTransform: "uppercase",
                         }}>{msg.senderRole}</span>
                         <span style={{ fontSize: 10, color: "#3f3f46" }}>{formatDate(msg.createdAt)}</span>
@@ -430,9 +430,9 @@ export default function PortalPage() {
                       <div style={{
                         maxWidth: "72%", padding: "9px 14px", borderRadius: isOwn ? "14px 14px 4px 14px" : "14px 14px 14px 4px",
                         background: isOwn
-                          ? "linear-gradient(135deg, rgba(124,58,237,0.35), rgba(99,102,241,0.25))"
+                          ? "linear-gradient(135deg, rgba(102,0,255,0.35), rgba(99,102,241,0.25))"
                           : "rgba(255,255,255,0.05)",
-                        border: isOwn ? "1px solid rgba(139,92,246,0.3)" : "1px solid rgba(255,255,255,0.07)",
+                        border: isOwn ? "1px solid rgba(102,0,255,0.3)" : "1px solid rgba(255,255,255,0.07)",
                         fontSize: 13, color: "#e2e8f0", lineHeight: 1.5, wordBreak: "break-word",
                       }}>
                         {msg.message}
@@ -458,7 +458,7 @@ export default function PortalPage() {
                 style={{
                   display: "flex", alignItems: "center", gap: 6,
                   padding: "10px 18px", flexShrink: 0,
-                  background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                  background: "linear-gradient(135deg, #6600ff, #7722ff)",
                   border: "none", borderRadius: 8, color: "#fff",
                   fontSize: 13, fontWeight: 700, cursor: "pointer",
                   opacity: isSendingChat || !chatInput.trim() ? 0.5 : 1,

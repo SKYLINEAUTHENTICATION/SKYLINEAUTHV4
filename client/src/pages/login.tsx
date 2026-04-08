@@ -1,8 +1,8 @@
 import { useState, useRef, useCallback } from "react";
 import { useLocation } from "wouter";
-import { Input } from "@/components/ui/input";
 import { useToast } from "@/hooks/use-toast";
 import { queryClient } from "@/lib/queryClient";
+import { User, Lock, LogIn } from "lucide-react";
 import logoPath from "@assets/IMG_20260404_161801_895_1775474263643.webp";
 import loginErrorSound from "@assets/login-error_1771588547644.mp3";
 import loginSuccessSound from "@assets/ElevenLabs_2026_02_20T12_28_13_Gojo_Calm,_Clear_and_Measured_p_1771590685418.mp3";
@@ -17,7 +17,6 @@ export default function LoginPage() {
   const errorAudioRef = useRef<HTMLAudioElement | null>(null);
   const successAudioRef = useRef<HTMLAudioElement | null>(null);
 
-  // Parallax state
   const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
   const containerRef = useRef<HTMLDivElement>(null);
 
@@ -76,13 +75,14 @@ export default function LoginPage() {
     }
   }
 
-  // Parallax offsets for orbs and card tilt
   const orb1X = (mouse.x - 0.5) * -60;
   const orb1Y = (mouse.y - 0.5) * -60;
   const orb2X = (mouse.x - 0.5) * 40;
   const orb2Y = (mouse.y - 0.5) * 40;
   const cardTiltX = (mouse.y - 0.5) * -8;
   const cardTiltY = (mouse.x - 0.5) * 8;
+
+  const canSubmit = !isLoading && username.trim() && password;
 
   return (
     <div
@@ -93,18 +93,19 @@ export default function LoginPage() {
         minHeight: "100vh",
         position: "relative",
         overflow: "hidden",
+        display: "flex",
+        alignItems: "center",
+        justifyContent: "center",
+        fontFamily: "'Inter', sans-serif",
+        padding: "0 16px",
       }}
-      className="flex flex-col items-center justify-center px-4"
     >
       {/* Parallax background orbs */}
-      <div style={{
-        position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0,
-        transition: "none",
-      }}>
+      <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
         <div style={{
           position: "absolute", width: "70vw", height: "70vw",
           top: `calc(-10% + ${orb1Y}px)`, left: `calc(20% + ${orb1X}px)`,
-          background: "radial-gradient(ellipse, rgba(124,58,237,0.22) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(153,0,255,0.20) 0%, transparent 70%)",
           borderRadius: "50%",
           transition: "top 0.1s ease-out, left 0.1s ease-out",
           willChange: "top, left",
@@ -112,7 +113,7 @@ export default function LoginPage() {
         <div style={{
           position: "absolute", width: "50vw", height: "50vw",
           bottom: `calc(-5% + ${-orb2Y}px)`, right: `calc(5% + ${-orb2X}px)`,
-          background: "radial-gradient(ellipse, rgba(99,102,241,0.14) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(102,0,255,0.14) 0%, transparent 70%)",
           borderRadius: "50%",
           transition: "bottom 0.15s ease-out, right 0.15s ease-out",
           willChange: "bottom, right",
@@ -120,20 +121,20 @@ export default function LoginPage() {
         <div style={{
           position: "absolute", width: "30vw", height: "30vw",
           top: `calc(60% + ${orb1Y * 0.4}px)`, left: `calc(5% + ${orb1X * 0.4}px)`,
-          background: "radial-gradient(ellipse, rgba(168,85,247,0.08) 0%, transparent 70%)",
+          background: "radial-gradient(ellipse, rgba(170,0,255,0.08) 0%, transparent 70%)",
           borderRadius: "50%",
           transition: "top 0.2s ease-out, left 0.2s ease-out",
         }} />
       </div>
 
-      {/* Post-login horizontal loading bar */}
+      {/* Post-login loading bar */}
       {showProgressBar && (
         <div className="login-progress-bar-track" data-testid="login-progress-bar">
           <div className="login-progress-bar-fill" />
         </div>
       )}
 
-      <div className="w-full" style={{ maxWidth: 380, position: "relative", zIndex: 1 }}>
+      <div style={{ width: "100%", maxWidth: 370, position: "relative", zIndex: 1 }}>
         <div
           className="skyline-glow-wrap"
           style={{
@@ -142,123 +143,99 @@ export default function LoginPage() {
             willChange: "transform",
           }}
         >
-          <div className="skyline-card" style={{ padding: "40px 32px 36px" }}>
+          <div className="skyline-card" style={{ padding: "40px 28px 36px" }}>
 
-            {/* Logo + Brand */}
-            <div style={{ textAlign: "center", marginBottom: 28 }}>
-              <div style={{
-                width: 88, height: 88, borderRadius: "50%",
-                margin: "0 auto 18px",
-                position: "relative",
-                display: "inline-block",
-              }}>
-                <div style={{
-                  position: "absolute", inset: -3, borderRadius: "50%",
-                  background: "conic-gradient(from 0deg, #00bfff, #a855f7, #00bfff)",
-                  animation: "spin 3s linear infinite",
-                  zIndex: 0,
-                  filter: "blur(1px) brightness(1.4)",
-                  boxShadow: "0 0 20px rgba(139,92,246,0.70), 0 0 40px rgba(124,58,237,0.40)",
-                }} />
-                <img
-                  src={logoPath}
-                  alt="SKYLINE"
-                  style={{
-                    width: 88, height: 88, borderRadius: "50%",
-                    objectFit: "cover", position: "relative", zIndex: 1,
-                    boxShadow: "0 0 30px rgba(0,200,255,0.4), 0 0 16px rgba(124,58,237,0.70)",
-                  }}
-                />
-              </div>
-              <span className="skyline-brand" data-testid="text-brand" style={{ fontSize: "1.6rem", letterSpacing: 5 }}>SKYLINE AUTHENTICATION</span>
-              <p style={{ textAlign: "center", fontSize: 12, color: "#4e3d6a", letterSpacing: "0.5px", marginTop: 5 }}>
-                Secure Auth Panel
-              </p>
+            {/* Logo */}
+            <div style={{ display: "flex", justifyContent: "center", marginBottom: 14 }}>
+              <img
+                src={logoPath}
+                alt="SKYLINE"
+                style={{
+                  width: 90, height: 90, borderRadius: "50%",
+                  objectFit: "cover",
+                  boxShadow: "0 0 24px rgba(170,0,255,0.45), 0 0 8px rgba(124,58,237,0.4)",
+                }}
+              />
             </div>
 
-            <form onSubmit={handleSubmit} style={{ display: "flex", flexDirection: "column", gap: 14 }}>
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+            {/* Brand */}
+            <span className="skyline-brand" data-testid="text-brand" style={{ marginBottom: 6 }}>
+              SKYLINE
+            </span>
+            <p style={{
+              textAlign: "center", fontSize: 12, color: "#4e3d6a",
+              fontWeight: 400, letterSpacing: "0.5px", marginBottom: 28,
+            }}>
+              Authentication Management System
+            </p>
+
+            <form onSubmit={handleSubmit} autoComplete="off">
+              {/* Username */}
+              <div style={{ marginBottom: 20 }}>
                 <label style={{
-                  fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px",
-                  textShadow: "0 0 8px rgba(167,139,250,0.70), 0 0 16px rgba(167,139,250,0.40)",
+                  display: "block", fontSize: 13, fontWeight: 700,
+                  color: "#ffffff", marginBottom: 9, letterSpacing: "0.15px",
                 }}>Username</label>
-                <Input
-                  data-testid="input-username"
-                  placeholder="Enter your username"
-                  value={username}
-                  onChange={(e) => setUsername(e.target.value)}
-                  autoComplete="username"
-                  autoFocus
-                  style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)", color: "#fff", borderRadius: 6 }}
-                />
+                <div className="login-inp-wrap">
+                  <User size={14} style={{ color: "#4d2e99", flexShrink: 0, width: 16 }} />
+                  <input
+                    data-testid="input-username"
+                    type="text"
+                    placeholder="Enter admin username"
+                    value={username}
+                    onChange={(e) => setUsername(e.target.value)}
+                    autoFocus
+                    autoComplete="username"
+                    className="login-inp"
+                  />
+                </div>
               </div>
 
-              <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+              {/* Password */}
+              <div style={{ marginBottom: 20 }}>
                 <label style={{
-                  fontSize: 12, fontWeight: 600, color: "#a78bfa", letterSpacing: "0.5px",
-                  textShadow: "0 0 8px rgba(167,139,250,0.70), 0 0 16px rgba(167,139,250,0.40)",
+                  display: "block", fontSize: 13, fontWeight: 700,
+                  color: "#ffffff", marginBottom: 9, letterSpacing: "0.15px",
                 }}>Password</label>
-                <Input
-                  data-testid="input-password"
-                  type="password"
-                  placeholder="Enter your password"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  autoComplete="current-password"
-                  style={{ background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)", color: "#fff", borderRadius: 6 }}
-                />
+                <div className="login-inp-wrap">
+                  <Lock size={14} style={{ color: "#4d2e99", flexShrink: 0, width: 16 }} />
+                  <input
+                    data-testid="input-password"
+                    type="password"
+                    placeholder="Enter admin password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    autoComplete="current-password"
+                    className="login-inp"
+                  />
+                </div>
               </div>
 
+              {/* Submit */}
               <button
                 type="submit"
-                disabled={isLoading || !username.trim() || !password}
+                disabled={!canSubmit}
                 data-testid="button-submit-login"
+                className="login-btn"
                 style={{
-                  marginTop: 6,
-                  background: isLoading || !username.trim() || !password
-                    ? "rgba(124,58,237,0.4)"
-                    : "linear-gradient(135deg, #7c3aed, #6366f1)",
-                  border: "none",
-                  color: "#fff",
-                  borderRadius: 6,
-                  padding: "12px 0",
-                  fontSize: 14,
-                  fontWeight: 700,
-                  letterSpacing: "0.5px",
-                  cursor: isLoading || !username.trim() || !password ? "not-allowed" : "pointer",
-                  boxShadow: isLoading || !username.trim() || !password
-                    ? "none"
-                    : "0 0 18px rgba(139,92,246,0.70), 0 0 36px rgba(124,58,237,0.40), 0 4px 18px rgba(124,58,237,0.35)",
-                  transition: "opacity 0.2s, transform 0.15s, box-shadow 0.2s",
-                  transform: "perspective(400px) translateZ(2px)",
-                }}
-                onMouseEnter={(e) => {
-                  if (!isLoading) {
-                    e.currentTarget.style.transform = "perspective(400px) translateZ(4px) translateY(-1px)";
-                    e.currentTarget.style.boxShadow = "0 0 24px rgba(139,92,246,0.80), 0 0 50px rgba(124,58,237,0.50), 0 6px 24px rgba(124,58,237,0.45)";
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.transform = "perspective(400px) translateZ(2px)";
-                  e.currentTarget.style.boxShadow = isLoading || !username.trim() || !password
-                    ? "none"
-                    : "0 0 18px rgba(139,92,246,0.70), 0 0 36px rgba(124,58,237,0.40), 0 4px 18px rgba(124,58,237,0.35)";
+                  opacity: canSubmit ? 1 : 0.5,
+                  cursor: canSubmit ? "pointer" : "not-allowed",
                 }}
               >
-                {isLoading ? "Signing in..." : "Sign In"}
+                <LogIn size={16} />
+                <span>{isLoading ? "Signing in..." : "Sign In"}</span>
               </button>
             </form>
 
-            <p style={{ textAlign: "center", fontSize: 11, color: "#2a1a3e", marginTop: 22 }}>
-              &copy; 2025 SKYLINE AUTHENTICATION &mdash; Secure Auth Panel
+            <p style={{
+              textAlign: "center", marginTop: 22, fontSize: 11,
+              color: "#2e2350", letterSpacing: "0.3px",
+            }}>
+              &copy; 2025 SKYLINE &mdash; Secure Auth Panel
             </p>
           </div>
         </div>
       </div>
-
-      <style>{`
-        @keyframes spin { from { transform: rotate(0deg); } to { transform: rotate(360deg); } }
-      `}</style>
     </div>
   );
 }

@@ -45,7 +45,7 @@ function statusBadge(status: string) {
 
 const inputStyle = {
   width: "100%", marginTop: 6, padding: "10px 14px", boxSizing: "border-box" as const,
-  background: "rgba(124,58,237,0.08)", border: "1px solid rgba(139,92,246,0.25)",
+  background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)",
   borderRadius: 8, color: "#fff", fontSize: 13, outline: "none",
 };
 
@@ -106,9 +106,9 @@ export default function ResellersPage() {
     display: "flex", alignItems: "center", justifyContent: "center", zIndex: 1000,
   };
   const cardStyle = {
-    background: "linear-gradient(145deg, #0d0015, #0a0010)", border: "1px solid rgba(139,92,246,0.35)",
+    background: "linear-gradient(145deg, #0d0015, #0a0010)", border: "1px solid rgba(102,0,255,0.35)",
     borderRadius: 16, padding: 32, width: "100%", maxWidth: 480,
-    boxShadow: "0 24px 80px rgba(124,58,237,0.3)",
+    boxShadow: "0 24px 80px rgba(102,0,255,0.3)",
   };
 
   if (user?.role === "reseller") {
@@ -118,21 +118,21 @@ export default function ResellersPage() {
 
     return (
       <div style={{ padding: "28px 32px", background: "#000", minHeight: "100%" }}>
-        <h1 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Rajdhani, sans-serif" }}>My Reseller Account</h1>
+        <h1 style={{ margin: "0 0 8px", fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif" }}>My Reseller Account</h1>
         <p style={{ margin: "0 0 32px", fontSize: 13, color: "#52525b" }}>Your credit balance and account status</p>
 
         <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 20, maxWidth: 760, marginBottom: 32 }}>
           <div style={{
             padding: 28, borderRadius: 20,
-            background: "linear-gradient(145deg, rgba(124,58,237,0.18), rgba(99,102,241,0.08))",
-            border: "1px solid rgba(139,92,246,0.4)",
-            boxShadow: "0 16px 60px rgba(124,58,237,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
+            background: "linear-gradient(145deg, rgba(102,0,255,0.18), rgba(99,102,241,0.08))",
+            border: "1px solid rgba(102,0,255,0.4)",
+            boxShadow: "0 16px 60px rgba(102,0,255,0.25), inset 0 1px 0 rgba(255,255,255,0.05)",
           }}>
             <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 12 }}>
               <Coins size={20} style={{ color: "#fbbf24" }} />
               <p style={{ margin: 0, fontSize: 12, color: "#71717a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>Credits Balance</p>
             </div>
-            <p style={{ margin: 0, fontSize: 56, fontWeight: 800, color: "#fff", fontFamily: "Rajdhani, sans-serif", lineHeight: 1 }} data-testid="text-my-credits">
+            <p style={{ margin: 0, fontSize: 56, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif", lineHeight: 1 }} data-testid="text-my-credits">
               {typeof myCredits?.credits === "number" ? myCredits.credits.toFixed(1) : "0.0"}
             </p>
           </div>
@@ -146,7 +146,7 @@ export default function ResellersPage() {
               <CalendarDays size={20} style={{ color: isExpired ? "#ef4444" : "#22c55e" }} />
               <p style={{ margin: 0, fontSize: 12, color: "#71717a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>Account Status</p>
             </div>
-            <p style={{ margin: "0 0 6px", fontSize: 20, fontWeight: 800, color: isExpired ? "#ef4444" : "#22c55e", fontFamily: "Rajdhani, sans-serif" }}>
+            <p style={{ margin: "0 0 6px", fontSize: 20, fontWeight: 800, color: isExpired ? "#ef4444" : "#22c55e", fontFamily: "Inter, sans-serif" }}>
               {isExpired ? "EXPIRED" : "ACTIVE"}
             </p>
             <p style={{ margin: 0, fontSize: 12, color: "#52525b" }}>
@@ -157,17 +157,17 @@ export default function ResellersPage() {
 
         <div style={{
           padding: 24, borderRadius: 16, maxWidth: 760,
-          background: "rgba(255,255,255,0.02)", border: "1px solid rgba(139,92,246,0.15)",
+          background: "rgba(255,255,255,0.02)", border: "1px solid rgba(102,0,255,0.15)",
         }}>
           <p style={{ margin: "0 0 16px", fontSize: 12, color: "#52525b", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>License Plans</p>
           <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
             {PLANS.map((p) => (
               <div key={p.days} style={{
                 padding: "14px 16px", borderRadius: 12,
-                background: "rgba(124,58,237,0.12)", border: "1px solid rgba(139,92,246,0.3)",
+                background: "rgba(102,0,255,0.12)", border: "1px solid rgba(102,0,255,0.3)",
                 textAlign: "center",
               }}>
-                <p style={{ margin: "0 0 6px", fontSize: 20, fontWeight: 800, color: "#fff", fontFamily: "Rajdhani, sans-serif" }}>{p.label}</p>
+                <p style={{ margin: "0 0 6px", fontSize: 20, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif" }}>{p.label}</p>
                 <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
                   <Coins size={12} style={{ color: "#fbbf24" }} />
                   <span style={{ fontSize: 14, fontWeight: 700, color: "#fbbf24" }}>{p.credits} credit{p.credits !== 1 ? "s" : ""}</span>
@@ -184,15 +184,15 @@ export default function ResellersPage() {
     <div style={{ padding: "28px 32px", background: "#000", minHeight: "100%" }}>
       <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between", marginBottom: 32 }}>
         <div>
-          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Rajdhani, sans-serif" }}>Resellers</h1>
+          <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif" }}>Resellers</h1>
           <p style={{ margin: "4px 0 0", fontSize: 13, color: "#52525b" }}>Manage reseller accounts, credits and expiry</p>
         </div>
         {canManage && (
           <button onClick={() => setShowCreate(true)} data-testid="button-new-reseller" style={{
             display: "flex", alignItems: "center", gap: 8, padding: "10px 18px",
-            background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+            background: "linear-gradient(135deg, #6600ff, #7722ff)",
             border: "none", borderRadius: 10, color: "#fff", fontSize: 13, fontWeight: 600,
-            cursor: "pointer", boxShadow: "0 4px 20px rgba(124,58,237,0.4)",
+            cursor: "pointer", boxShadow: "0 4px 20px rgba(102,0,255,0.4)",
             transition: "transform 0.15s",
           }}
             onMouseEnter={(e) => e.currentTarget.style.transform = "translateY(-1px)"}
@@ -217,7 +217,7 @@ export default function ResellersPage() {
               { key: "password", label: "Password", type: "password" },
             ].map(({ key, label, type }) => (
               <div key={key} style={{ marginBottom: 14 }}>
-                <label style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600 }}>{label}</label>
+                <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600 }}>{label}</label>
                 <input
                   type={type}
                   value={(form as any)[key]}
@@ -229,7 +229,7 @@ export default function ResellersPage() {
             ))}
 
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600 }}>Starting Credits</label>
+              <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600 }}>Starting Credits</label>
               <input
                 type="number" min={0} step={0.5}
                 value={form.credits}
@@ -240,7 +240,7 @@ export default function ResellersPage() {
             </div>
 
             <div style={{ marginBottom: 20 }}>
-              <label style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600 }}>Account Expiry</label>
+              <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600 }}>Account Expiry</label>
               <select
                 value={form.expiryDays}
                 onChange={(e) => setForm((f) => ({ ...f, expiryDays: Number(e.target.value) }))}
@@ -255,7 +255,7 @@ export default function ResellersPage() {
 
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <button onClick={() => setShowCreate(false)} style={{
-                padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.25)",
+                padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(102,0,255,0.25)",
                 background: "transparent", color: "#71717a", fontSize: 13, cursor: "pointer",
               }}>Cancel</button>
               <button
@@ -264,9 +264,9 @@ export default function ResellersPage() {
                 data-testid="button-submit-reseller"
                 style={{
                   padding: "9px 20px", borderRadius: 8, border: "none",
-                  background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                  background: "linear-gradient(135deg, #6600ff, #7722ff)",
                   color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer",
-                  boxShadow: "0 4px 16px rgba(124,58,237,0.35)",
+                  boxShadow: "0 4px 16px rgba(102,0,255,0.35)",
                 }}
               >
                 {createMutation.isPending ? "Creating..." : "Create Reseller"}
@@ -284,7 +284,7 @@ export default function ResellersPage() {
               <h2 style={{ margin: 0, color: "#fff", fontSize: 18, fontWeight: 700 }}>Adjust Credits</h2>
               <button onClick={() => setShowCredits(null)} style={{ background: "none", border: "none", color: "#52525b", cursor: "pointer" }}><X size={18} /></button>
             </div>
-            <p style={{ color: "#a78bfa", fontSize: 13, marginBottom: 16 }}>
+            <p style={{ color: "#aa44ff", fontSize: 13, marginBottom: 16 }}>
               @{showCredits.username} — Current: <strong style={{ color: "#fbbf24" }}>{typeof showCredits.credits === "number" ? showCredits.credits.toFixed(1) : showCredits.credits}</strong> credits
             </p>
             <div style={{ marginBottom: 10 }}>
@@ -292,9 +292,9 @@ export default function ResellersPage() {
               <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 8, marginBottom: 12 }}>
                 {PLANS.map((p) => (
                   <button key={p.days} onClick={() => setCreditAmount(p.credits)} style={{
-                    padding: "7px 12px", borderRadius: 8, border: `1px solid ${creditAmount === p.credits ? "rgba(139,92,246,0.6)" : "rgba(139,92,246,0.2)"}`,
-                    background: creditAmount === p.credits ? "rgba(124,58,237,0.25)" : "rgba(124,58,237,0.08)",
-                    color: "#a78bfa", fontSize: 12, cursor: "pointer", display: "flex", justifyContent: "space-between",
+                    padding: "7px 12px", borderRadius: 8, border: `1px solid ${creditAmount === p.credits ? "rgba(102,0,255,0.6)" : "rgba(102,0,255,0.2)"}`,
+                    background: creditAmount === p.credits ? "rgba(102,0,255,0.25)" : "rgba(102,0,255,0.08)",
+                    color: "#aa44ff", fontSize: 12, cursor: "pointer", display: "flex", justifyContent: "space-between",
                   }}>
                     <span>{p.label}</span>
                     <span style={{ color: "#fbbf24", fontWeight: 700 }}>+{p.credits} {p.credits === 1 ? "credit" : "credits"}</span>
@@ -312,7 +312,7 @@ export default function ResellersPage() {
             />
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <button onClick={() => setShowCredits(null)} style={{
-                padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.25)",
+                padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(102,0,255,0.25)",
                 background: "transparent", color: "#71717a", fontSize: 13, cursor: "pointer",
               }}>Cancel</button>
               <button
@@ -321,9 +321,9 @@ export default function ResellersPage() {
                 data-testid="button-submit-credits"
                 style={{
                   padding: "9px 20px", borderRadius: 8, border: "none",
-                  background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                  background: "linear-gradient(135deg, #6600ff, #7722ff)",
                   color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer",
-                  boxShadow: "0 4px 16px rgba(124,58,237,0.35)",
+                  boxShadow: "0 4px 16px rgba(102,0,255,0.35)",
                 }}
               >
                 {creditAmount > 0 ? "Add Credits" : "Deduct Credits"}
@@ -341,10 +341,10 @@ export default function ResellersPage() {
               <h2 style={{ margin: 0, color: "#fff", fontSize: 18, fontWeight: 700 }}>Update Expiry</h2>
               <button onClick={() => setShowExpiry(null)} style={{ background: "none", border: "none", color: "#52525b", cursor: "pointer" }}><X size={18} /></button>
             </div>
-            <p style={{ color: "#a78bfa", fontSize: 13, marginBottom: 16 }}>
+            <p style={{ color: "#aa44ff", fontSize: 13, marginBottom: 16 }}>
               @{showExpiry.username} — Current expiry: <strong style={{ color: "#fff" }}>{formatDate(showExpiry.expiryDate)}</strong>
             </p>
-            <label style={{ fontSize: 12, color: "#a78bfa", fontWeight: 600, display: "block", marginBottom: 6 }}>Set New Expiry (from today)</label>
+            <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600, display: "block", marginBottom: 6 }}>Set New Expiry (from today)</label>
             <select
               value={expiryDays}
               onChange={(e) => setExpiryDays(Number(e.target.value))}
@@ -357,7 +357,7 @@ export default function ResellersPage() {
             </select>
             <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
               <button onClick={() => setShowExpiry(null)} style={{
-                padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(139,92,246,0.25)",
+                padding: "9px 18px", borderRadius: 8, border: "1px solid rgba(102,0,255,0.25)",
                 background: "transparent", color: "#71717a", fontSize: 13, cursor: "pointer",
               }}>Cancel</button>
               <button
@@ -366,9 +366,9 @@ export default function ResellersPage() {
                 data-testid="button-submit-expiry"
                 style={{
                   padding: "9px 20px", borderRadius: 8, border: "none",
-                  background: "linear-gradient(135deg, #7c3aed, #6366f1)",
+                  background: "linear-gradient(135deg, #6600ff, #7722ff)",
                   color: "#fff", fontSize: 13, fontWeight: 600, cursor: "pointer",
-                  boxShadow: "0 4px 16px rgba(124,58,237,0.35)",
+                  boxShadow: "0 4px 16px rgba(102,0,255,0.35)",
                 }}
               >
                 {updateExpiryMutation.isPending ? "Updating..." : "Update Expiry"}
@@ -380,12 +380,12 @@ export default function ResellersPage() {
 
       {/* Table */}
       <div style={{
-        background: "rgba(255,255,255,0.02)", border: "1px solid rgba(139,92,246,0.15)",
+        background: "rgba(255,255,255,0.02)", border: "1px solid rgba(102,0,255,0.15)",
         borderRadius: 16, overflow: "hidden",
       }}>
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
-            <tr style={{ borderBottom: "1px solid rgba(139,92,246,0.15)" }}>
+            <tr style={{ borderBottom: "1px solid rgba(102,0,255,0.15)" }}>
               {["Username", "Credits", "Expiry Date", "Status", "Joined", "Actions"].map((h) => (
                 <th key={h} style={{ padding: "14px 20px", textAlign: "left", fontSize: 11, color: "#52525b", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>{h}</th>
               ))}
@@ -400,8 +400,8 @@ export default function ResellersPage() {
                 No resellers yet
               </td></tr>
             ) : resellers.map((r: any) => (
-              <tr key={r.id} data-testid={`reseller-row-${r.id}`} style={{ borderBottom: "1px solid rgba(139,92,246,0.07)", transition: "background 0.15s" }}
-                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(139,92,246,0.05)")}
+              <tr key={r.id} data-testid={`reseller-row-${r.id}`} style={{ borderBottom: "1px solid rgba(102,0,255,0.07)", transition: "background 0.15s" }}
+                onMouseEnter={(e) => (e.currentTarget.style.background = "rgba(102,0,255,0.05)")}
                 onMouseLeave={(e) => (e.currentTarget.style.background = "transparent")}
               >
                 <td style={{ padding: "14px 20px" }}>
@@ -442,8 +442,8 @@ export default function ResellersPage() {
                       data-testid={`button-credits-${r.id}`}
                       style={{
                         display: "flex", alignItems: "center", gap: 5, padding: "5px 10px",
-                        background: "rgba(139,92,246,0.12)", border: "1px solid rgba(139,92,246,0.25)",
-                        borderRadius: 6, color: "#a78bfa", fontSize: 11, cursor: "pointer",
+                        background: "rgba(102,0,255,0.12)", border: "1px solid rgba(102,0,255,0.25)",
+                        borderRadius: 6, color: "#aa44ff", fontSize: 11, cursor: "pointer",
                       }}
                     >
                       <Coins size={11} /> Credits
@@ -468,14 +468,14 @@ export default function ResellersPage() {
       </div>
 
       {/* Plans Reference */}
-      <div style={{ marginTop: 24, padding: "16px 20px", borderRadius: 12, background: "rgba(139,92,246,0.05)", border: "1px solid rgba(139,92,246,0.15)" }}>
+      <div style={{ marginTop: 24, padding: "16px 20px", borderRadius: 12, background: "rgba(102,0,255,0.05)", border: "1px solid rgba(102,0,255,0.15)" }}>
         <p style={{ margin: "0 0 10px", fontSize: 12, color: "#52525b", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>License Plans — Credit Costs</p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {PLANS.map((p) => (
             <div key={p.days} style={{
               padding: "5px 14px", borderRadius: 6, fontSize: 12,
-              background: "rgba(124,58,237,0.15)", border: "1px solid rgba(139,92,246,0.25)",
-              color: "#a78bfa", display: "flex", alignItems: "center", gap: 6,
+              background: "rgba(102,0,255,0.15)", border: "1px solid rgba(102,0,255,0.25)",
+              color: "#aa44ff", display: "flex", alignItems: "center", gap: 6,
             }}>
               <span style={{ fontWeight: 700 }}>{p.label}</span>
               <span style={{ color: "#52525b" }}>→</span>
