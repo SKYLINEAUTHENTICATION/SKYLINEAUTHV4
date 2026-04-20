@@ -1,10 +1,11 @@
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap');
+/* ── Rajdhani — primary brand font ───────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* SKYLINE dark theme — always dark */
+/* ── SKYLINE dark theme — always dark ───────────────── */
 :root {
   --button-outline: rgba(255,255,255, .10);
   --badge-outline: rgba(255,255,255, .05);
@@ -46,7 +47,7 @@
   --chart-3: 250 60% 42%;
   --chart-4: 220 55% 40%;
   --chart-5: 300 50% 40%;
-  --font-sans: "Inter", system-ui, -apple-system, sans-serif;
+  --font-sans: "Rajdhani", system-ui, -apple-system, sans-serif;
   --font-serif: Georgia, serif;
   --font-mono: "JetBrains Mono", "Fira Code", monospace;
   --radius: .5rem;
@@ -136,8 +137,16 @@
   }
 
   body {
-    @apply font-sans antialiased bg-background text-foreground;
+    /* Rajdhani as the global font */
+    font-family: "Rajdhani", system-ui, -apple-system, sans-serif;
+    @apply antialiased bg-background text-foreground;
     perspective: 1200px;
+    /* Performance hint */
+    -webkit-font-smoothing: antialiased;
+  }
+
+  h1, h2, h3, h4, h5, h6, button, label, span, p, a, li, td, th {
+    font-family: "Rajdhani", system-ui, -apple-system, sans-serif;
   }
 
   ::selection {
@@ -150,6 +159,175 @@
   ::-webkit-scrollbar-thumb:hover { background: rgba(80,30,160,0.6); }
 }
 
+/* ════════════════════════════════════════════════════════
+   SCROLL-REVEAL — driven by .is-visible toggled by JS
+   ════════════════════════════════════════════════════════ */
+.reveal-fade {
+  opacity: 0;
+  transition: opacity 0.7s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.7s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-slide-up {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-scale {
+  opacity: 0;
+  transform: scale(0.94);
+  transition: opacity 0.65s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.65s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-slide-left {
+  opacity: 0;
+  transform: translateX(-24px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.reveal-slide-right {
+  opacity: 0;
+  transform: translateX(24px);
+  transition: opacity 0.6s cubic-bezier(0.22, 1, 0.36, 1),
+              transform 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* Triggered state — all reveals converge here */
+.is-visible {
+  opacity: 1 !important;
+  transform: none !important;
+}
+
+/* Stagger delay helpers (attach alongside reveal-* class) */
+.delay-1  { transition-delay: 0.05s; }
+.delay-2  { transition-delay: 0.10s; }
+.delay-3  { transition-delay: 0.15s; }
+.delay-4  { transition-delay: 0.20s; }
+.delay-5  { transition-delay: 0.25s; }
+.delay-6  { transition-delay: 0.30s; }
+
+/* ════════════════════════════════════════════════════════
+   GLASSMORPHISM utility
+   ════════════════════════════════════════════════════════ */
+.glass {
+  background: rgba(10, 4, 24, 0.55);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid rgba(102, 0, 255, 0.18);
+}
+
+.glass-strong {
+  background: rgba(8, 3, 18, 0.72);
+  backdrop-filter: blur(22px);
+  -webkit-backdrop-filter: blur(22px);
+  border: 1px solid rgba(102, 0, 255, 0.22);
+}
+
+/* ════════════════════════════════════════════════════════
+   CARD GLOW — hover border glow using brand purple
+   ════════════════════════════════════════════════════════ */
+.card-glow {
+  position: relative;
+  transition:
+    transform 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.28s cubic-bezier(0.22, 1, 0.36, 1),
+    border-color 0.28s ease;
+}
+
+.card-glow:hover {
+  transform: translateY(-3px) scale(1.012);
+  box-shadow:
+    0 8px 32px rgba(102, 0, 255, 0.22),
+    0 2px 8px rgba(0, 0, 0, 0.6),
+    inset 0 0 0 1px rgba(153, 0, 255, 0.28);
+  border-color: rgba(153, 0, 255, 0.35) !important;
+}
+
+/* stat card variant — more dramatic lift */
+.card-glow-stat:hover {
+  transform: translateY(-4px) scale(1.015);
+  box-shadow:
+    0 12px 40px rgba(102, 0, 255, 0.26),
+    0 4px 12px rgba(0, 0, 0, 0.65),
+    inset 0 0 0 1px rgba(153, 0, 255, 0.32);
+  border-color: rgba(170, 0, 255, 0.40) !important;
+}
+
+/* ════════════════════════════════════════════════════════
+   BUTTON GLOW — hover shine using brand purple
+   ════════════════════════════════════════════════════════ */
+.btn-glow {
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    box-shadow 0.22s cubic-bezier(0.22, 1, 0.36, 1),
+    opacity 0.18s ease;
+}
+
+.btn-glow:hover:not(:disabled) {
+  transform: translateY(-1px) scale(1.025);
+  box-shadow: 0 4px 22px rgba(102, 0, 255, 0.55), 0 0 8px rgba(153, 0, 255, 0.3);
+}
+
+.btn-glow:active:not(:disabled) {
+  transform: translateY(0px) scale(0.98);
+  box-shadow: 0 2px 10px rgba(102, 0, 255, 0.35);
+}
+
+/* Shimmer sweep on hover */
+.btn-glow::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 60%; height: 100%;
+  background: linear-gradient(
+    120deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0.08) 50%,
+    transparent 100%
+  );
+  transition: left 0.45s ease;
+  pointer-events: none;
+}
+
+.btn-glow:hover::after {
+  left: 150%;
+}
+
+/* ════════════════════════════════════════════════════════
+   ANIMATED DOT-GRID BACKGROUND
+   ════════════════════════════════════════════════════════ */
+.bg-dot-grid {
+  background-image: radial-gradient(
+    circle,
+    rgba(102, 0, 255, 0.18) 1px,
+    transparent 1px
+  );
+  background-size: 28px 28px;
+}
+
+/* Subtle animated grid lines */
+.bg-grid-lines {
+  background-image:
+    linear-gradient(rgba(102, 0, 255, 0.05) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(102, 0, 255, 0.05) 1px, transparent 1px);
+  background-size: 44px 44px;
+}
+
+/* ════════════════════════════════════════════════════════
+   GLOW ORB utility (layered radial backgrounds)
+   ════════════════════════════════════════════════════════ */
+.glow-orb {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  will-change: transform;
+}
+
+/* ════════════════════════════════════════════════════════
+   LEGACY utilities (kept for compatibility)
+   ════════════════════════════════════════════════════════ */
 @layer utilities {
   input[type="search"]::-webkit-search-cancel-button {
     @apply hidden;
@@ -220,26 +398,27 @@
     inset: -1px;
   }
 
+  /* Legacy instant animations */
   .animate-fade-in {
-    animation: fadeIn 0.4s ease-out forwards;
+    animation: fadeIn 0.5s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   .animate-slide-up {
-    animation: slideUp 0.4s ease-out forwards;
+    animation: slideUp 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   .animate-slide-in-left {
-    animation: slideInLeft 0.3s ease-out forwards;
+    animation: slideInLeft 0.45s cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   .transition-smooth {
-    transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    transition: all 0.25s cubic-bezier(0.22, 1, 0.36, 1);
   }
 
   .stagger-1 { animation-delay: 0.05s; }
-  .stagger-2 { animation-delay: 0.1s; }
+  .stagger-2 { animation-delay: 0.10s; }
   .stagger-3 { animation-delay: 0.15s; }
-  .stagger-4 { animation-delay: 0.2s; }
+  .stagger-4 { animation-delay: 0.20s; }
 }
 
 @keyframes fadeIn {
@@ -248,16 +427,18 @@
 }
 
 @keyframes slideUp {
-  from { opacity: 0; transform: translateY(12px); }
+  from { opacity: 0; transform: translateY(16px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slideInLeft {
-  from { opacity: 0; transform: translateX(-8px); }
+  from { opacity: 0; transform: translateX(-10px); }
   to { opacity: 1; transform: translateX(0); }
 }
 
-/* ── SKYLINE animated border (login card) ───────────────────── */
+/* ════════════════════════════════════════════════════════
+   SKYLINE animated border (login card)
+   ════════════════════════════════════════════════════════ */
 @property --skyline-angle {
   syntax: '<angle>';
   initial-value: 0deg;
@@ -338,33 +519,36 @@
 
 .skyline-card:hover {
   box-shadow:
-    0 12px 40px -4px rgba(0,0,0,0.9),
+    0 12px 48px -4px rgba(102, 0, 255, 0.28),
+    0 4px 16px rgba(0,0,0,0.9),
     inset 0 1px 0 rgba(255,255,255,0.04),
     inset 0 -1px 0 rgba(0,0,0,0.6);
 }
 
 /* ── SKYLINE brand text ───────────────────── */
 .skyline-brand {
-  font-family: 'Inter', sans-serif;
+  font-family: 'Rajdhani', sans-serif;
   font-size: 38px;
-  font-weight: 900;
-  letter-spacing: 7px;
+  font-weight: 700;
+  letter-spacing: 10px;
   background: linear-gradient(90deg, #aa00ff, #dd66ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
   text-align: center;
   display: block;
+  text-transform: uppercase;
 }
 
 .skyline-brand-sidebar {
-  font-family: 'Inter', sans-serif;
-  font-weight: 800;
+  font-family: 'Rajdhani', sans-serif;
+  font-weight: 700;
   letter-spacing: 3px;
   background: linear-gradient(135deg, #aa00ff, #9900ff);
   -webkit-background-clip: text;
   -webkit-text-fill-color: transparent;
   background-clip: text;
+  text-transform: uppercase;
 }
 
 /* ── Login page inputs & button ───────────── */
@@ -376,7 +560,7 @@
   border-radius: 2px;
   padding: 0 14px;
   gap: 11px;
-  transition: border-color 0.15s, box-shadow 0.15s;
+  transition: border-color 0.18s, box-shadow 0.18s;
 }
 
 .login-inp-wrap:focus-within {
@@ -390,10 +574,12 @@
   border: none;
   outline: none;
   padding: 14px 0;
-  font-family: 'Inter', sans-serif;
-  font-size: 14px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
   color: #cdbff0;
   caret-color: #aa44ff;
+  letter-spacing: 0.3px;
 }
 
 .login-inp::placeholder {
@@ -407,32 +593,52 @@
   border-radius: 2px;
   background: linear-gradient(90deg, #4400cc, #6600ff, #9922ff);
   color: #fff;
-  font-family: 'Inter', sans-serif;
-  font-size: 15px;
+  font-family: 'Rajdhani', sans-serif;
+  font-size: 16px;
   font-weight: 700;
-  letter-spacing: 0.8px;
+  letter-spacing: 1.5px;
   text-transform: uppercase;
   cursor: pointer;
   box-shadow: 0 4px 30px rgba(102,0,255,0.65), inset 0 1px 0 rgba(255,255,255,0.08);
-  transition: opacity 0.16s, transform 0.12s;
+  transition: transform 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+              box-shadow 0.18s cubic-bezier(0.22, 1, 0.36, 1),
+              opacity 0.15s ease;
   margin-top: 4px;
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 9px;
+  position: relative;
+  overflow: hidden;
+}
+
+/* Shimmer sweep */
+.login-btn::after {
+  content: "";
+  position: absolute;
+  top: 0; left: -100%;
+  width: 55%; height: 100%;
+  background: linear-gradient(120deg, transparent, rgba(255,255,255,0.10), transparent);
+  transition: left 0.5s ease;
+  pointer-events: none;
+}
+
+.login-btn:hover:not(:disabled)::after {
+  left: 150%;
 }
 
 .login-btn:hover:not(:disabled) {
-  opacity: 0.86;
-  transform: translateY(-1px);
+  opacity: 0.9;
+  transform: translateY(-2px);
+  box-shadow: 0 8px 40px rgba(102,0,255,0.75), inset 0 1px 0 rgba(255,255,255,0.10);
 }
 
 .login-btn:active:not(:disabled) {
-  opacity: 1;
-  transform: none;
+  transform: translateY(0px) scale(0.98);
+  box-shadow: 0 2px 14px rgba(102,0,255,0.50);
 }
 
-/* ── Input focus ring (no outer glow) ── */
+/* ── Input focus ring ── */
 input:focus,
 textarea:focus {
   box-shadow: 0 0 0 2px hsl(var(--primary) / 0.60) !important;
@@ -440,7 +646,7 @@ textarea:focus {
   outline: none;
 }
 
-/* ── Login page progress bar ── */
+/* ── Login progress bar ── */
 @keyframes login-bar-fill {
   0%   { width: 0%; opacity: 1; }
   40%  { width: 60%; }
@@ -473,6 +679,7 @@ textarea:focus {
     login-bar-fill 1.6s cubic-bezier(0.4, 0, 0.2, 1) forwards,
     login-bar-shimmer 1.2s linear infinite;
   border-radius: 0 2px 2px 0;
+  box-shadow: 0 0 8px rgba(102, 0, 255, 0.7), 0 0 20px rgba(153, 0, 255, 0.4);
 }
 
 /* ── 3D depth for page root ── */
@@ -507,8 +714,87 @@ textarea:focus {
 }
 [data-sidebar="group-label"] {
   color: hsl(var(--sidebar-accent-foreground));
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 11px;
 }
 .text-accent-foreground,
 .text-sidebar-accent-foreground {
   text-shadow: none;
+}
+
+/* Sidebar nav item subtle hover glow */
+[data-sidebar="menu-button"]:hover:not([data-active="true"]) {
+  box-shadow: inset 0 0 0 1px rgba(102, 0, 255, 0.12);
+  transition: box-shadow 0.2s ease, background 0.2s ease;
+}
+
+/* ════════════════════════════════════════════════════════
+   LANDING PAGE — section border accents
+   ════════════════════════════════════════════════════════ */
+.section-label {
+  font-family: "Rajdhani", sans-serif;
+  font-weight: 700;
+  letter-spacing: 0.25em;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: hsl(var(--primary));
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.section-label::before,
+.section-label::after {
+  content: "";
+  display: block;
+  width: 24px;
+  height: 1px;
+  background: hsl(var(--primary) / 0.5);
+}
+
+/* ── Floating particles (pure CSS, performance-safe) ── */
+@keyframes float-particle {
+  0%   { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.3; }
+  33%  { transform: translateY(-14px) translateX(6px) scale(1.1); opacity: 0.6; }
+  66%  { transform: translateY(-8px) translateX(-4px) scale(0.9); opacity: 0.4; }
+  100% { transform: translateY(0px) translateX(0px) scale(1); opacity: 0.3; }
+}
+
+.particle {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(153, 0, 255, 0.6) 0%, transparent 70%);
+  animation: float-particle linear infinite;
+  pointer-events: none;
+  will-change: transform, opacity;
+}
+
+/* ── Stat counter pulse ── */
+@keyframes stat-pulse {
+  0%, 100% { box-shadow: 0 0 0 0 rgba(102,0,255,0); }
+  50%       { box-shadow: 0 0 0 6px rgba(102,0,255,0.12); }
+}
+
+/* ── Reduce motion for accessibility ── */
+@media (prefers-reduced-motion: reduce) {
+  .reveal-fade, .reveal-slide-up, .reveal-scale,
+  .reveal-slide-left, .reveal-slide-right {
+    transition: none;
+    opacity: 1;
+    transform: none;
+  }
+  .particle { animation: none; }
+  .skyline-glow-wrap::before,
+  .skyline-glow-wrap::after { animation: none; }
+  .login-btn::after { display: none; }
+}
+
+/* ── Mobile: reduce heavy parallax effects ── */
+@media (max-width: 768px) {
+  .card-glow:hover { transform: none; }
+  .card-glow-stat:hover { transform: none; }
+  .btn-glow:hover:not(:disabled) { transform: none; }
 }

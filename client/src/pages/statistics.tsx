@@ -70,18 +70,31 @@ function StatCard({
 }) {
   return (
     <Card
-      className="p-4 animate-slide-up"
-      style={{ animationDelay: `${delay || 0}s` }}
+      className="card-glow card-glow-stat reveal-slide-up group relative overflow-hidden p-4 glass border-border/60"
+      style={{ transitionDelay: `${delay || 0}s` }}
     >
+      {/* Top accent line on hover */}
+      <div className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
       <div className="flex items-start justify-between gap-3">
         <div>
-          <p className="text-xs font-medium text-muted-foreground">{label}</p>
-          <p className="mt-1 text-2xl font-bold tabular-nums" data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`}>
+          <p
+            className="text-xs font-semibold text-muted-foreground tracking-wide"
+            style={{ fontFamily: "Rajdhani, sans-serif", letterSpacing: "0.08em" }}
+          >
+            {label}
+          </p>
+          <p
+            className="mt-1 text-2xl font-bold tabular-nums"
+            style={{ fontFamily: "Rajdhani, sans-serif" }}
+            data-testid={`stat-${label.toLowerCase().replace(/\s+/g, "-")}`}
+          >
             {value}
           </p>
-          {sub && <p className="mt-0.5 text-xs text-muted-foreground">{sub}</p>}
+          {sub && (
+            <p className="mt-0.5 text-xs text-muted-foreground font-medium">{sub}</p>
+          )}
         </div>
-        <div className={`rounded-md p-2 ${bg}`}>
+        <div className={`rounded-md p-2 ${bg} transition-all duration-300 group-hover:scale-110 group-hover:shadow-[0_0_12px_rgba(102,0,255,0.25)]`}>
           <Icon className={`h-4 w-4 ${color}`} />
         </div>
       </div>
@@ -131,15 +144,19 @@ export default function StatisticsPage() {
   return (
     <div className="p-6 lg:p-8 animate-fade-in">
       <div className="mb-8">
-        <div className="flex items-center gap-3">
-          <div className="rounded-md bg-primary/10 p-2">
+        <div className="reveal-slide-up flex items-center gap-3">
+          <div className="rounded-md bg-primary/10 p-2 shadow-[0_0_14px_rgba(102,0,255,0.2)]">
             <Activity className="h-5 w-5 text-primary" />
           </div>
           <div>
-            <h1 className="text-2xl font-bold tracking-tight" data-testid="text-statistics-title">
+            <h1
+              className="text-2xl font-bold tracking-tight"
+              style={{ fontFamily: "Rajdhani, sans-serif", letterSpacing: "0.04em" }}
+              data-testid="text-statistics-title"
+            >
               Statistics
             </h1>
-            <p className="text-sm text-muted-foreground">
+            <p className="text-sm text-muted-foreground font-medium">
               Real-time analytics across all your applications.
             </p>
           </div>
@@ -148,13 +165,13 @@ export default function StatisticsPage() {
 
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <StatCard label="Total Apps" value={overview.totalApps} icon={AppWindow} color="text-blue-400" bg="bg-blue-500/10" sub={`${overview.enabledApps} enabled`} delay={0} />
-        <StatCard label="Total Licenses" value={overview.totalLicenses} icon={Key} color="text-emerald-400" bg="bg-emerald-500/10" sub={`${overview.activeLicenses} active`} delay={0.05} />
-        <StatCard label="Total Users" value={overview.totalUsers} icon={Users} color="text-amber-400" bg="bg-amber-500/10" sub={`${overview.activeUsers} active`} delay={0.1} />
-        <StatCard label="Total Tokens" value={overview.totalTokens} icon={Coins} color="text-purple-400" bg="bg-purple-500/10" sub={`${overview.usedTokens} used`} delay={0.15} />
+        <StatCard label="Total Licenses" value={overview.totalLicenses} icon={Key} color="text-emerald-400" bg="bg-emerald-500/10" sub={`${overview.activeLicenses} active`} delay={0.07} />
+        <StatCard label="Total Users" value={overview.totalUsers} icon={Users} color="text-amber-400" bg="bg-amber-500/10" sub={`${overview.activeUsers} active`} delay={0.14} />
+        <StatCard label="Total Tokens" value={overview.totalTokens} icon={Coins} color="text-purple-400" bg="bg-purple-500/10" sub={`${overview.usedTokens} used`} delay={0.21} />
       </div>
 
       <div className="mt-6 grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-        <Card className="p-5 animate-slide-up" style={{ animationDelay: "0.2s" }}>
+        <Card className="reveal-slide-up card-glow p-5 glass border-border/60" style={{ transitionDelay: "0.25s" }}>
           <h3 className="mb-4 flex items-center gap-2 font-semibold">
             <Key className="h-4 w-4 text-emerald-400" />
             License Breakdown
@@ -187,7 +204,7 @@ export default function StatisticsPage() {
           </div>
         </Card>
 
-        <Card className="p-5 animate-slide-up" style={{ animationDelay: "0.25s" }}>
+        <Card className="reveal-slide-up card-glow p-5 glass border-border/60" style={{ transitionDelay: "0.32s" }}>
           <h3 className="mb-4 flex items-center gap-2 font-semibold">
             <Users className="h-4 w-4 text-amber-400" />
             User Breakdown
@@ -212,7 +229,7 @@ export default function StatisticsPage() {
           </div>
         </Card>
 
-        <Card className="p-5 animate-slide-up" style={{ animationDelay: "0.3s" }}>
+        <Card className="reveal-slide-up card-glow p-5 glass border-border/60" style={{ transitionDelay: "0.39s" }}>
           <h3 className="mb-4 flex items-center gap-2 font-semibold">
             <Coins className="h-4 w-4 text-purple-400" />
             Token Breakdown
@@ -240,7 +257,7 @@ export default function StatisticsPage() {
 
       {Object.keys(licensesByLevel).length > 0 && (
         <div className="mt-6 grid gap-4 sm:grid-cols-2">
-          <Card className="p-5 animate-slide-up" style={{ animationDelay: "0.35s" }}>
+          <Card className="reveal-slide-up card-glow p-5 glass border-border/60" style={{ transitionDelay: "0.46s" }}>
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
               <TrendingUp className="h-4 w-4 text-primary" />
               Licenses by Level
@@ -257,7 +274,7 @@ export default function StatisticsPage() {
             </div>
           </Card>
 
-          <Card className="p-5 animate-slide-up" style={{ animationDelay: "0.4s" }}>
+          <Card className="reveal-slide-up card-glow p-5 glass border-border/60" style={{ transitionDelay: "0.53s" }}>
             <h3 className="mb-4 flex items-center gap-2 font-semibold">
               <TrendingUp className="h-4 w-4 text-primary" />
               Users by Level
@@ -278,39 +295,54 @@ export default function StatisticsPage() {
 
       {perApp.length > 0 && (
         <div className="mt-6">
-          <h3 className="mb-4 text-lg font-semibold">Per-Application Breakdown</h3>
+          <h3
+            className="reveal-slide-up mb-4 text-lg font-bold tracking-wide"
+            style={{ fontFamily: "Rajdhani, sans-serif", letterSpacing: "0.06em" }}
+          >
+            Per-Application Breakdown
+          </h3>
           <div className="grid gap-4 lg:grid-cols-2">
             {perApp.map((app, i) => (
-              <Card key={app.appId} className="p-5 animate-slide-up" style={{ animationDelay: `${0.45 + i * 0.05}s` }}>
+              <Card
+                key={app.appId}
+                className="reveal-slide-up card-glow group relative overflow-hidden p-5 glass border-border/60"
+                style={{ transitionDelay: `${0.08 + i * 0.07}s` }}
+              >
+                {/* Top accent on hover */}
+                <div className="pointer-events-none absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-primary/35 to-transparent opacity-0 transition-opacity duration-300 group-hover:opacity-100" />
                 <div className="mb-4 flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
-                    <div className="rounded-md bg-primary/10 p-2">
+                    <div className="rounded-md bg-primary/10 p-2 transition-all duration-300 group-hover:scale-110 group-hover:bg-primary/20">
                       <AppWindow className="h-4 w-4 text-primary" />
                     </div>
                     <div>
-                      <p className="font-semibold" data-testid={`stat-app-name-${app.appId}`}>{app.appName}</p>
+                      <p className="font-bold" style={{ fontFamily: "Rajdhani, sans-serif" }} data-testid={`stat-app-name-${app.appId}`}>{app.appName}</p>
                       <p className="text-xs text-muted-foreground">v{app.version}</p>
                     </div>
                   </div>
-                  <Badge variant={app.enabled ? "secondary" : "destructive"} className="text-xs">
+                  <Badge
+                    variant={app.enabled ? "secondary" : "destructive"}
+                    className="text-xs font-semibold"
+                    style={{ fontFamily: "Rajdhani, sans-serif", letterSpacing: "0.06em" }}
+                  >
                     {app.enabled ? "Active" : "Disabled"}
                   </Badge>
                 </div>
                 <div className="grid grid-cols-3 gap-4">
                   <div className="text-center">
-                    <p className="text-xl font-bold tabular-nums">{app.totalLicenses}</p>
-                    <p className="text-xs text-muted-foreground">Licenses</p>
-                    <p className="text-xs text-emerald-400">{app.usedLicenses} used</p>
+                    <p className="text-xl font-bold tabular-nums" style={{ fontFamily: "Rajdhani, sans-serif" }}>{app.totalLicenses}</p>
+                    <p className="text-xs text-muted-foreground font-medium">Licenses</p>
+                    <p className="text-xs text-emerald-400 font-semibold">{app.usedLicenses} used</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xl font-bold tabular-nums">{app.totalUsers}</p>
-                    <p className="text-xs text-muted-foreground">Users</p>
-                    <p className="text-xs text-emerald-400">{app.activeUsers} active</p>
+                    <p className="text-xl font-bold tabular-nums" style={{ fontFamily: "Rajdhani, sans-serif" }}>{app.totalUsers}</p>
+                    <p className="text-xs text-muted-foreground font-medium">Users</p>
+                    <p className="text-xs text-emerald-400 font-semibold">{app.activeUsers} active</p>
                   </div>
                   <div className="text-center">
-                    <p className="text-xl font-bold tabular-nums">{app.totalTokens}</p>
-                    <p className="text-xs text-muted-foreground">Tokens</p>
-                    <p className="text-xs text-emerald-400">{app.usedTokens} used</p>
+                    <p className="text-xl font-bold tabular-nums" style={{ fontFamily: "Rajdhani, sans-serif" }}>{app.totalTokens}</p>
+                    <p className="text-xs text-muted-foreground font-medium">Tokens</p>
+                    <p className="text-xs text-emerald-400 font-semibold">{app.usedTokens} used</p>
                   </div>
                 </div>
               </Card>

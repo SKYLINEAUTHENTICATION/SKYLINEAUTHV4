@@ -10,6 +10,35 @@ import { AppSidebar } from "@/components/app-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
 import { useEffect, useRef, useState, useCallback } from "react";
 
+/**
+ * Global scroll-reveal: re-runs IntersectionObserver on every route change.
+ * Finds all .reveal-* elements that aren't yet .is-visible and observes them.
+ */
+function useGlobalScrollReveal(location: string) {
+  useEffect(() => {
+    // Small delay so the new page DOM is rendered
+    const timer = setTimeout(() => {
+      const targets = document.querySelectorAll(
+        ".reveal-fade:not(.is-visible), .reveal-slide-up:not(.is-visible), .reveal-scale:not(.is-visible), .reveal-slide-left:not(.is-visible), .reveal-slide-right:not(.is-visible)"
+      );
+      const observer = new IntersectionObserver(
+        (entries) => {
+          entries.forEach((entry) => {
+            if (entry.isIntersecting) {
+              entry.target.classList.add("is-visible");
+              observer.unobserve(entry.target);
+            }
+          });
+        },
+        { threshold: 0.08, rootMargin: "0px 0px -20px 0px" }
+      );
+      targets.forEach((el) => observer.observe(el));
+      return () => observer.disconnect();
+    }, 60);
+    return () => clearTimeout(timer);
+  }, [location]);
+}
+
 import LoginPage from "@/pages/login";
 import DashboardPage from "@/pages/dashboard";
 import ManageAppsPage from "@/pages/manage-apps";
@@ -104,6 +133,8 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
   const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
   const layoutRef = useRef<HTMLDivElement>(null);
+  const [location] = useLocation();
+  useGlobalScrollReveal(location);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
     const rect = layoutRef.current?.getBoundingClientRect();
