@@ -8,7 +8,7 @@ import { useAuth } from "@/hooks/use-auth";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/app-sidebar";
 import { Skeleton } from "@/components/ui/skeleton";
-import { useEffect, useRef, useState, useCallback } from "react";
+import { useEffect, useRef, useState, useCallback, useMemo } from "react";
 
 /**
  * Global scroll-reveal: re-runs IntersectionObserver on every route change.
@@ -55,6 +55,7 @@ import ResellersPage from "@/pages/resellers";
 import PortalPage from "@/pages/portal";
 import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
+import LandingPage from "@/pages/landing";
 
 function IdleTimerBar({ onLogout }: { onLogout: () => void }) {
   const [secondsLeft, setSecondsLeft] = useState(180);
@@ -129,26 +130,73 @@ function IdleTimerBar({ onLogout }: { onLogout: () => void }) {
   );
 }
 
+/* ── Starfield for dashboard layout ────────────────────── */
+function LayoutStarfield({ mx, my }: { mx: number; my: number }) {
+  const stars = useMemo(() =>
+    Array.from({ length: 55 }, (_, i) => ({
+      id: i,
+      x: (Math.sin(i * 137.5) * 0.5 + 0.5) * 100,
+      y: (Math.cos(i * 137.5) * 0.5 + 0.5) * 100,
+      size: (Math.sin(i * 7.3) * 0.5 + 0.5) * 1.6 + 0.4,
+      opacity: (Math.sin(i * 3.1) * 0.5 + 0.5) * 0.45 + 0.06,
+      twinkle: (Math.sin(i * 2.7) * 0.5 + 0.5) * 5 + 2.5,
+      delay: (Math.sin(i * 1.9) * 0.5 + 0.5) * 5,
+      depth: (Math.sin(i * 4.3) * 0.5 + 0.5) * 0.06 + 0.01,
+    })),
+    []
+  );
+  const dx = (mx - 0.5) * 40;
+  const dy = (my - 0.5) * 40;
+  return (
+    <div style={{ position: "absolute", inset: 0, pointerEvents: "none", overflow: "hidden", zIndex: 0 }} aria-hidden>
+      {stars.map((s) => (
+        <div key={s.id} style={{
+          position: "absolute",
+          left: `calc(${s.x}% + ${dx * s.depth}px)`,
+          top:  `calc(${s.y}% + ${dy * s.depth}px)`,
+          width: s.size, height: s.size,
+          borderRadius: "50%",
+          background: `rgba(200,160,255,${s.opacity})`,
+          animation: `star-twinkle ${s.twinkle}s ease-in-out ${s.delay}s infinite`,
+          transition: "left 0.30s ease-out, top 0.30s ease-out",
+        }} />
+      ))}
+    </div>
+  );
+}
+
 function DashboardLayout({ children }: { children: React.ReactNode }) {
   const { logout } = useAuth();
+  const rafRef = useRef<number>(0);
   const [mouse, setMouse] = useState({ x: 0.5, y: 0.5 });
   const layoutRef = useRef<HTMLDivElement>(null);
   const [location] = useLocation();
   useGlobalScrollReveal(location);
 
   const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
-    const rect = layoutRef.current?.getBoundingClientRect();
-    if (!rect) return;
-    setMouse({
-      x: (e.clientX - rect.left) / rect.width,
-      y: (e.clientY - rect.top) / rect.height,
+    cancelAnimationFrame(rafRef.current);
+    rafRef.current = requestAnimationFrame(() => {
+      const rect = layoutRef.current?.getBoundingClientRect();
+      if (!rect) return;
+      setMouse({
+        x: (e.clientX - rect.left) / rect.width,
+        y: (e.clientY - rect.top) / rect.height,
+      });
     });
   }, []);
 
-  const orb1X = (mouse.x - 0.5) * -40;
-  const orb1Y = (mouse.y - 0.5) * -40;
-  const orb2X = (mouse.x - 0.5) * 30;
-  const orb2Y = (mouse.y - 0.5) * 30;
+  const dx = mouse.x - 0.5;
+  const dy = mouse.y - 0.5;
+
+  /* 6 orb layers — intensities carefully spaced for depth illusion */
+  const orbs = [
+    { bg: "153,0,255", a: 0.14, w: "75vw", cx: "55%",  cy: "-18%", mi: -120, t: "0.22s" },
+    { bg: "102,0,255", a: 0.11, w: "58vw", cx: "15%",  cy: "85%",  mi:  90,  t: "0.18s" },
+    { bg: "200,50,255",a: 0.09, w: "42vw", cx: "85%",  cy: "55%",  mi: -65,  t: "0.15s" },
+    { bg: "80,0,200",  a: 0.07, w: "28vw", cx: "30%",  cy: "30%",  mi:  45,  t: "0.12s" },
+    { bg: "255,80,255",a: 0.06, w: "18vw", cx: "65%",  cy: "78%",  mi: -30,  t: "0.09s" },
+    { bg: "153,0,255", a: 0.10, w: "10vw", cx: "40%",  cy: "50%",  mi: 200,  t: "0.06s" },
+  ];
 
   const style = {
     "--sidebar-width": "15rem",
@@ -163,31 +211,30 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
         className="flex h-screen w-full"
         style={{ position: "relative", overflow: "hidden" }}
       >
-        {/* Parallax background orbs */}
+        {/* ── Deep starfield layer ──────────────────── */}
+        <LayoutStarfield mx={mouse.x} my={mouse.y} />
+
+        {/* ── 6-depth-layer parallax orbs ──────────── */}
         <div style={{ position: "absolute", inset: 0, pointerEvents: "none", zIndex: 0 }}>
-          <div style={{
-            position: "absolute", width: "60vw", height: "60vw",
-            top: `calc(-15% + ${orb1Y}px)`, left: `calc(25% + ${orb1X}px)`,
-            background: "radial-gradient(ellipse, rgba(153,0,255,0.12) 0%, transparent 70%)",
-            borderRadius: "50%",
-            transition: "top 0.12s ease-out, left 0.12s ease-out",
-            willChange: "top, left",
-          }} />
-          <div style={{
-            position: "absolute", width: "45vw", height: "45vw",
-            bottom: `calc(-10% + ${-orb2Y}px)`, right: `calc(10% + ${-orb2X}px)`,
-            background: "radial-gradient(ellipse, rgba(102,0,255,0.09) 0%, transparent 70%)",
-            borderRadius: "50%",
-            transition: "bottom 0.15s ease-out, right 0.15s ease-out",
-            willChange: "bottom, right",
-          }} />
-          <div style={{
-            position: "absolute", width: "25vw", height: "25vw",
-            top: `calc(55% + ${orb1Y * 0.3}px)`, left: `calc(3% + ${orb1X * 0.3}px)`,
-            background: "radial-gradient(ellipse, rgba(170,0,255,0.06) 0%, transparent 70%)",
-            borderRadius: "50%",
-            transition: "top 0.2s ease-out, left 0.2s ease-out",
-          }} />
+          {/* Drifting grid */}
+          <div className="absolute inset-0 bg-grid-lines opacity-30" aria-hidden />
+
+          {orbs.map((o, i) => (
+            <div key={i} style={{
+              position: "absolute",
+              borderRadius: "50%",
+              width: o.w, height: o.w,
+              left: `calc(${o.cx} + ${dx * o.mi}px)`,
+              top:  `calc(${o.cy} + ${dy * o.mi}px)`,
+              transform: "translate(-50%, -50%)",
+              background: `radial-gradient(ellipse, rgba(${o.bg},${o.a}) 0%, transparent 68%)`,
+              transition: `left ${o.t} ease-out, top ${o.t} ease-out`,
+              willChange: "left, top",
+            }} />
+          ))}
+
+          {/* Single recurring scan sweep */}
+          <div className="scan-line" style={{ animationDuration: "12s", animationDelay: "4s" }} aria-hidden />
         </div>
 
         <AppSidebar />
@@ -311,10 +358,8 @@ function AppRouter() {
     <Switch>
       <Route path="/login" component={LoginPage} />
       <Route path="/portal" component={PortalPage} />
-      <Route path="/">
-        <Redirect to="/login" />
-      </Route>
-      <Route component={LoginPage} />
+      <Route path="/" component={LandingPage} />
+      <Route component={LandingPage} />
     </Switch>
   );
 }

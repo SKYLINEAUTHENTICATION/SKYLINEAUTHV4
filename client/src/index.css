@@ -778,6 +778,119 @@ textarea:focus {
   50%       { box-shadow: 0 0 0 6px rgba(102,0,255,0.12); }
 }
 
+/* ════════════════════════════════════════════════════════
+   STARFIELD — tiny twinkling dots
+   ════════════════════════════════════════════════════════ */
+@keyframes star-twinkle {
+  0%, 100% { opacity: 0.15; transform: scale(1); }
+  50%       { opacity: 0.90; transform: scale(1.6); }
+}
+
+@keyframes star-drift {
+  0%   { transform: translateY(0px) translateX(0px); }
+  50%  { transform: translateY(-8px) translateX(3px); }
+  100% { transform: translateY(0px) translateX(0px); }
+}
+
+/* ════════════════════════════════════════════════════════
+   FLOATING RING decorations
+   ════════════════════════════════════════════════════════ */
+@keyframes ring-spin {
+  from { transform: rotate(0deg) scale(1); }
+  to   { transform: rotate(360deg) scale(1); }
+}
+
+@keyframes ring-breathe {
+  0%, 100% { transform: scale(1) rotate(0deg); opacity: 0.30; }
+  50%       { transform: scale(1.08) rotate(180deg); opacity: 0.55; }
+}
+
+.parallax-ring {
+  position: absolute;
+  border-radius: 50%;
+  border: 1px solid rgba(102, 0, 255, 0.30);
+  pointer-events: none;
+  animation: ring-breathe linear infinite;
+  will-change: transform, opacity;
+}
+
+/* ════════════════════════════════════════════════════════
+   SCAN LINE — horizontal sweep
+   ════════════════════════════════════════════════════════ */
+@keyframes scan-sweep {
+  0%   { top: -2%; opacity: 0; }
+  5%   { opacity: 0.6; }
+  90%  { opacity: 0.6; }
+  100% { top: 102%; opacity: 0; }
+}
+
+.scan-line {
+  position: absolute;
+  left: 0; right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent 0%, rgba(102,0,255,0.4) 30%, rgba(153,0,255,0.7) 50%, rgba(102,0,255,0.4) 70%, transparent 100%);
+  pointer-events: none;
+  box-shadow: 0 0 12px rgba(102,0,255,0.5), 0 0 40px rgba(153,0,255,0.15);
+  animation: scan-sweep 8s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+  will-change: top, opacity;
+}
+
+/* ════════════════════════════════════════════════════════
+   DEPTH GRID — drifting mesh overlay
+   ════════════════════════════════════════════════════════ */
+@keyframes grid-drift {
+  0%   { background-position: 0px 0px; }
+  100% { background-position: 44px 44px; }
+}
+
+.bg-grid-animated {
+  background-image:
+    linear-gradient(rgba(102,0,255,0.06) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(102,0,255,0.06) 1px, transparent 1px);
+  background-size: 44px 44px;
+  animation: grid-drift 12s linear infinite;
+}
+
+/* ════════════════════════════════════════════════════════
+   HERO TEXT LAYERS — extra depth on the h1
+   ════════════════════════════════════════════════════════ */
+.depth-text-near {
+  display: inline-block;
+  transition: transform 0.12s cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* ════════════════════════════════════════════════════════
+   FLOATING BADGE — gentle vertical bob
+   ════════════════════════════════════════════════════════ */
+@keyframes badge-bob {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-5px); }
+}
+
+.badge-bob {
+  animation: badge-bob 3.5s ease-in-out infinite;
+}
+
+/* ════════════════════════════════════════════════════════
+   COUNTER FLASH — stat numbers pop in
+   ════════════════════════════════════════════════════════ */
+@keyframes counter-pop {
+  0%   { opacity: 0; transform: scale(0.7) translateY(8px); }
+  60%  { opacity: 1; transform: scale(1.08) translateY(-2px); }
+  100% { opacity: 1; transform: scale(1) translateY(0px); }
+}
+
+.counter-pop {
+  animation: counter-pop 0.55s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+
+/* ════════════════════════════════════════════════════════
+   PARALLAX CARD DATA-DEPTH — driven by JS mouse offset
+   ════════════════════════════════════════════════════════ */
+[data-depth] {
+  will-change: transform;
+}
+
 /* ── Reduce motion for accessibility ── */
 @media (prefers-reduced-motion: reduce) {
   .reveal-fade, .reveal-slide-up, .reveal-scale,
