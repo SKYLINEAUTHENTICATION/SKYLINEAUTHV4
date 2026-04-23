@@ -358,8 +358,10 @@ function AppRouter() {
     <Switch>
       <Route path="/login" component={LoginPage} />
       <Route path="/portal" component={PortalPage} />
-      <Route path="/" component={LandingPage} />
-      <Route component={LandingPage} />
+      <Route path="/">
+        <Redirect to="/login" />
+      </Route>
+      <Route component={LoginPage} />
     </Switch>
   );
 }
