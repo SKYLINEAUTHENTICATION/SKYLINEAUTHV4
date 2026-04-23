@@ -155,27 +155,6 @@ export default function ResellersPage() {
           </div>
         </div>
 
-        <div style={{
-          padding: 24, borderRadius: 16, maxWidth: 760,
-          background: "rgba(255,255,255,0.02)", border: "1px solid rgba(102,0,255,0.15)",
-        }}>
-          <p style={{ margin: "0 0 16px", fontSize: 12, color: "#52525b", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>License Plans</p>
-          <div style={{ display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 12 }}>
-            {PLANS.map((p) => (
-              <div key={p.days} style={{
-                padding: "14px 16px", borderRadius: 12,
-                background: "rgba(102,0,255,0.12)", border: "1px solid rgba(102,0,255,0.3)",
-                textAlign: "center",
-              }}>
-                <p style={{ margin: "0 0 6px", fontSize: 20, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif" }}>{p.label}</p>
-                <div style={{ display: "flex", alignItems: "center", justifyContent: "center", gap: 4 }}>
-                  <Coins size={12} style={{ color: "#fbbf24" }} />
-                  <span style={{ fontSize: 14, fontWeight: 700, color: "#fbbf24" }}>{p.credits} credit{p.credits !== 1 ? "s" : ""}</span>
-                </div>
-              </div>
-            ))}
-          </div>
-        </div>
       </div>
     );
   }

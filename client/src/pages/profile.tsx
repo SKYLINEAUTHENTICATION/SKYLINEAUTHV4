@@ -1,19 +1,22 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { apiRequest } from "@/lib/queryClient";
 import { useAuth } from "@/hooks/use-auth";
 import { useToast } from "@/hooks/use-toast";
-import { User, Mail, Lock, Camera, Save } from "lucide-react";
+import { User, Mail, Lock, Camera, Save, X } from "lucide-react";
+
+const MAX_IMAGE_BYTES = 2 * 1024 * 1024; // 2 MB raw file limit
 
 export default function ProfilePage() {
   const { user } = useAuth();
   const { toast } = useToast();
   const queryClient = useQueryClient();
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   const [profileImageUrl, setProfileImageUrl] = useState("");
   const [email, setEmail] = useState("");
+  const [avatarHover, setAvatarHover] = useState(false);
 
-  // Sync form state once user data loads (user is null on first render)
   useEffect(() => {
     if (user) {
       setProfileImageUrl(user.profileImageUrl || "");
@@ -50,7 +53,34 @@ export default function ProfilePage() {
     passwordMutation.mutate();
   };
 
-  const getInitials = () => user?.username?.slice(0, 2).toUpperCase() || "U";
+  /* ─── File-picker handler ──────────────────────── */
+  const handleFileSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    if (!file.type.startsWith("image/")) {
+      toast({ title: "Please select an image file", variant: "destructive" });
+      return;
+    }
+    if (file.size > MAX_IMAGE_BYTES) {
+      toast({ title: "Image too large", description: "Maximum 2 MB. Try a smaller image.", variant: "destructive" });
+      return;
+    }
+
+    const reader = new FileReader();
+    reader.onload = () => {
+      const dataUrl = reader.result as string;
+      setProfileImageUrl(dataUrl);
+      toast({ title: "Image loaded", description: "Click 'Save Changes' to apply." });
+    };
+    reader.onerror = () => toast({ title: "Failed to read image", variant: "destructive" });
+    reader.readAsDataURL(file);
+
+    // Reset input so re-picking the same file still triggers onChange
+    e.target.value = "";
+  };
+
+  const openPicker = () => fileInputRef.current?.click();
 
   const inputStyle = {
     width: "100%", padding: "10px 14px", boxSizing: "border-box" as const,
@@ -75,46 +105,113 @@ export default function ProfilePage() {
   return (
     <div style={{ padding: "28px 32px", background: "#000", minHeight: "100%" }}>
       <div style={{ marginBottom: 32 }}>
-        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif" }}>Profile Settings</h1>
+        <h1 style={{ margin: 0, fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Rajdhani, sans-serif", letterSpacing: "0.04em" }}>Profile Settings</h1>
         <p style={{ margin: "4px 0 0", fontSize: 13, color: "#52525b" }}>Manage your account information</p>
       </div>
+
+      {/* Hidden file input — triggered by avatar click */}
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/*"
+        onChange={handleFileSelect}
+        data-testid="input-profile-image-file"
+        style={{ display: "none" }}
+      />
 
       <div style={{ display: "grid", gridTemplateColumns: "1fr 1fr", gap: 24, maxWidth: 900 }}>
         {/* Avatar & Info Card */}
         <div style={{ ...cardStyle, gridColumn: "1 / -1", display: "flex", alignItems: "center", gap: 24 }}>
-          <div style={{ position: "relative", flexShrink: 0 }}>
+          <div
+            style={{
+              position: "relative",
+              flexShrink: 0,
+              cursor: "pointer",
+              transition: "transform 0.15s ease",
+              transform: avatarHover ? "scale(1.04)" : "scale(1)",
+            }}
+            onClick={openPicker}
+            onMouseEnter={() => setAvatarHover(true)}
+            onMouseLeave={() => setAvatarHover(false)}
+            data-testid="button-change-avatar"
+            title="Click to upload a profile picture"
+          >
             {profileImageUrl ? (
               <img
                 src={profileImageUrl}
                 alt="Profile"
                 data-testid="img-profile-avatar"
-                style={{ width: 80, height: 80, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(102,0,255,0.4)" }}
-                onError={(e) => { (e.currentTarget as any).style.display = "none"; }}
+                style={{
+                  width: 96, height: 96, borderRadius: "50%", objectFit: "cover",
+                  border: "2px solid rgba(102,0,255,0.45)",
+                  boxShadow: avatarHover ? "0 0 28px rgba(153,0,255,0.55)" : "0 0 12px rgba(102,0,255,0.25)",
+                  transition: "box-shadow 0.2s",
+                  display: "block",
+                }}
               />
             ) : (
               <div style={{
-                width: 80, height: 80, borderRadius: "50%",
-                background: "linear-gradient(135deg, #6600ff, #7722ff)",
+                width: 96, height: 96, borderRadius: "50%",
+                background: "rgba(102,0,255,0.06)",
+                border: "2px dashed rgba(102,0,255,0.45)",
+                display: "flex", flexDirection: "column", alignItems: "center", justifyContent: "center",
+                color: "#aa44ff",
+                boxShadow: avatarHover ? "0 0 28px rgba(153,0,255,0.55)" : "none",
+                transition: "box-shadow 0.2s",
+              }} data-testid="empty-avatar-prompt">
+                <Camera size={28} />
+                <span style={{ fontSize: 9, marginTop: 4, fontWeight: 700, letterSpacing: "0.06em", textTransform: "uppercase" }}>Upload</span>
+              </div>
+            )}
+
+            {/* Hover overlay with camera icon */}
+            {profileImageUrl && avatarHover && (
+              <div style={{
+                position: "absolute", inset: 0, borderRadius: "50%",
+                background: "rgba(0,0,0,0.55)",
                 display: "flex", alignItems: "center", justifyContent: "center",
-                fontSize: 28, fontWeight: 800, color: "#fff",
-              }} data-testid="text-avatar-initials">{getInitials()}</div>
+                color: "#fff", pointerEvents: "none",
+              }}>
+                <Camera size={22} />
+              </div>
             )}
           </div>
-          <div>
-            <p style={{ margin: 0, fontSize: 20, fontWeight: 700, color: "#fff" }} data-testid="text-profile-username">{user?.username}</p>
-            <p style={{ margin: "4px 0 0", fontSize: 12, color: "#aa44ff", textTransform: "uppercase", letterSpacing: 1 }}>{user?.role}</p>
+
+          <div style={{ flex: 1 }}>
+            <p style={{ margin: 0, fontSize: 22, fontWeight: 700, color: "#fff", fontFamily: "Rajdhani, sans-serif", letterSpacing: "0.02em" }} data-testid="text-profile-username">{user?.username}</p>
+            <p style={{ margin: "4px 0 0", fontSize: 12, color: "#aa44ff", textTransform: "uppercase", letterSpacing: 1, fontWeight: 600 }}>{user?.role}</p>
             <p style={{ margin: "4px 0 0", fontSize: 12, color: "#52525b" }}>{user?.email || "No email set"}</p>
+            <p style={{ margin: "10px 0 0", fontSize: 11, color: "#52525b" }}>
+              <Camera size={10} style={{ display: "inline", marginRight: 4, verticalAlign: "middle" }} />
+              Click your avatar to change it
+            </p>
           </div>
+
+          {profileImageUrl && (
+            <button
+              onClick={(e) => { e.stopPropagation(); setProfileImageUrl(""); }}
+              data-testid="button-remove-avatar"
+              title="Remove profile picture"
+              style={{
+                background: "rgba(239,68,68,0.10)", border: "1px solid rgba(239,68,68,0.35)",
+                borderRadius: 8, color: "#ef4444", padding: "8px 12px",
+                fontSize: 11, fontWeight: 600, cursor: "pointer",
+                display: "flex", alignItems: "center", gap: 5,
+              }}
+            >
+              <X size={12} /> Remove
+            </button>
+          )}
         </div>
 
         {/* Profile Info */}
         <div style={cardStyle}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
             <User size={16} style={{ color: "#aa44ff" }} />
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff" }}>Profile Information</h2>
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff", fontFamily: "Rajdhani, sans-serif", letterSpacing: "0.04em" }}>Profile Information</h2>
           </div>
 
-          <div style={{ marginBottom: 14 }}>
+          <div style={{ marginBottom: 20 }}>
             <label style={labelStyle}><Mail size={11} style={{ display: "inline", marginRight: 5 }} />Email Address</label>
             <input
               type="email"
@@ -125,31 +222,6 @@ export default function ProfilePage() {
               style={inputStyle}
             />
           </div>
-
-          <div style={{ marginBottom: 20 }}>
-            <label style={labelStyle}><Camera size={11} style={{ display: "inline", marginRight: 5 }} />Profile Picture URL</label>
-            <input
-              type="url"
-              value={profileImageUrl}
-              onChange={(e) => setProfileImageUrl(e.target.value)}
-              placeholder="https://example.com/avatar.jpg"
-              data-testid="input-profile-image-url"
-              style={inputStyle}
-            />
-            <p style={{ margin: "6px 0 0", fontSize: 11, color: "#52525b" }}>Enter a direct image URL for your avatar</p>
-          </div>
-
-          {profileImageUrl && (
-            <div style={{ marginBottom: 16 }}>
-              <p style={{ ...labelStyle, marginBottom: 8 }}>Preview</p>
-              <img
-                src={profileImageUrl}
-                alt="Preview"
-                style={{ width: 56, height: 56, borderRadius: "50%", objectFit: "cover", border: "2px solid rgba(102,0,255,0.4)" }}
-                onError={(e) => { (e.currentTarget as any).style.opacity = "0.3"; }}
-              />
-            </div>
-          )}
 
           <button
             onClick={() => profileMutation.mutate()}
@@ -166,7 +238,7 @@ export default function ProfilePage() {
         <div style={cardStyle}>
           <div style={{ display: "flex", alignItems: "center", gap: 8, marginBottom: 20 }}>
             <Lock size={16} style={{ color: "#aa44ff" }} />
-            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff" }}>Change Password</h2>
+            <h2 style={{ margin: 0, fontSize: 15, fontWeight: 700, color: "#fff", fontFamily: "Rajdhani, sans-serif", letterSpacing: "0.04em" }}>Change Password</h2>
           </div>
 
           {[
