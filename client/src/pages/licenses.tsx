@@ -636,18 +636,6 @@ export default function LicensesPage() {
             <DialogTitle>Generate Licenses</DialogTitle>
           </DialogHeader>
           <div className="space-y-4 pt-2">
-            {isReseller && (
-              <div style={{
-                padding: "12px 14px", borderRadius: 10,
-                background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)",
-                display: "flex", alignItems: "center", justifyContent: "space-between",
-              }}>
-                <span style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600 }}>Your Balance</span>
-                <span style={{ fontSize: 18, fontWeight: 800, color: "#fbbf24" }}>
-                  {typeof user?.credits === "number" ? user.credits.toFixed(1) : "0.0"}$
-                </span>
-              </div>
-            )}
             <div>
               <label className="mb-1.5 block text-sm font-medium">Application</label>
               <Select value={selectedAppId} onValueChange={setSelectedAppId}>
@@ -661,73 +649,23 @@ export default function LicensesPage() {
                 </SelectContent>
               </Select>
             </div>
-            {isReseller && (() => {
-              const qty = Math.max(1, parseInt(count || "1") || 1);
-              const activePlan = LICENSE_PLANS.find((p) => p.id === selectedPlan);
-              const totalCost = activePlan ? activePlan.credits * qty : 0;
-              const balance = user?.credits ?? 0;
-              const canAfford = balance >= totalCost;
-              return (
-                <div>
-                  <label className="mb-1.5 block text-sm font-medium">Plan</label>
-                  <div style={{
-                    display: "grid", gridTemplateColumns: "repeat(4, 1fr)", gap: 6,
-                    padding: 4, borderRadius: 10,
-                    background: "rgba(102,0,255,0.05)", border: "1px solid rgba(102,0,255,0.18)",
-                  }}>
-                    {LICENSE_PLANS.map((p) => {
-                      const isSelected = selectedPlan === p.id;
-                      return (
-                        <button
-                          key={p.id}
-                          onClick={() => setSelectedPlan(p.id)}
-                          data-testid={`button-plan-${p.id}`}
-                          style={{
-                            padding: "9px 4px", borderRadius: 7, cursor: "pointer",
-                            border: "none",
-                            background: isSelected
-                              ? "linear-gradient(135deg, #6600ff, #7722ff)"
-                              : "transparent",
-                            color: isSelected ? "#fff" : "#aa44ff",
-                            fontSize: 13, fontWeight: 700,
-                            boxShadow: isSelected ? "0 4px 14px rgba(102,0,255,0.4)" : "none",
-                            transition: "all 0.15s",
-                            display: "flex", flexDirection: "column", alignItems: "center", gap: 1,
-                          }}
-                        >
-                          <span style={{ letterSpacing: "0.02em" }}>{p.label}</span>
-                          <span style={{
-                            fontSize: 10, fontWeight: 600,
-                            color: isSelected ? "rgba(255,255,255,0.85)" : "#fbbf24",
-                          }}>
-                            {p.credits}$
-                          </span>
-                        </button>
-                      );
-                    })}
-                  </div>
-                  <div style={{
-                    marginTop: 8, padding: "8px 12px", borderRadius: 8,
-                    background: canAfford ? "rgba(34,197,94,0.08)" : "rgba(239,68,68,0.08)",
-                    border: `1px solid ${canAfford ? "rgba(34,197,94,0.25)" : "rgba(239,68,68,0.3)"}`,
-                    display: "flex", justifyContent: "space-between", alignItems: "center",
-                    fontSize: 12,
-                  }} data-testid="text-plan-summary">
-                    <span style={{ color: "#a1a1aa" }}>
-                      Total: <strong style={{ color: "#fff" }}>{totalCost.toFixed(1)}$</strong>
-                      <span style={{ color: "#52525b", margin: "0 6px" }}>·</span>
-                      Balance: <strong style={{ color: "#fbbf24" }}>{balance.toFixed(1)}$</strong>
-                    </span>
-                    <span style={{
-                      color: canAfford ? "#22c55e" : "#ef4444", fontWeight: 700, fontSize: 11,
-                      textTransform: "uppercase", letterSpacing: "0.05em",
-                    }}>
-                      {canAfford ? "OK" : "Insufficient"}
-                    </span>
-                  </div>
-                </div>
-              );
-            })()}
+            {isReseller && (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Plan</label>
+                <Select value={selectedPlan} onValueChange={setSelectedPlan}>
+                  <SelectTrigger data-testid="select-license-plan">
+                    <SelectValue placeholder="Select a plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LICENSE_PLANS.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.label} — {p.credits}$
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            )}
             <div>
               <label className="mb-1.5 block text-sm font-medium">Count</label>
               <Input type="number" min="1" max="100" value={count} onChange={(e) => setCount(e.target.value)} data-testid="input-license-count" />

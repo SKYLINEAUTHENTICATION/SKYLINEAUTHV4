@@ -2,7 +2,15 @@ import { useState, useMemo } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient, apiRequest } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
 import { isUnauthorizedError } from "@/lib/auth-utils";
+
+const USER_PLANS = [
+  { id: "5d", label: "5 Days", days: 5, credits: 0.5 },
+  { id: "10d", label: "10 Days", days: 10, credits: 1 },
+  { id: "20d", label: "20 Days", days: 20, credits: 2 },
+  { id: "30d", label: "30 Days", days: 30, credits: 4 },
+];
 import { Card } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -76,6 +84,7 @@ type StatusFilter = "all" | "active" | "banned" | "expired";
 
 export default function AppUsersPage() {
   const { toast } = useToast();
+  const { isReseller } = useAuth();
 
   const [search, setSearch] = useState("");
   const [viewMode, setViewMode] = useState<ViewMode>("grid");
@@ -97,6 +106,7 @@ export default function AppUsersPage() {
   const [maxHwid, setMaxHwid] = useState("1");
   const [hwidAffected, setHwidAffected] = useState(false);
   const [createHwid, setCreateHwid] = useState("");
+  const [selectedPlan, setSelectedPlan] = useState<string>("10d");
 
   const [successOpen, setSuccessOpen] = useState(false);
   const [createdUserInfo, setCreatedUserInfo] = useState<{
@@ -189,9 +199,10 @@ export default function AppUsersPage() {
         password: password || undefined,
         email: email || undefined,
         level: parseInt(subscription) || 1,
-        expiresAt: getExpirationDate(),
+        expiresAt: isReseller ? undefined : getExpirationDate(),
         hwid: hwidAffected ? (createHwid || undefined) : undefined,
         maxHwid: parseInt(maxHwid),
+        plan: isReseller ? selectedPlan : undefined,
       });
       return res.json();
     },
@@ -203,14 +214,20 @@ export default function AppUsersPage() {
       const subLabels: Record<string, string> = {
         "1": "default", "2": "2", "3": "3", "4": "4", "5": "5", "10": "10",
       };
+      const planExpiryLabel = USER_PLANS.find((p) => p.id === selectedPlan)?.label || selectedPlan;
       setCreatedUserInfo({
         username,
         password: password || "(none)",
-        expiry: expirationUnit === "custom" ? expirationCustom : (expiryLabels[expirationUnit] || expirationUnit),
+        expiry: isReseller
+          ? planExpiryLabel
+          : (expirationUnit === "custom" ? expirationCustom : (expiryLabels[expirationUnit] || expirationUnit)),
         subscription: subLabels[subscription] || subscription,
         appName: getAppName(selectedAppId),
       });
       queryClient.invalidateQueries({ queryKey: ["/api/app-users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/local/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/resellers/me"] });
       setCreateOpen(false);
       setUsername("");
       setPassword("");
@@ -742,34 +759,52 @@ export default function AppUsersPage() {
                 </SelectContent>
               </Select>
             </div>
-            <div>
-              <label className="mb-1.5 block text-sm font-medium">Expiration <span className="text-destructive">*</span></label>
-              <Select value={expirationUnit} onValueChange={setExpirationUnit}>
-                <SelectTrigger data-testid="select-user-expiration">
-                  <SelectValue placeholder="Select duration" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="1h">1 Hour</SelectItem>
-                  <SelectItem value="1d">1 Day</SelectItem>
-                  <SelectItem value="7d">7 Days</SelectItem>
-                  <SelectItem value="30d">30 Days</SelectItem>
-                  <SelectItem value="90d">90 Days</SelectItem>
-                  <SelectItem value="180d">180 Days</SelectItem>
-                  <SelectItem value="365d">365 Days</SelectItem>
-                  <SelectItem value="lifetime">Lifetime</SelectItem>
-                  <SelectItem value="custom">Custom Date</SelectItem>
-                </SelectContent>
-              </Select>
-              {expirationUnit === "custom" && (
-                <Input
-                  className="mt-2"
-                  type="datetime-local"
-                  value={expirationCustom}
-                  onChange={(e) => setExpirationCustom(e.target.value)}
-                  data-testid="input-user-expiration-custom"
-                />
-              )}
-            </div>
+            {isReseller ? (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Plan <span className="text-destructive">*</span></label>
+                <Select value={selectedPlan} onValueChange={setSelectedPlan}>
+                  <SelectTrigger data-testid="select-user-plan">
+                    <SelectValue placeholder="Select a plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {USER_PLANS.map((p) => (
+                      <SelectItem key={p.id} value={p.id}>
+                        {p.label} — {p.credits}$
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+            ) : (
+              <div>
+                <label className="mb-1.5 block text-sm font-medium">Expiration <span className="text-destructive">*</span></label>
+                <Select value={expirationUnit} onValueChange={setExpirationUnit}>
+                  <SelectTrigger data-testid="select-user-expiration">
+                    <SelectValue placeholder="Select duration" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="1h">1 Hour</SelectItem>
+                    <SelectItem value="1d">1 Day</SelectItem>
+                    <SelectItem value="7d">7 Days</SelectItem>
+                    <SelectItem value="30d">30 Days</SelectItem>
+                    <SelectItem value="90d">90 Days</SelectItem>
+                    <SelectItem value="180d">180 Days</SelectItem>
+                    <SelectItem value="365d">365 Days</SelectItem>
+                    <SelectItem value="lifetime">Lifetime</SelectItem>
+                    <SelectItem value="custom">Custom Date</SelectItem>
+                  </SelectContent>
+                </Select>
+                {expirationUnit === "custom" && (
+                  <Input
+                    className="mt-2"
+                    type="datetime-local"
+                    value={expirationCustom}
+                    onChange={(e) => setExpirationCustom(e.target.value)}
+                    data-testid="input-user-expiration-custom"
+                  />
+                )}
+              </div>
+            )}
             <div>
               <label className="mb-1.5 block text-sm font-medium">Max HWID <span className="text-destructive">*</span></label>
               <Select value={maxHwid} onValueChange={setMaxHwid}>
@@ -796,7 +831,7 @@ export default function AppUsersPage() {
             </Button>
             <Button
               onClick={() => createUser.mutate()}
-              disabled={!selectedAppId || !username.trim() || (expirationUnit === "custom" && !expirationCustom) || createUser.isPending}
+              disabled={!selectedAppId || !username.trim() || (!isReseller && expirationUnit === "custom" && !expirationCustom) || createUser.isPending}
               data-testid="button-submit-user"
             >
               {createUser.isPending ? "Creating..." : "Create User"}

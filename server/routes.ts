@@ -1015,6 +1015,7 @@ export async function registerRoutes(
     "20d": { days: 20, credits: 2 },
     "30d": { days: 30, credits: 4 },
   };
+  (app as any).locals.PLANS = PLANS;
 
   app.post("/api/licenses", isAuthenticatedCombined, async (req: any, res) => {
     try {
@@ -1168,7 +1169,7 @@ export async function registerRoutes(
   app.post("/api/app-users", isAuthenticatedCombined, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
-      const { appId, username, password, email, level, expiresAt, hwid, maxHwid } = req.body;
+      const { appId, username, password, email, level, expiresAt, hwid, maxHwid, plan } = req.body;
       if (!appId || !username) {
         return res.status(400).json({ message: "Application and username are required" });
       }
@@ -1177,13 +1178,29 @@ export async function registerRoutes(
       if (!(await canManageApp(userId, appId))) {
         return res.status(403).json({ message: "Access denied" });
       }
+
+      let finalExpires: Date | null = expiresAt ? new Date(expiresAt) : null;
+
+      const account = await getAccountForUser(userId);
+      if (account?.role === "reseller") {
+        if (!plan || !PLANS[plan]) {
+          return res.status(400).json({ message: "Resellers must select a plan." });
+        }
+        const planInfo = PLANS[plan];
+        if ((account.credits ?? 0) < planInfo.credits) {
+          return res.status(400).json({ message: `Insufficient credits. Need ${planInfo.credits}$, have ${account.credits ?? 0}$.` });
+        }
+        await storage.spendCredits(account.id, planInfo.credits);
+        finalExpires = new Date(Date.now() + planInfo.days * 86400000);
+      }
+
       const user = await storage.createAppUser({
         appId,
         username: username.trim(),
         password: password || null,
         email: email || null,
         level: level !== undefined ? parseInt(level) : 1,
-        expiresAt: expiresAt ? new Date(expiresAt) : null,
+        expiresAt: finalExpires,
         hwid: hwid || null,
         maxHwid: maxHwid !== undefined && maxHwid !== null ? parseInt(maxHwid) : 1,
       });
