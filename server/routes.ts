@@ -895,6 +895,10 @@ async function canManageApp(userId: string, appId: string): Promise<boolean> {
   const account = await getAccountForUser(userId);
   if (!account) return false;
   if (account.role === "superadmin" || account.role === "admin") return true;
+  if (account.role === "reseller") {
+    if (account.expiryDate && new Date(account.expiryDate) < new Date()) return false;
+    return true;
+  }
   const app = await storage.getApplication(appId);
   return !!(app && app.ownerId === userId);
 }
