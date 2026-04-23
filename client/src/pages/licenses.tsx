@@ -642,9 +642,9 @@ export default function LicensesPage() {
                 background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)",
                 display: "flex", alignItems: "center", justifyContent: "space-between",
               }}>
-                <span style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600 }}>Your Credits</span>
+                <span style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600 }}>Your Balance</span>
                 <span style={{ fontSize: 18, fontWeight: 800, color: "#fbbf24" }}>
-                  {typeof user?.credits === "number" ? user.credits.toFixed(1) : "0.0"}
+                  {typeof user?.credits === "number" ? user.credits.toFixed(1) : "0.0"}$
                 </span>
               </div>
             )}
@@ -700,7 +700,7 @@ export default function LicensesPage() {
                             fontSize: 10, fontWeight: 600,
                             color: isSelected ? "rgba(255,255,255,0.85)" : "#fbbf24",
                           }}>
-                            {p.credits} cr
+                            {p.credits}$
                           </span>
                         </button>
                       );
@@ -714,9 +714,9 @@ export default function LicensesPage() {
                     fontSize: 12,
                   }} data-testid="text-plan-summary">
                     <span style={{ color: "#a1a1aa" }}>
-                      Total: <strong style={{ color: "#fff" }}>{totalCost.toFixed(1)}</strong> credits
+                      Total: <strong style={{ color: "#fff" }}>{totalCost.toFixed(1)}$</strong>
                       <span style={{ color: "#52525b", margin: "0 6px" }}>·</span>
-                      Balance: <strong style={{ color: "#fbbf24" }}>{balance.toFixed(1)}</strong>
+                      Balance: <strong style={{ color: "#fbbf24" }}>{balance.toFixed(1)}$</strong>
                     </span>
                     <span style={{
                       color: canAfford ? "#22c55e" : "#ef4444", fontWeight: 700, fontSize: 11,

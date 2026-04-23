@@ -133,7 +133,7 @@ export default function ResellersPage() {
               <p style={{ margin: 0, fontSize: 12, color: "#71717a", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>Credits Balance</p>
             </div>
             <p style={{ margin: 0, fontSize: 56, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif", lineHeight: 1 }} data-testid="text-my-credits">
-              {typeof myCredits?.credits === "number" ? myCredits.credits.toFixed(1) : "0.0"}
+              {typeof myCredits?.credits === "number" ? myCredits.credits.toFixed(1) : "0.0"}<span style={{ fontSize: 32, color: "#fbbf24", marginLeft: 4 }}>$</span>
             </p>
           </div>
 
@@ -208,11 +208,12 @@ export default function ResellersPage() {
             ))}
 
             <div style={{ marginBottom: 14 }}>
-              <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600 }}>Starting Credits</label>
+              <label style={{ fontSize: 12, color: "#aa44ff", fontWeight: 600 }}>Starting Balance ($)</label>
               <input
                 type="number" min={0} step={0.5}
                 value={form.credits}
                 onChange={(e) => setForm((f) => ({ ...f, credits: Number(e.target.value) }))}
+                placeholder="e.g. 10$"
                 data-testid="input-reseller-credits"
                 style={inputStyle}
               />
@@ -264,7 +265,7 @@ export default function ResellersPage() {
               <button onClick={() => setShowCredits(null)} style={{ background: "none", border: "none", color: "#52525b", cursor: "pointer" }}><X size={18} /></button>
             </div>
             <p style={{ color: "#aa44ff", fontSize: 13, marginBottom: 16 }}>
-              @{showCredits.username} — Current: <strong style={{ color: "#fbbf24" }}>{typeof showCredits.credits === "number" ? showCredits.credits.toFixed(1) : showCredits.credits}</strong> credits
+              @{showCredits.username} — Current: <strong style={{ color: "#fbbf24" }}>{typeof showCredits.credits === "number" ? showCredits.credits.toFixed(1) : showCredits.credits}$</strong>
             </p>
             <div style={{ marginBottom: 10 }}>
               <p style={{ margin: "0 0 8px", fontSize: 11, color: "#52525b", fontWeight: 600, textTransform: "uppercase", letterSpacing: "0.5px" }}>Quick Add by Plan</p>
@@ -276,7 +277,7 @@ export default function ResellersPage() {
                     color: "#aa44ff", fontSize: 12, cursor: "pointer", display: "flex", justifyContent: "space-between",
                   }}>
                     <span>{p.label}</span>
-                    <span style={{ color: "#fbbf24", fontWeight: 700 }}>+{p.credits} {p.credits === 1 ? "credit" : "credits"}</span>
+                    <span style={{ color: "#fbbf24", fontWeight: 700 }}>+{p.credits}$</span>
                   </button>
                 ))}
               </div>
@@ -285,7 +286,7 @@ export default function ResellersPage() {
               type="number" step={0.5}
               value={creditAmount}
               onChange={(e) => setCreditAmount(Number(e.target.value))}
-              placeholder="Custom amount (negative to deduct)"
+              placeholder="Custom amount in $ (negative to deduct)"
               data-testid="input-credit-amount"
               style={{ ...inputStyle, marginBottom: 16 }}
             />
@@ -398,7 +399,7 @@ export default function ResellersPage() {
                   <div style={{ display: "flex", alignItems: "center", gap: 6 }}>
                     <Coins size={13} style={{ color: "#fbbf24" }} />
                     <span style={{ color: "#fbbf24", fontWeight: 700, fontSize: 14 }}>
-                      {typeof r.credits === "number" ? r.credits.toFixed(1) : r.credits}
+                      {typeof r.credits === "number" ? r.credits.toFixed(1) : r.credits}$
                     </span>
                   </div>
                 </td>
@@ -448,7 +449,7 @@ export default function ResellersPage() {
 
       {/* Plans Reference */}
       <div style={{ marginTop: 24, padding: "16px 20px", borderRadius: 12, background: "rgba(102,0,255,0.05)", border: "1px solid rgba(102,0,255,0.15)" }}>
-        <p style={{ margin: "0 0 10px", fontSize: 12, color: "#52525b", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>License Plans — Credit Costs</p>
+        <p style={{ margin: "0 0 10px", fontSize: 12, color: "#52525b", fontWeight: 600, letterSpacing: "0.5px", textTransform: "uppercase" }}>License Plans — Cost</p>
         <div style={{ display: "flex", gap: 10, flexWrap: "wrap" }}>
           {PLANS.map((p) => (
             <div key={p.days} style={{
@@ -459,7 +460,7 @@ export default function ResellersPage() {
               <span style={{ fontWeight: 700 }}>{p.label}</span>
               <span style={{ color: "#52525b" }}>→</span>
               <Coins size={11} style={{ color: "#fbbf24" }} />
-              <span style={{ color: "#fbbf24", fontWeight: 700 }}>{p.credits} {p.credits === 1 ? "credit" : "credits"}</span>
+              <span style={{ color: "#fbbf24", fontWeight: 700 }}>{p.credits}$</span>
             </div>
           ))}
         </div>
