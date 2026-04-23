@@ -56,6 +56,7 @@ import PortalPage from "@/pages/portal";
 import ProfilePage from "@/pages/profile";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
+import { SnowDrift } from "@/components/snow-drift";
 
 function IdleTimerBar({ onLogout }: { onLogout: () => void }) {
   const [secondsLeft, setSecondsLeft] = useState(180);
@@ -372,6 +373,7 @@ function App() {
       <ThemeProvider>
         <TooltipProvider>
           <Toaster />
+          <SnowDrift count={55} />
           <AppRouter />
         </TooltipProvider>
       </ThemeProvider>
