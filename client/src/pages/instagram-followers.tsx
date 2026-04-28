@@ -1389,6 +1389,13 @@ function TabButton({
 /* ── Orders panel (list + cancel) ───────────────────────── */
 function OrdersPanel() {
   const { toast } = useToast();
+  const { isSuperAdmin } = useAuth();
+  const [showImport, setShowImport] = useState(false);
+  const [importId, setImportId] = useState("");
+  const [importLink, setImportLink] = useState("");
+  const [importQty, setImportQty] = useState("");
+  const [importName, setImportName] = useState("");
+
   const {
     data: orders = [],
     isLoading,
@@ -1399,6 +1406,34 @@ function OrdersPanel() {
   } = useQuery<SmmOrderRow[]>({
     queryKey: ["/api/smm/orders"],
     refetchInterval: 20000,
+  });
+
+  const importMutation = useMutation({
+    mutationFn: async () => {
+      const res = await apiRequest("POST", "/api/smm/orders/import", {
+        providerOrderId: importId.trim(),
+        link: importLink.trim(),
+        quantity: Number(importQty),
+        serviceName: importName.trim() || undefined,
+      });
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Order imported" });
+      setImportId("");
+      setImportLink("");
+      setImportQty("");
+      setImportName("");
+      setShowImport(false);
+      queryClient.invalidateQueries({ queryKey: ["/api/smm/orders"] });
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Import failed",
+        description: err?.message || "Unknown error",
+        variant: "destructive",
+      });
+    },
   });
 
   const cancelMutation = useMutation({
@@ -1458,32 +1493,159 @@ function OrdersPanel() {
           justifyContent: "space-between",
           alignItems: "center",
           marginBottom: 12,
+          gap: 10,
+          flexWrap: "wrap",
         }}
       >
         <div style={{ fontSize: 12, color: "#71717a", fontWeight: 600 }}>
           {orders.length} order{orders.length === 1 ? "" : "s"} · auto-refreshes every 20 seconds
         </div>
-        <button
-          onClick={() => refetch()}
-          data-testid="button-refresh-orders"
+        <div style={{ display: "flex", gap: 8 }}>
+          {isSuperAdmin && (
+            <button
+              onClick={() => setShowImport((s) => !s)}
+              data-testid="button-toggle-import"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "6px 12px",
+                borderRadius: 8,
+                border: "1px solid rgba(170,68,255,0.35)",
+                background: showImport
+                  ? "linear-gradient(135deg, #6600ff, #aa44ff)"
+                  : "rgba(170,68,255,0.12)",
+                color: showImport ? "#fff" : "#d4b3ff",
+                fontSize: 12,
+                fontWeight: 700,
+                cursor: "pointer",
+              }}
+            >
+              {showImport ? "Close" : "+ Import old order"}
+            </button>
+          )}
+          <button
+            onClick={() => refetch()}
+            data-testid="button-refresh-orders"
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "6px 12px",
+              borderRadius: 8,
+              border: "1px solid rgba(170,68,255,0.35)",
+              background: "rgba(170,68,255,0.12)",
+              color: "#d4b3ff",
+              fontSize: 12,
+              fontWeight: 600,
+              cursor: "pointer",
+            }}
+          >
+            <RefreshCw size={12} className={isFetching ? "spin" : ""} />
+            Refresh
+          </button>
+        </div>
+      </div>
+
+      {isSuperAdmin && showImport && (
+        <div
+          data-testid="panel-import-order"
           style={{
-            display: "flex",
-            alignItems: "center",
-            gap: 6,
-            padding: "6px 12px",
-            borderRadius: 8,
-            border: "1px solid rgba(170,68,255,0.35)",
-            background: "rgba(170,68,255,0.12)",
-            color: "#d4b3ff",
-            fontSize: 12,
-            fontWeight: 600,
-            cursor: "pointer",
+            marginBottom: 14,
+            padding: 16,
+            borderRadius: 12,
+            background: "rgba(15,5,30,0.75)",
+            border: "1px solid rgba(170,68,255,0.28)",
           }}
         >
-          <RefreshCw size={12} className={isFetching ? "spin" : ""} />
-          Refresh
-        </button>
-      </div>
+          <div style={{ fontSize: 12, color: "#a1a1aa", marginBottom: 12, lineHeight: 1.5 }}>
+            Paste the IndiansMMHub order ID and the original link/quantity to add a
+            previously-placed order to this list. We'll fetch the live status from
+            the provider.
+          </div>
+          <div
+            style={{
+              display: "grid",
+              gridTemplateColumns: "1fr 1fr",
+              gap: 10,
+              marginBottom: 10,
+            }}
+          >
+            <input
+              data-testid="input-import-order-id"
+              value={importId}
+              onChange={(e) => setImportId(e.target.value)}
+              placeholder="Order ID (e.g. 12345678)"
+              style={inputStyle}
+            />
+            <input
+              data-testid="input-import-quantity"
+              type="number"
+              value={importQty}
+              onChange={(e) => setImportQty(e.target.value)}
+              placeholder="Quantity"
+              style={inputStyle}
+            />
+          </div>
+          <input
+            data-testid="input-import-link"
+            value={importLink}
+            onChange={(e) => setImportLink(e.target.value)}
+            placeholder="Original target link (e.g. instagram.com/yourprofile)"
+            style={{ ...inputStyle, marginBottom: 10 }}
+          />
+          <input
+            data-testid="input-import-name"
+            value={importName}
+            onChange={(e) => setImportName(e.target.value)}
+            placeholder="Service name (optional, e.g. Instagram Followers - Indian)"
+            style={{ ...inputStyle, marginBottom: 12 }}
+          />
+          <button
+            onClick={() => importMutation.mutate()}
+            disabled={
+              importMutation.isPending ||
+              !importId.trim() ||
+              !importLink.trim() ||
+              !Number(importQty)
+            }
+            data-testid="button-import-submit"
+            style={{
+              padding: "10px 16px",
+              borderRadius: 9,
+              border: "none",
+              cursor:
+                importMutation.isPending ||
+                !importId.trim() ||
+                !importLink.trim() ||
+                !Number(importQty)
+                  ? "not-allowed"
+                  : "pointer",
+              opacity:
+                importMutation.isPending ||
+                !importId.trim() ||
+                !importLink.trim() ||
+                !Number(importQty)
+                  ? 0.5
+                  : 1,
+              background: "linear-gradient(135deg, #6600ff, #aa44ff)",
+              color: "#fff",
+              fontSize: 13,
+              fontWeight: 700,
+              display: "flex",
+              alignItems: "center",
+              gap: 8,
+            }}
+          >
+            {importMutation.isPending ? (
+              <Loader2 size={13} className="spin" />
+            ) : (
+              <Package size={13} />
+            )}
+            {importMutation.isPending ? "Importing…" : "Import order"}
+          </button>
+        </div>
+      )}
 
       <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
         {orders.map((o) => (

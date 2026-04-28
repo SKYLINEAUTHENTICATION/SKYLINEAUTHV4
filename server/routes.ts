@@ -1281,6 +1281,59 @@ export async function registerRoutes(
     }
   });
 
+  // Import an existing IndiansMMHub order ID into the panel (super admin only).
+  // Useful for orders placed BEFORE the panel started persisting them.
+  app.post("/api/smm/orders/import", async (req, res) => {
+    const ctx = await requireSmmAccess(req, res);
+    if (!ctx) return;
+    if (ctx.account.role !== "superadmin") {
+      return res.status(403).json({ message: "Super admin only" });
+    }
+    try {
+      const { providerOrderId, link, quantity, serviceName, supportsCancel } =
+        req.body || {};
+      if (!providerOrderId || !link || !quantity) {
+        return res
+          .status(400)
+          .json({ message: "providerOrderId, link and quantity are required" });
+      }
+
+      const qty = Number(quantity);
+      if (!isFinite(qty) || qty <= 0) {
+        return res.status(400).json({ message: "Invalid quantity" });
+      }
+
+      // Verify the order exists at the provider before saving
+      const data = await callSmmApi({
+        action: "status",
+        order: String(providerOrderId),
+      });
+      if (data?.error) {
+        return res
+          .status(400)
+          .json({ message: `Provider error: ${String(data.error)}` });
+      }
+
+      const charge = data?.charge !== undefined ? Number(data.charge) : 0;
+      const created = await storage.createSmmOrder({
+        accountId: ctx.account.id,
+        providerOrderId: String(providerOrderId),
+        serviceId: "0",
+        serviceName: String(serviceName || "Imported order"),
+        category: "Imported",
+        link: String(link),
+        quantity: qty,
+        cost: isFinite(charge) ? charge : 0,
+        supportsCancel: !!supportsCancel,
+        status: String(data?.status || "Pending"),
+      });
+      res.json({ success: true, order: created });
+    } catch (err: any) {
+      console.error("SMM import error:", err);
+      res.status(500).json({ message: err?.message || "Failed to import order" });
+    }
+  });
+
   // Cancel an order (only when the plan supports cancellation)
   app.post("/api/smm/orders/:id/cancel", async (req, res) => {
     const ctx = await requireSmmAccess(req, res);
