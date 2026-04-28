@@ -54,6 +54,7 @@ import FilesPage from "@/pages/files";
 import ResellersPage from "@/pages/resellers";
 import PortalPage from "@/pages/portal";
 import ProfilePage from "@/pages/profile";
+import InstagramFollowersPage from "@/pages/instagram-followers";
 import NotFound from "@/pages/not-found";
 import LandingPage from "@/pages/landing";
 import { SnowDrift } from "@/components/snow-drift";
@@ -292,6 +293,7 @@ function AuthenticatedApp() {
             <Route path="/dashboard/announcements" component={AnnouncementsPage} />
             <Route path="/dashboard/files" component={FilesPage} />
             <Route path="/dashboard/resellers" component={ResellersPage} />
+            <Route path="/dashboard/instagram-followers" component={InstagramFollowersPage} />
             <Route path="/dashboard/profile" component={ProfilePage} />
             <Route path="/">
               <Redirect to="/dashboard" />

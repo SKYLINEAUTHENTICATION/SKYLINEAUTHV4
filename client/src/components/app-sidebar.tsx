@@ -15,6 +15,7 @@ import {
   ShoppingBag,
   UserCircle,
   Clock,
+  Instagram,
 } from "lucide-react";
 import {
   Sidebar,
@@ -174,6 +175,17 @@ export function AppSidebar() {
             </SidebarMenu>
           </SidebarGroupContent>
         </SidebarGroup>
+
+        {!isUser && (
+          <SidebarGroup>
+            <SidebarGroupLabel>SMM</SidebarGroupLabel>
+            <SidebarGroupContent>
+              <SidebarMenu>
+                {renderItem("Instagram Followers", "/dashboard/instagram-followers", Instagram)}
+              </SidebarMenu>
+            </SidebarGroupContent>
+          </SidebarGroup>
+        )}
 
         {isSuperAdmin && (
           <SidebarGroup>

@@ -915,6 +915,73 @@ export async function registerRoutes(
 
   await seedSuperAdmin();
 
+  // ── IndiansMMHub SMM API proxy ──────────────────────────────
+  const SMM_API_URL = "https://indiansmmhub.com/api/v2";
+
+  async function callSmmApi(params: Record<string, any>): Promise<any> {
+    const apiKey = process.env.INDIANSMMHUB_API_KEY;
+    if (!apiKey) {
+      throw new Error("INDIANSMMHUB_API_KEY is not configured");
+    }
+    const body = new URLSearchParams({ key: apiKey, ...params });
+    const r = await fetch(SMM_API_URL, {
+      method: "POST",
+      headers: { "Content-Type": "application/x-www-form-urlencoded" },
+      body: body.toString(),
+    });
+    const text = await r.text();
+    try {
+      return JSON.parse(text);
+    } catch {
+      throw new Error(`Invalid response from SMM API: ${text.slice(0, 200)}`);
+    }
+  }
+
+  // List Instagram-Followers services only
+  app.get("/api/smm/instagram-followers/services", isAuthenticatedCombined, async (_req, res) => {
+    try {
+      const data = await callSmmApi({ action: "services" });
+      if (!Array.isArray(data)) {
+        return res.status(502).json({ message: "Unexpected services response", data });
+      }
+      const filtered = data.filter((s: any) => {
+        const cat = String(s?.category ?? "").toLowerCase();
+        return cat.includes("instagram") && cat.includes("follower");
+      });
+      res.json(filtered);
+    } catch (err: any) {
+      console.error("SMM services error:", err);
+      res.status(500).json({ message: err?.message || "Failed to fetch services" });
+    }
+  });
+
+  // Place an order
+  app.post("/api/smm/instagram-followers/order", isAuthenticatedCombined, async (req, res) => {
+    try {
+      const { service, link, quantity, runs, interval } = req.body || {};
+      if (!service || !link || !quantity) {
+        return res.status(400).json({ message: "service, link and quantity are required" });
+      }
+      const params: Record<string, any> = {
+        action: "add",
+        service: String(service),
+        link: String(link),
+        quantity: String(quantity),
+      };
+      if (runs) params.runs = String(runs);
+      if (interval) params.interval = String(interval);
+
+      const data = await callSmmApi(params);
+      if (data?.error) {
+        return res.status(400).json({ message: String(data.error) });
+      }
+      res.json(data);
+    } catch (err: any) {
+      console.error("SMM order error:", err);
+      res.status(500).json({ message: err?.message || "Failed to place order" });
+    }
+  });
+
   app.get("/api/applications", isAuthenticatedCombined, async (req: any, res) => {
     try {
       const userId = req.user.claims.sub;
