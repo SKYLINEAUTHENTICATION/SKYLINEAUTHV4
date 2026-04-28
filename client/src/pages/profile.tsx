@@ -32,6 +32,9 @@ export default function ProfilePage() {
     mutationFn: () => apiRequest("PATCH", "/api/profile", { email: email.trim() || null, profileImageUrl: profileImageUrl.trim() || null }),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/auth/user"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/contacts"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/chat/messages"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/announcements"] });
       toast({ title: "Profile updated successfully" });
     },
     onError: (err: any) => toast({ title: "Failed to update profile", description: err.message, variant: "destructive" }),
