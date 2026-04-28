@@ -47,6 +47,10 @@ type OrderResponse = {
 const ACCENT = "#aa44ff";
 const ACCENT_DEEP = "#6600ff";
 
+/** USD → INR conversion factor used to display API rates in rupees. */
+const USD_TO_INR = 83;
+const toInr = (usd: number | string) => (Number(usd) || 0) * USD_TO_INR;
+
 /**
  * Clean a service name by:
  *  - Normalizing fancy mathematical bold/italic Unicode letters back to plain ASCII
@@ -146,7 +150,7 @@ export default function InstagramFollowersPage() {
   });
 
   const qtyNum = Number(quantity) || 0;
-  const rateNum = selected ? Number(selected.rate) || 0 : 0;
+  const rateNum = selected ? toInr(selected.rate) : 0;
   const totalCost = (qtyNum * rateNum) / 1000;
 
   const minNum = selected ? Number(selected.min) || 0 : 0;
@@ -358,7 +362,7 @@ export default function InstagramFollowersPage() {
                               fontFamily: "Inter, sans-serif",
                             }}
                           >
-                            ₹{Number(s.rate).toFixed(2)}/1k
+                            ₹{toInr(s.rate).toFixed(2)}/1k
                           </span>
                           {isCheapest && (
                             <span
@@ -641,7 +645,7 @@ function PlanSummary({
       </div>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: service.description ? 12 : 0 }}>
-        <Pill label="Rate / 1k" value={`₹${Number(service.rate).toFixed(2)}`} highlight />
+        <Pill label="Rate / 1k" value={`₹${toInr(service.rate).toFixed(2)}`} highlight />
         <Pill label="Min" value={String(service.min)} />
         <Pill label="Max" value={String(service.max)} />
         {service.dripfeed && <Pill label="Drip-feed" value="Yes" />}
