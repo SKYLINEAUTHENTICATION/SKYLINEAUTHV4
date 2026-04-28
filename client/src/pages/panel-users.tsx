@@ -259,11 +259,16 @@ export default function PanelUsersPage() {
       const res = await fetch(`/api/panel/users/${id}`, { method: "DELETE", credentials: "include" });
       const json = await res.json();
       if (!res.ok) throw new Error(json.message || "Failed to delete");
-      return json;
+      return json as { success: boolean; refunded?: number };
     },
-    onSuccess: () => {
+    onSuccess: (data) => {
       queryClient.invalidateQueries({ queryKey: ["/api/panel/users"] });
-      toast({ title: "User deleted" });
+      queryClient.invalidateQueries({ queryKey: ["/api/panel/super-wallet"] });
+      const refunded = Number(data?.refunded) || 0;
+      toast({
+        title: "User deleted",
+        description: refunded > 0 ? `₹${refunded.toFixed(2)} refunded to your wallet.` : undefined,
+      });
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });

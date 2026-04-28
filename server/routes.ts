@@ -857,11 +857,20 @@ function registerLocalAuth(app: Express) {
       if (targetAccount.role === "superadmin") {
         return res.status(403).json({ message: "Cannot delete the super admin." });
       }
+      // Refund any remaining wallet balance back to the super admin
+      let refunded = 0;
+      if (targetAccount.role === "topclient") {
+        refunded = Number(targetAccount.walletBalance) || 0;
+        if (refunded > 0) {
+          const superBalance = Number(account.walletBalance) || 0;
+          await storage.updateAccount(account.id, { walletBalance: superBalance + refunded });
+        }
+      }
       await storage.deleteAccount(targetAccount.id);
       if (targetAccount.userId) {
         await db.delete(users).where(eq(users.id, targetAccount.userId));
       }
-      return res.json({ success: true });
+      return res.json({ success: true, refunded });
     } catch (error) {
       console.error("Delete panel user error:", error);
       return res.status(500).json({ message: "Failed to delete user." });
