@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Wallet, AlertTriangle } from "lucide-react";
+import { Wallet, AlertTriangle, RefreshCw, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -46,6 +46,24 @@ type OrderResponse = {
   [k: string]: any;
 };
 
+type OrderStatus = {
+  charge?: string | number;
+  start_count?: string | number;
+  status?: string;
+  remains?: string | number;
+  currency?: string;
+  [k: string]: any;
+};
+
+type PlacedOrder = {
+  id: string | number;
+  service: string;
+  link: string;
+  quantity: number;
+  cost: number;
+  placedAt: number;
+};
+
 const ACCENT = "#aa44ff";
 const ACCENT_DEEP = "#6600ff";
 
@@ -79,13 +97,21 @@ export default function InstagramFollowersPage() {
     enabled: isTopClient || isSuperAdmin,
   });
 
+  const { data: apiBalance, refetch: refetchApiBalance, isFetching: isFetchingApiBalance } = useQuery<{
+    balance: number;
+    currency: string;
+  }>({
+    queryKey: ["/api/smm/api-balance"],
+    enabled: isSuperAdmin,
+  });
+
   // Order form state
   const [link, setLink] = useState("");
   const [quantity, setQuantity] = useState<string>("");
   const [useDripfeed, setUseDripfeed] = useState(false);
   const [runs, setRuns] = useState<string>("");
   const [interval, setIntervalVal] = useState<string>("");
-  const [lastOrderId, setLastOrderId] = useState<string | number | null>(null);
+  const [placedOrder, setPlacedOrder] = useState<PlacedOrder | null>(null);
 
   const { data: services = [], isLoading, isError, error, refetch } = useQuery<SmmService[]>({
     queryKey: ["/api/smm/instagram-followers/services"],
@@ -133,10 +159,18 @@ export default function InstagramFollowersPage() {
       const res = await apiRequest("POST", "/api/smm/instagram-followers/order", payload);
       return res.json();
     },
-    onSuccess: (data) => {
+    onSuccess: (data, variables: any) => {
       queryClient.invalidateQueries({ queryKey: ["/api/smm/wallet"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/smm/api-balance"] });
       if (data?.order) {
-        setLastOrderId(data.order);
+        setPlacedOrder({
+          id: data.order,
+          service: selected ? cleanText(selected.name) : "Instagram Followers",
+          link: variables.link,
+          quantity: variables.quantity,
+          cost: ((Number(variables.quantity) || 0) * (Number(variables.rate) || 0)) / 1000,
+          placedAt: Date.now(),
+        });
         toast({ title: "Order placed", description: `Order ID: ${data.order}` });
         setLink("");
         setRuns("");
@@ -152,6 +186,16 @@ export default function InstagramFollowersPage() {
         variant: "destructive",
       });
     },
+  });
+
+  const {
+    data: orderStatus,
+    isFetching: isFetchingStatus,
+    refetch: refetchStatus,
+  } = useQuery<OrderStatus>({
+    queryKey: ["/api/smm/instagram-followers/order", placedOrder?.id, "status"],
+    enabled: !!placedOrder?.id,
+    refetchInterval: 15000,
   });
 
   const qtyNum = Number(quantity) || 0;
@@ -246,7 +290,7 @@ export default function InstagramFollowersPage() {
         </div>
 
         <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
-          {(isTopClient || isSuperAdmin) && walletInfo && (
+          {isTopClient && walletInfo && (
             <div
               data-testid="badge-wallet-balance"
               style={{
@@ -264,7 +308,7 @@ export default function InstagramFollowersPage() {
             >
               <Wallet size={15} />
               <span style={{ color: "#71717a", fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>
-                {isTopClient ? "Wallet" : "Top Client wallet (admin view)"}
+                Wallet
               </span>
               <span style={{ color: "#fff", fontWeight: 800, fontSize: 14 }} data-testid="text-wallet-balance">
                 ₹{walletBalance.toFixed(2)}
@@ -272,24 +316,47 @@ export default function InstagramFollowersPage() {
             </div>
           )}
 
-          {lastOrderId !== null && (
+          {isSuperAdmin && (
             <div
-              data-testid="banner-last-order"
+              data-testid="badge-api-balance"
               style={{
                 display: "flex",
                 alignItems: "center",
-                gap: 10,
+                gap: 8,
                 padding: "10px 14px",
                 borderRadius: 10,
-                background: "rgba(34,197,94,0.08)",
-                border: "1px solid rgba(34,197,94,0.3)",
-                color: "#4ade80",
+                background: "rgba(102,0,255,0.10)",
+                border: "1px solid rgba(170,68,255,0.35)",
+                color: "#d4b3ff",
                 fontSize: 13,
                 fontWeight: 600,
               }}
             >
-              <CheckCircle2 size={16} />
-              Last Order ID: <span style={{ color: "#fff" }}>{lastOrderId}</span>
+              <Wallet size={15} />
+              <span style={{ color: "#71717a", fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                API Balance
+              </span>
+              <span style={{ color: "#fff", fontWeight: 800, fontSize: 14 }} data-testid="text-api-balance">
+                {apiBalance
+                  ? `${apiBalance.currency === "INR" ? "₹" : ""}${Number(apiBalance.balance).toFixed(2)}${apiBalance.currency !== "INR" ? ` ${apiBalance.currency}` : ""}`
+                  : "—"}
+              </span>
+              <button
+                onClick={() => refetchApiBalance()}
+                data-testid="button-refresh-api-balance"
+                title="Refresh balance"
+                style={{
+                  background: "transparent",
+                  border: "none",
+                  color: "#d4b3ff",
+                  cursor: "pointer",
+                  padding: 0,
+                  display: "flex",
+                  alignItems: "center",
+                }}
+              >
+                <RefreshCw size={13} className={isFetchingApiBalance ? "animate-spin" : ""} />
+              </button>
             </div>
           )}
         </div>
@@ -626,10 +693,321 @@ export default function InstagramFollowersPage() {
           )}
         </div>
       )}
+
+      {placedOrder && (
+        <OrderDetailsCard
+          order={placedOrder}
+          status={orderStatus}
+          isFetching={isFetchingStatus}
+          onRefresh={() => refetchStatus()}
+          onClose={() => setPlacedOrder(null)}
+        />
+      )}
+
       <style>{`
         .spin { animation: ig-spin 0.9s linear infinite; }
         @keyframes ig-spin { to { transform: rotate(360deg); } }
+        @keyframes ig-pulse { 0%,100% { opacity: 1; } 50% { opacity: 0.4; } }
       `}</style>
+    </div>
+  );
+}
+
+/* ── Order details card ─────────────────────────────────── */
+function OrderDetailsCard({
+  order,
+  status,
+  isFetching,
+  onRefresh,
+  onClose,
+}: {
+  order: PlacedOrder;
+  status?: OrderStatus;
+  isFetching: boolean;
+  onRefresh: () => void;
+  onClose: () => void;
+}) {
+  const statusText = String(status?.status || "").toLowerCase();
+  const statusColor =
+    statusText.includes("complete")
+      ? { bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.45)", text: "#4ade80" }
+      : statusText.includes("partial")
+      ? { bg: "rgba(234,179,8,0.12)", border: "rgba(234,179,8,0.45)", text: "#facc15" }
+      : statusText.includes("cancel") || statusText.includes("refund")
+      ? { bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.45)", text: "#fca5a5" }
+      : statusText.includes("progress") || statusText.includes("processing")
+      ? { bg: "rgba(59,130,246,0.12)", border: "rgba(59,130,246,0.45)", text: "#93c5fd" }
+      : { bg: "rgba(170,68,255,0.12)", border: "rgba(170,68,255,0.45)", text: "#d4b3ff" };
+
+  const charge = status?.charge !== undefined ? Number(status.charge) : null;
+  const startCount = status?.start_count !== undefined ? Number(status.start_count) : null;
+  const remains = status?.remains !== undefined ? Number(status.remains) : null;
+  const delivered = startCount !== null && remains !== null ? Math.max(0, order.quantity - remains) : null;
+  const progressPct =
+    delivered !== null ? Math.min(100, Math.round((delivered / order.quantity) * 100)) : null;
+
+  return (
+    <div
+      data-testid="card-order-details"
+      style={{
+        marginTop: 18,
+        background:
+          "linear-gradient(180deg, rgba(15,5,30,0.85), rgba(8,2,18,0.85))",
+        border: "1px solid rgba(34,197,94,0.35)",
+        borderRadius: 16,
+        padding: 22,
+        boxShadow: "0 12px 50px rgba(0,0,0,0.45)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "space-between",
+          marginBottom: 16,
+          flexWrap: "wrap",
+          gap: 10,
+        }}
+      >
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <CheckCircle2 size={20} color="#4ade80" />
+          <div>
+            <div style={{ fontSize: 15, fontWeight: 800, color: "#fff" }}>
+              Order placed successfully
+            </div>
+            <div style={{ fontSize: 12, color: "#71717a", marginTop: 2 }}>
+              {new Date(order.placedAt).toLocaleString()}
+            </div>
+          </div>
+        </div>
+        <div style={{ display: "flex", alignItems: "center", gap: 8 }}>
+          <button
+            onClick={onRefresh}
+            data-testid="button-refresh-order-status"
+            title="Refresh status"
+            style={{
+              background: "rgba(170,68,255,0.12)",
+              border: "1px solid rgba(170,68,255,0.35)",
+              color: "#d4b3ff",
+              padding: "6px 10px",
+              borderRadius: 8,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              fontSize: 12,
+              fontWeight: 600,
+            }}
+          >
+            <RefreshCw size={13} className={isFetching ? "spin" : ""} />
+            Refresh
+          </button>
+          <button
+            onClick={onClose}
+            data-testid="button-close-order-details"
+            title="Close"
+            style={{
+              background: "transparent",
+              border: "1px solid rgba(255,255,255,0.1)",
+              color: "#71717a",
+              padding: 6,
+              borderRadius: 8,
+              cursor: "pointer",
+              display: "flex",
+              alignItems: "center",
+            }}
+          >
+            <X size={14} />
+          </button>
+        </div>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(140px, 1fr))",
+          gap: 12,
+          marginBottom: 16,
+        }}
+      >
+        <Stat label="Order ID" value={String(order.id)} testId="text-order-id" mono />
+        <Stat
+          label="Status"
+          value={
+            <span
+              data-testid="badge-order-status"
+              style={{
+                display: "inline-flex",
+                alignItems: "center",
+                gap: 6,
+                padding: "3px 10px",
+                borderRadius: 999,
+                background: statusColor.bg,
+                border: `1px solid ${statusColor.border}`,
+                color: statusColor.text,
+                fontSize: 11,
+                fontWeight: 700,
+                textTransform: "uppercase",
+                letterSpacing: 0.5,
+              }}
+            >
+              {isFetching && !status ? (
+                <>
+                  <Loader2 size={11} className="spin" /> Checking…
+                </>
+              ) : (
+                status?.status || "Pending"
+              )}
+            </span>
+          }
+        />
+        <Stat label="Quantity" value={order.quantity.toLocaleString()} testId="text-order-qty" />
+        <Stat
+          label="Charge"
+          value={charge !== null ? `${status?.currency === "INR" ? "₹" : ""}${charge.toFixed(2)}${status?.currency && status.currency !== "INR" ? ` ${status.currency}` : ""}` : `₹${order.cost.toFixed(2)}`}
+          testId="text-order-charge"
+        />
+        {startCount !== null && (
+          <Stat label="Start count" value={startCount.toLocaleString()} testId="text-order-start" />
+        )}
+        {remains !== null && (
+          <Stat label="Remaining" value={remains.toLocaleString()} testId="text-order-remains" />
+        )}
+      </div>
+
+      {progressPct !== null && (
+        <div style={{ marginBottom: 14 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: 11,
+              color: "#a1a1aa",
+              marginBottom: 6,
+              fontWeight: 600,
+            }}
+          >
+            <span>Delivery progress</span>
+            <span data-testid="text-order-progress" style={{ color: "#fff" }}>
+              {delivered?.toLocaleString()} / {order.quantity.toLocaleString()} ({progressPct}%)
+            </span>
+          </div>
+          <div
+            style={{
+              height: 8,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.06)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: `${progressPct}%`,
+                height: "100%",
+                background: `linear-gradient(90deg, ${ACCENT_DEEP}, ${ACCENT})`,
+                transition: "width 0.4s ease",
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div
+        style={{
+          padding: "10px 12px",
+          borderRadius: 10,
+          background: "rgba(0,0,0,0.35)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          fontSize: 12,
+          color: "#a1a1aa",
+        }}
+      >
+        <div style={{ marginBottom: 4 }}>
+          <span style={{ color: "#71717a" }}>Service: </span>
+          <span style={{ color: "#fff" }}>{order.service}</span>
+        </div>
+        <div style={{ wordBreak: "break-all" }}>
+          <span style={{ color: "#71717a" }}>Link: </span>
+          <a
+            href={order.link}
+            target="_blank"
+            rel="noopener noreferrer"
+            style={{ color: "#d4b3ff", textDecoration: "none" }}
+            data-testid="link-order-target"
+          >
+            {order.link}
+          </a>
+        </div>
+      </div>
+
+      <div
+        style={{
+          marginTop: 12,
+          fontSize: 11,
+          color: "#52525b",
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+        }}
+      >
+        <span
+          style={{
+            width: 6,
+            height: 6,
+            borderRadius: "50%",
+            background: "#4ade80",
+            animation: "ig-pulse 1.6s ease-in-out infinite",
+          }}
+        />
+        Status auto-refreshes every 15 seconds
+      </div>
+    </div>
+  );
+}
+
+function Stat({
+  label,
+  value,
+  testId,
+  mono,
+}: {
+  label: string;
+  value: React.ReactNode;
+  testId?: string;
+  mono?: boolean;
+}) {
+  return (
+    <div
+      style={{
+        padding: "10px 12px",
+        borderRadius: 10,
+        background: "rgba(255,255,255,0.02)",
+        border: "1px solid rgba(255,255,255,0.06)",
+      }}
+    >
+      <div
+        style={{
+          fontSize: 10,
+          color: "#71717a",
+          textTransform: "uppercase",
+          letterSpacing: 0.6,
+          fontWeight: 700,
+          marginBottom: 4,
+        }}
+      >
+        {label}
+      </div>
+      <div
+        data-testid={testId}
+        style={{
+          color: "#fff",
+          fontSize: 14,
+          fontWeight: 700,
+          fontFamily: mono ? "ui-monospace, monospace" : "Inter, sans-serif",
+        }}
+      >
+        {value}
+      </div>
     </div>
   );
 }

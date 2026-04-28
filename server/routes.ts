@@ -1002,6 +1002,44 @@ export async function registerRoutes(
     });
   });
 
+  // SMM provider account balance (superadmin only — shows IndiansMMHub balance)
+  app.get("/api/smm/api-balance", async (req, res) => {
+    const ctx = await requireSmmAccess(req, res);
+    if (!ctx) return;
+    if (ctx.account.role !== "superadmin") {
+      return res.status(403).json({ message: "Super admin only" });
+    }
+    try {
+      const data = await callSmmApi({ action: "balance" });
+      if (data?.error) {
+        return res.status(502).json({ message: String(data.error) });
+      }
+      res.json({
+        balance: Number(data?.balance) || 0,
+        currency: data?.currency || "INR",
+      });
+    } catch (err: any) {
+      console.error("SMM balance error:", err);
+      res.status(500).json({ message: err?.message || "Failed to fetch balance" });
+    }
+  });
+
+  // Look up the status of a single order
+  app.get("/api/smm/instagram-followers/order/:id/status", async (req, res) => {
+    const ctx = await requireSmmAccess(req, res);
+    if (!ctx) return;
+    try {
+      const data = await callSmmApi({ action: "status", order: String(req.params.id) });
+      if (data?.error) {
+        return res.status(400).json({ message: String(data.error) });
+      }
+      res.json(data);
+    } catch (err: any) {
+      console.error("SMM status error:", err);
+      res.status(500).json({ message: err?.message || "Failed to fetch order status" });
+    }
+  });
+
   // List Instagram-Followers services only
   app.get("/api/smm/instagram-followers/services", async (req, res) => {
     const ctx = await requireSmmAccess(req, res);
