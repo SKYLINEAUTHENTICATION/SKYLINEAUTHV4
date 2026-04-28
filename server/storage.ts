@@ -146,6 +146,7 @@ export interface IStorage {
 
   createSmmOrder(data: InsertSmmOrder): Promise<SmmOrder>;
   getSmmOrdersByAccount(accountId: string): Promise<SmmOrder[]>;
+  getAllSmmOrders(): Promise<SmmOrder[]>;
   getSmmOrder(id: string): Promise<SmmOrder | undefined>;
   updateSmmOrder(id: string, data: Partial<SmmOrder>): Promise<SmmOrder | undefined>;
 }
@@ -562,6 +563,11 @@ export class DatabaseStorage implements IStorage {
       .from(smmOrders)
       .where(eq(smmOrders.accountId, accountId))
       .orderBy(desc(smmOrders.createdAt));
+  }
+
+  async getAllSmmOrders(): Promise<SmmOrder[]> {
+    const { desc } = await import("drizzle-orm");
+    return db.select().from(smmOrders).orderBy(desc(smmOrders.createdAt));
   }
 
   async getSmmOrder(id: string): Promise<SmmOrder | undefined> {

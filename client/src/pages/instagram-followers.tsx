@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Wallet, AlertTriangle, RefreshCw, X, Package, Ban, ExternalLink } from "lucide-react";
+import { Wallet, AlertTriangle, RefreshCw, X, Package, Ban, ExternalLink, User } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -102,6 +102,8 @@ type SmmOrderRow = {
   remains: number | null;
   charge: number | null;
   currency: string;
+  placedByUsername: string | null;
+  placedByRole: string | null;
 };
 
 export default function InstagramFollowersPage() {
@@ -1570,11 +1572,54 @@ function OrderRow({
           <div style={{ fontSize: 14, color: "#fff", fontWeight: 700 }}>
             {cleanText(order.serviceName)}
           </div>
-          {placedAt && (
-            <div style={{ fontSize: 11, color: "#71717a", marginTop: 4 }}>
-              Placed {placedAt.toLocaleString()}
-            </div>
-          )}
+          <div
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 10,
+              flexWrap: "wrap",
+              marginTop: 4,
+            }}
+          >
+            {placedAt && (
+              <span style={{ fontSize: 11, color: "#71717a" }}>
+                {placedAt.toLocaleString()}
+              </span>
+            )}
+            {order.placedByUsername && (
+              <span
+                data-testid={`text-placed-by-${order.id}`}
+                style={{
+                  display: "inline-flex",
+                  alignItems: "center",
+                  gap: 5,
+                  padding: "2px 9px",
+                  borderRadius: 999,
+                  background: "rgba(170,68,255,0.10)",
+                  border: "1px solid rgba(170,68,255,0.28)",
+                  color: "#d4b3ff",
+                  fontSize: 11,
+                  fontWeight: 700,
+                }}
+              >
+                <User size={10} />
+                {order.placedByUsername}
+                {order.placedByRole && order.placedByRole !== "topclient" && (
+                  <span
+                    style={{
+                      color: "#9ca3af",
+                      fontWeight: 600,
+                      textTransform: "uppercase",
+                      fontSize: 9,
+                      letterSpacing: 0.4,
+                    }}
+                  >
+                    · {order.placedByRole}
+                  </span>
+                )}
+              </span>
+            )}
+          </div>
         </div>
         <span
           data-testid={`badge-status-${order.id}`}

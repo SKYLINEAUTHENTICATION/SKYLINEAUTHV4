@@ -1219,12 +1219,25 @@ export async function registerRoutes(
     }
   });
 
-  // List the current user's SMM orders (auto-refreshes status from provider)
+  // List SMM orders. Super admin sees every order with the placer's username;
+  // top clients see only their own.
   app.get("/api/smm/orders", async (req, res) => {
     const ctx = await requireSmmAccess(req, res);
     if (!ctx) return;
     try {
-      const orders = await storage.getSmmOrdersByAccount(ctx.account.id);
+      const isSuper = ctx.account.role === "superadmin";
+      const orders = isSuper
+        ? await storage.getAllSmmOrders()
+        : await storage.getSmmOrdersByAccount(ctx.account.id);
+
+      // Build a map of accountId -> { username, role } for super admin view
+      let placerMap: Record<string, { username: string; role: string }> = {};
+      if (isSuper && orders.length > 0) {
+        const allAccounts = await storage.getAllAccounts();
+        placerMap = Object.fromEntries(
+          allAccounts.map((a) => [a.id, { username: a.username, role: a.role }]),
+        );
+      }
 
       // Refresh provider status for each order in parallel; tolerate failures
       const enriched = await Promise.all(
@@ -1247,6 +1260,7 @@ export async function registerRoutes(
               /* ignore */
             }
           }
+          const placedBy = isSuper ? placerMap[o.accountId] : null;
           return {
             ...o,
             status: live?.status || o.status,
@@ -1255,6 +1269,8 @@ export async function registerRoutes(
             remains: live?.remains !== undefined ? Number(live.remains) : null,
             charge: live?.charge !== undefined ? Number(live.charge) : null,
             currency: live?.currency || "INR",
+            placedByUsername: placedBy?.username ?? null,
+            placedByRole: placedBy?.role ?? null,
           };
         }),
       );
