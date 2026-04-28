@@ -10,6 +10,7 @@ import {
   chatMessages,
   announcements,
   appFiles,
+  smmOrders,
   type Application,
   type InsertApplication,
   type License,
@@ -23,6 +24,8 @@ import {
   type ChatMessage,
   type Announcement,
   type AppFile,
+  type SmmOrder,
+  type InsertSmmOrder,
 } from "@shared/schema";
 import { accounts, users, type Account, type User } from "@shared/models/auth";
 
@@ -140,6 +143,11 @@ export interface IStorage {
   getResellerAccounts(): Promise<Account[]>;
   addCredits(accountId: string, credits: number): Promise<Account | undefined>;
   spendCredits(accountId: string, credits: number): Promise<Account | undefined>;
+
+  createSmmOrder(data: InsertSmmOrder): Promise<SmmOrder>;
+  getSmmOrdersByAccount(accountId: string): Promise<SmmOrder[]>;
+  getSmmOrder(id: string): Promise<SmmOrder | undefined>;
+  updateSmmOrder(id: string, data: Partial<SmmOrder>): Promise<SmmOrder | undefined>;
 }
 
 export class DatabaseStorage implements IStorage {
@@ -540,6 +548,34 @@ export class DatabaseStorage implements IStorage {
       .where(eq(accounts.id, accountId))
       .returning();
     return account;
+  }
+
+  async createSmmOrder(data: InsertSmmOrder): Promise<SmmOrder> {
+    const [order] = await db.insert(smmOrders).values(data).returning();
+    return order;
+  }
+
+  async getSmmOrdersByAccount(accountId: string): Promise<SmmOrder[]> {
+    const { desc } = await import("drizzle-orm");
+    return db
+      .select()
+      .from(smmOrders)
+      .where(eq(smmOrders.accountId, accountId))
+      .orderBy(desc(smmOrders.createdAt));
+  }
+
+  async getSmmOrder(id: string): Promise<SmmOrder | undefined> {
+    const [order] = await db.select().from(smmOrders).where(eq(smmOrders.id, id));
+    return order;
+  }
+
+  async updateSmmOrder(id: string, data: Partial<SmmOrder>): Promise<SmmOrder | undefined> {
+    const [order] = await db
+      .update(smmOrders)
+      .set(data)
+      .where(eq(smmOrders.id, id))
+      .returning();
+    return order;
   }
 }
 

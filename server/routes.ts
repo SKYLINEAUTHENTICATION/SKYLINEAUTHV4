@@ -1160,6 +1160,17 @@ export async function registerRoutes(
         }
       }
 
+      // Look up the chosen service to capture name/category/cancel-support
+      let serviceMeta: any = null;
+      try {
+        const list = await callSmmApi({ action: "services" });
+        if (Array.isArray(list)) {
+          serviceMeta = list.find((s: any) => String(s?.service) === String(service)) || null;
+        }
+      } catch {
+        /* non-fatal — keep going */
+      }
+
       const params: Record<string, any> = {
         action: "add",
         service: String(service),
@@ -1181,10 +1192,119 @@ export async function registerRoutes(
         await storage.updateAccount(ctx.account.id, { walletBalance: newBalance });
       }
 
+      // Persist the order so it shows in the "Orders" tab
+      if (data?.order !== undefined && data?.order !== null) {
+        try {
+          await storage.createSmmOrder({
+            accountId: ctx.account.id,
+            providerOrderId: String(data.order),
+            serviceId: String(service),
+            serviceName: String(serviceMeta?.name || "Instagram Followers"),
+            category: String(serviceMeta?.category || "Instagram Followers"),
+            link: String(link),
+            quantity: qty,
+            cost,
+            supportsCancel: !!serviceMeta?.cancel,
+            status: "Pending",
+          });
+        } catch (e) {
+          console.error("Failed to persist SMM order:", e);
+        }
+      }
+
       res.json({ ...data, walletBalance: newBalance });
     } catch (err: any) {
       console.error("SMM order error:", err);
       res.status(500).json({ message: err?.message || "Failed to place order" });
+    }
+  });
+
+  // List the current user's SMM orders (auto-refreshes status from provider)
+  app.get("/api/smm/orders", async (req, res) => {
+    const ctx = await requireSmmAccess(req, res);
+    if (!ctx) return;
+    try {
+      const orders = await storage.getSmmOrdersByAccount(ctx.account.id);
+
+      // Refresh provider status for each order in parallel; tolerate failures
+      const enriched = await Promise.all(
+        orders.map(async (o) => {
+          let live: any = null;
+          try {
+            const data = await callSmmApi({
+              action: "status",
+              order: String(o.providerOrderId),
+            });
+            if (data && !data.error) live = data;
+          } catch {
+            /* keep cached status */
+          }
+          // Cache the latest status string back to DB (best effort)
+          if (live?.status && live.status !== o.status) {
+            try {
+              await storage.updateSmmOrder(o.id, { status: String(live.status) });
+            } catch {
+              /* ignore */
+            }
+          }
+          return {
+            ...o,
+            status: live?.status || o.status,
+            startCount:
+              live?.start_count !== undefined ? Number(live.start_count) : null,
+            remains: live?.remains !== undefined ? Number(live.remains) : null,
+            charge: live?.charge !== undefined ? Number(live.charge) : null,
+            currency: live?.currency || "INR",
+          };
+        }),
+      );
+      res.json(enriched);
+    } catch (err: any) {
+      console.error("SMM list orders error:", err);
+      res.status(500).json({ message: err?.message || "Failed to load orders" });
+    }
+  });
+
+  // Cancel an order (only when the plan supports cancellation)
+  app.post("/api/smm/orders/:id/cancel", async (req, res) => {
+    const ctx = await requireSmmAccess(req, res);
+    if (!ctx) return;
+    try {
+      const order = await storage.getSmmOrder(req.params.id);
+      if (!order) return res.status(404).json({ message: "Order not found" });
+      if (order.accountId !== ctx.account.id && ctx.account.role !== "superadmin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      if (!order.supportsCancel) {
+        return res
+          .status(400)
+          .json({ message: "This plan does not support cancellation." });
+      }
+
+      const data = await callSmmApi({
+        action: "cancel",
+        orders: String(order.providerOrderId),
+      });
+
+      // The standard SMM panel response is an array like
+      // [{ order: "123", cancel: { error: "..." } | "..." }] — surface any error
+      let errMsg: string | null = null;
+      if (Array.isArray(data) && data.length > 0) {
+        const first = data[0];
+        const cancelField = first?.cancel;
+        if (cancelField && typeof cancelField === "object" && cancelField.error) {
+          errMsg = String(cancelField.error);
+        }
+      } else if (data?.error) {
+        errMsg = String(data.error);
+      }
+      if (errMsg) return res.status(400).json({ message: errMsg });
+
+      await storage.updateSmmOrder(order.id, { status: "Canceled" });
+      res.json({ success: true });
+    } catch (err: any) {
+      console.error("SMM cancel error:", err);
+      res.status(500).json({ message: err?.message || "Failed to cancel order" });
     }
   });
 

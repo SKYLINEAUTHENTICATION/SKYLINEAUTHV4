@@ -6,13 +6,14 @@ import {
   timestamp,
   boolean,
   integer,
+  real,
   index,
 } from "drizzle-orm/pg-core";
 import { createInsertSchema } from "drizzle-zod";
 import { z } from "zod";
 
 export * from "./models/auth";
-import { users } from "./models/auth";
+import { users, accounts } from "./models/auth";
 
 export const applications = pgTable("applications", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
@@ -129,6 +130,27 @@ export const announcements = pgTable("announcements", {
   createdAt: timestamp("created_at").defaultNow(),
 });
 
+export const smmOrders = pgTable(
+  "smm_orders",
+  {
+    id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
+    accountId: varchar("account_id")
+      .notNull()
+      .references(() => accounts.id, { onDelete: "cascade" }),
+    providerOrderId: varchar("provider_order_id").notNull(),
+    serviceId: varchar("service_id").notNull(),
+    serviceName: text("service_name").notNull(),
+    category: text("category"),
+    link: text("link").notNull(),
+    quantity: integer("quantity").notNull(),
+    cost: real("cost").notNull().default(0),
+    supportsCancel: boolean("supports_cancel").notNull().default(false),
+    status: varchar("status", { length: 32 }).default("Pending"),
+    createdAt: timestamp("created_at").defaultNow(),
+  },
+  (table) => [index("idx_smm_order_account").on(table.accountId)],
+);
+
 export const appFiles = pgTable("app_files", {
   id: varchar("id").primaryKey().default(sql`gen_random_uuid()`),
   createdByUsername: varchar("created_by_username").notNull(),
@@ -189,6 +211,11 @@ export const insertAppFileSchema = createInsertSchema(appFiles).omit({
   updatedAt: true,
 });
 
+export const insertSmmOrderSchema = createInsertSchema(smmOrders).omit({
+  id: true,
+  createdAt: true,
+});
+
 export type Application = typeof applications.$inferSelect;
 export type InsertApplication = z.infer<typeof insertApplicationSchema>;
 export type License = typeof licenses.$inferSelect;
@@ -205,3 +232,5 @@ export type Announcement = typeof announcements.$inferSelect;
 export type InsertAnnouncement = z.infer<typeof insertAnnouncementSchema>;
 export type AppFile = typeof appFiles.$inferSelect;
 export type InsertAppFile = z.infer<typeof insertAppFileSchema>;
+export type SmmOrder = typeof smmOrders.$inferSelect;
+export type InsertSmmOrder = z.infer<typeof insertSmmOrderSchema>;

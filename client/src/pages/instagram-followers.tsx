@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Wallet, AlertTriangle, RefreshCw, X } from "lucide-react";
+import { Wallet, AlertTriangle, RefreshCw, X, Package, Ban, ExternalLink } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -86,10 +86,29 @@ function cleanText(input: string): string {
   return s.trim();
 }
 
+type SmmOrderRow = {
+  id: string;
+  providerOrderId: string;
+  serviceId: string;
+  serviceName: string;
+  category: string | null;
+  link: string;
+  quantity: number;
+  cost: number;
+  supportsCancel: boolean;
+  status: string | null;
+  createdAt: string;
+  startCount: number | null;
+  remains: number | null;
+  charge: number | null;
+  currency: string;
+};
+
 export default function InstagramFollowersPage() {
   const { toast } = useToast();
   const { isTopClient, isSuperAdmin } = useAuth();
 
+  const [tab, setTab] = useState<"place" | "orders">("place");
   const [selectedId, setSelectedId] = useState<string>("");
 
   const { data: walletInfo } = useQuery<{ role: string; walletBalance: number }>({
@@ -362,8 +381,41 @@ export default function InstagramFollowersPage() {
         </div>
       </div>
 
-      {/* Body */}
-      {isLoading ? (
+      {/* Tabs */}
+      <div
+        style={{
+          display: "flex",
+          gap: 4,
+          marginBottom: 18,
+          padding: 4,
+          borderRadius: 12,
+          background: "rgba(15,5,30,0.6)",
+          border: "1px solid rgba(102,0,255,0.18)",
+          width: "fit-content",
+        }}
+      >
+        <TabButton
+          active={tab === "place"}
+          onClick={() => setTab("place")}
+          icon={<Send size={14} />}
+          label="Place Order"
+          testId="tab-place-order"
+        />
+        <TabButton
+          active={tab === "orders"}
+          onClick={() => {
+            setTab("orders");
+            queryClient.invalidateQueries({ queryKey: ["/api/smm/orders"] });
+          }}
+          icon={<Package size={14} />}
+          label="Orders"
+          testId="tab-orders"
+        />
+      </div>
+
+      {tab === "orders" ? (
+        <OrdersPanel />
+      ) : isLoading ? (
         <LoadingState label="Loading plans…" />
       ) : isError ? (
         <ErrorState
@@ -1286,6 +1338,401 @@ function EmptyState() {
       }}
     >
       No Instagram Followers plans available right now.
+    </div>
+  );
+}
+
+/* ── Tab button ─────────────────────────────────────────── */
+function TabButton({
+  active,
+  onClick,
+  icon,
+  label,
+  testId,
+}: {
+  active: boolean;
+  onClick: () => void;
+  icon: React.ReactNode;
+  label: string;
+  testId?: string;
+}) {
+  return (
+    <button
+      onClick={onClick}
+      data-testid={testId}
+      style={{
+        display: "flex",
+        alignItems: "center",
+        gap: 8,
+        padding: "9px 16px",
+        borderRadius: 9,
+        border: "none",
+        cursor: "pointer",
+        fontSize: 13,
+        fontWeight: 700,
+        color: active ? "#fff" : "#a1a1aa",
+        background: active
+          ? "linear-gradient(135deg, #6600ff, #aa44ff)"
+          : "transparent",
+        boxShadow: active ? "0 4px 14px rgba(102,0,255,0.45)" : "none",
+        transition: "all 0.15s ease",
+      }}
+    >
+      {icon}
+      {label}
+    </button>
+  );
+}
+
+/* ── Orders panel (list + cancel) ───────────────────────── */
+function OrdersPanel() {
+  const { toast } = useToast();
+  const {
+    data: orders = [],
+    isLoading,
+    isError,
+    error,
+    refetch,
+    isFetching,
+  } = useQuery<SmmOrderRow[]>({
+    queryKey: ["/api/smm/orders"],
+    refetchInterval: 20000,
+  });
+
+  const cancelMutation = useMutation({
+    mutationFn: async (orderId: string) => {
+      const res = await apiRequest("POST", `/api/smm/orders/${orderId}/cancel`);
+      return res.json();
+    },
+    onSuccess: () => {
+      toast({ title: "Cancellation requested" });
+      queryClient.invalidateQueries({ queryKey: ["/api/smm/orders"] });
+    },
+    onError: (err: any) => {
+      toast({
+        title: "Cancellation failed",
+        description: err?.message || "Unknown error",
+        variant: "destructive",
+      });
+    },
+  });
+
+  if (isLoading) return <LoadingState label="Loading your orders…" />;
+  if (isError)
+    return (
+      <ErrorState
+        message={(error as any)?.message || "Failed to load orders"}
+        onRetry={() => refetch()}
+      />
+    );
+
+  if (orders.length === 0) {
+    return (
+      <div
+        data-testid="state-no-orders"
+        style={{
+          padding: 40,
+          textAlign: "center",
+          color: "#71717a",
+          fontSize: 13,
+          border: "1px dashed rgba(102,0,255,0.22)",
+          borderRadius: 12,
+        }}
+      >
+        <Package
+          size={28}
+          style={{ margin: "0 auto 10px", display: "block", opacity: 0.5 }}
+        />
+        You haven't placed any orders yet. Use the "Place Order" tab to get started.
+      </div>
+    );
+  }
+
+  return (
+    <div>
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "center",
+          marginBottom: 12,
+        }}
+      >
+        <div style={{ fontSize: 12, color: "#71717a", fontWeight: 600 }}>
+          {orders.length} order{orders.length === 1 ? "" : "s"} · auto-refreshes every 20 seconds
+        </div>
+        <button
+          onClick={() => refetch()}
+          data-testid="button-refresh-orders"
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: 6,
+            padding: "6px 12px",
+            borderRadius: 8,
+            border: "1px solid rgba(170,68,255,0.35)",
+            background: "rgba(170,68,255,0.12)",
+            color: "#d4b3ff",
+            fontSize: 12,
+            fontWeight: 600,
+            cursor: "pointer",
+          }}
+        >
+          <RefreshCw size={12} className={isFetching ? "spin" : ""} />
+          Refresh
+        </button>
+      </div>
+
+      <div style={{ display: "flex", flexDirection: "column", gap: 14 }}>
+        {orders.map((o) => (
+          <OrderRow
+            key={o.id}
+            order={o}
+            onCancel={() => cancelMutation.mutate(o.id)}
+            isCanceling={cancelMutation.isPending && cancelMutation.variables === o.id}
+          />
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function OrderRow({
+  order,
+  onCancel,
+  isCanceling,
+}: {
+  order: SmmOrderRow;
+  onCancel: () => void;
+  isCanceling: boolean;
+}) {
+  const statusText = String(order.status || "Pending").toLowerCase();
+  const statusColor = statusText.includes("complete")
+    ? { bg: "rgba(34,197,94,0.12)", border: "rgba(34,197,94,0.45)", text: "#4ade80" }
+    : statusText.includes("partial")
+    ? { bg: "rgba(234,179,8,0.12)", border: "rgba(234,179,8,0.45)", text: "#facc15" }
+    : statusText.includes("cancel") || statusText.includes("refund")
+    ? { bg: "rgba(239,68,68,0.12)", border: "rgba(239,68,68,0.45)", text: "#fca5a5" }
+    : statusText.includes("progress") || statusText.includes("processing")
+    ? { bg: "rgba(59,130,246,0.12)", border: "rgba(59,130,246,0.45)", text: "#93c5fd" }
+    : { bg: "rgba(170,68,255,0.12)", border: "rgba(170,68,255,0.45)", text: "#d4b3ff" };
+
+  const delivered =
+    order.startCount !== null && order.remains !== null
+      ? Math.max(0, order.quantity - order.remains)
+      : null;
+  const progressPct =
+    delivered !== null ? Math.min(100, Math.round((delivered / order.quantity) * 100)) : null;
+
+  // Cancel is meaningful only while the order is still active
+  const isFinal =
+    statusText.includes("complete") ||
+    statusText.includes("cancel") ||
+    statusText.includes("refund");
+  const canCancel = order.supportsCancel && !isFinal;
+
+  const placedAt = order.createdAt ? new Date(order.createdAt) : null;
+
+  return (
+    <div
+      data-testid={`card-order-${order.id}`}
+      style={{
+        padding: 18,
+        borderRadius: 14,
+        background: "linear-gradient(180deg, rgba(15,5,30,0.85), rgba(8,2,18,0.85))",
+        border: "1px solid rgba(102,0,255,0.22)",
+        boxShadow: "0 8px 30px rgba(0,0,0,0.35)",
+      }}
+    >
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          alignItems: "flex-start",
+          gap: 10,
+          marginBottom: 14,
+          flexWrap: "wrap",
+        }}
+      >
+        <div>
+          <div
+            style={{
+              fontSize: 11,
+              color: "#71717a",
+              textTransform: "uppercase",
+              letterSpacing: 0.7,
+              fontWeight: 700,
+              marginBottom: 4,
+            }}
+          >
+            Order #{order.providerOrderId}
+          </div>
+          <div style={{ fontSize: 14, color: "#fff", fontWeight: 700 }}>
+            {cleanText(order.serviceName)}
+          </div>
+          {placedAt && (
+            <div style={{ fontSize: 11, color: "#71717a", marginTop: 4 }}>
+              Placed {placedAt.toLocaleString()}
+            </div>
+          )}
+        </div>
+        <span
+          data-testid={`badge-status-${order.id}`}
+          style={{
+            display: "inline-flex",
+            alignItems: "center",
+            padding: "4px 12px",
+            borderRadius: 999,
+            background: statusColor.bg,
+            border: `1px solid ${statusColor.border}`,
+            color: statusColor.text,
+            fontSize: 11,
+            fontWeight: 700,
+            textTransform: "uppercase",
+            letterSpacing: 0.5,
+            whiteSpace: "nowrap",
+          }}
+        >
+          {order.status || "Pending"}
+        </span>
+      </div>
+
+      <div
+        style={{
+          display: "grid",
+          gridTemplateColumns: "repeat(auto-fit, minmax(120px, 1fr))",
+          gap: 10,
+          marginBottom: 14,
+        }}
+      >
+        <Stat label="Quantity" value={order.quantity.toLocaleString()} />
+        <Stat
+          label="Charge"
+          value={
+            order.charge !== null
+              ? `${order.currency === "INR" ? "₹" : ""}${order.charge.toFixed(2)}${order.currency && order.currency !== "INR" ? ` ${order.currency}` : ""}`
+              : `₹${(Number(order.cost) || 0).toFixed(2)}`
+          }
+        />
+        {order.startCount !== null && (
+          <Stat label="Start count" value={order.startCount.toLocaleString()} />
+        )}
+        {order.remains !== null && (
+          <Stat label="Remaining" value={order.remains.toLocaleString()} />
+        )}
+      </div>
+
+      {progressPct !== null && (
+        <div style={{ marginBottom: 14 }}>
+          <div
+            style={{
+              display: "flex",
+              justifyContent: "space-between",
+              fontSize: 11,
+              color: "#a1a1aa",
+              marginBottom: 6,
+              fontWeight: 600,
+            }}
+          >
+            <span>Delivery progress</span>
+            <span style={{ color: "#fff" }}>
+              {delivered?.toLocaleString()} / {order.quantity.toLocaleString()} ({progressPct}%)
+            </span>
+          </div>
+          <div
+            style={{
+              height: 7,
+              borderRadius: 999,
+              background: "rgba(255,255,255,0.06)",
+              overflow: "hidden",
+            }}
+          >
+            <div
+              style={{
+                width: `${progressPct}%`,
+                height: "100%",
+                background: `linear-gradient(90deg, ${ACCENT_DEEP}, ${ACCENT})`,
+                transition: "width 0.4s ease",
+              }}
+            />
+          </div>
+        </div>
+      )}
+
+      <div
+        style={{
+          padding: "10px 12px",
+          borderRadius: 10,
+          background: "rgba(0,0,0,0.35)",
+          border: "1px solid rgba(255,255,255,0.06)",
+          fontSize: 12,
+          color: "#a1a1aa",
+          marginBottom: 12,
+          display: "flex",
+          alignItems: "center",
+          gap: 6,
+          wordBreak: "break-all",
+        }}
+      >
+        <span style={{ color: "#71717a", flexShrink: 0 }}>Link:</span>
+        <a
+          href={order.link}
+          target="_blank"
+          rel="noopener noreferrer"
+          style={{
+            color: "#d4b3ff",
+            textDecoration: "none",
+            display: "inline-flex",
+            alignItems: "center",
+            gap: 4,
+          }}
+          data-testid={`link-target-${order.id}`}
+        >
+          {order.link}
+          <ExternalLink size={11} />
+        </a>
+      </div>
+
+      <div style={{ display: "flex", justifyContent: "flex-end", gap: 8 }}>
+        {canCancel ? (
+          <button
+            onClick={() => {
+              if (confirm("Cancel this order? Refunds depend on the provider.")) onCancel();
+            }}
+            disabled={isCanceling}
+            data-testid={`button-cancel-${order.id}`}
+            style={{
+              display: "flex",
+              alignItems: "center",
+              gap: 6,
+              padding: "8px 14px",
+              borderRadius: 9,
+              border: "1px solid rgba(239,68,68,0.45)",
+              background: "rgba(239,68,68,0.12)",
+              color: "#fca5a5",
+              fontSize: 12,
+              fontWeight: 700,
+              cursor: isCanceling ? "not-allowed" : "pointer",
+              opacity: isCanceling ? 0.6 : 1,
+            }}
+          >
+            {isCanceling ? <Loader2 size={12} className="spin" /> : <Ban size={12} />}
+            {isCanceling ? "Canceling…" : "Cancel order"}
+          </button>
+        ) : !order.supportsCancel ? (
+          <span
+            data-testid={`text-no-cancel-${order.id}`}
+            style={{
+              fontSize: 11,
+              color: "#52525b",
+              fontStyle: "italic",
+              padding: "8px 12px",
+            }}
+          >
+            Cancellation not supported for this plan
+          </span>
+        ) : null}
+      </div>
     </div>
   );
 }
