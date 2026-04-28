@@ -47,6 +47,25 @@ type OrderResponse = {
 const ACCENT = "#aa44ff";
 const ACCENT_DEEP = "#6600ff";
 
+/**
+ * Clean a service name by:
+ *  - Normalizing fancy mathematical bold/italic Unicode letters back to plain ASCII
+ *  - Stripping emojis and other pictographic symbols
+ *  - Collapsing whitespace
+ */
+function cleanText(input: string): string {
+  if (!input) return "";
+  let s = input.normalize("NFKC");
+  // Remove emoji & pictographic symbols (broad ranges)
+  s = s.replace(
+    /[\u{1F300}-\u{1FAFF}\u{2600}-\u{27BF}\u{2300}-\u{23FF}\u{2B00}-\u{2BFF}\u{2190}-\u{21FF}\uFE0F\u200D]/gu,
+    "",
+  );
+  // Collapse repeated separators that get left behind
+  s = s.replace(/\s+/g, " ").replace(/\s*([\[\(])\s*/g, " $1").replace(/\s*([\]\)])/g, "$1");
+  return s.trim();
+}
+
 export default function InstagramFollowersPage() {
   const { toast } = useToast();
 
@@ -325,9 +344,10 @@ export default function InstagramFollowersPage() {
                               whiteSpace: "nowrap",
                               fontSize: 13,
                               color: "#e4e4e7",
+                              fontFamily: "Inter, sans-serif",
                             }}
                           >
-                            {s.name}
+                            {cleanText(s.name)}
                           </span>
                           <span
                             style={{
@@ -335,9 +355,10 @@ export default function InstagramFollowersPage() {
                               color: "#d4b3ff",
                               fontWeight: 700,
                               flexShrink: 0,
+                              fontFamily: "Inter, sans-serif",
                             }}
                           >
-                            ${Number(s.rate).toFixed(4)}/1k
+                            ₹{Number(s.rate).toFixed(2)}/1k
                           </span>
                           {isCheapest && (
                             <span
@@ -491,9 +512,9 @@ export default function InstagramFollowersPage() {
                 </span>
                 <span
                   data-testid="text-total-cost"
-                  style={{ fontSize: 18, fontWeight: 800, color: "#fff" }}
+                  style={{ fontSize: 18, fontWeight: 800, color: "#fff", fontFamily: "Inter, sans-serif" }}
                 >
-                  ${totalCost.toFixed(4)}
+                  ₹{totalCost.toFixed(2)}
                 </span>
               </div>
 
@@ -612,14 +633,15 @@ function PlanSummary({
           marginBottom: 10,
           paddingRight: isRecommended ? 110 : 0,
           lineHeight: 1.4,
+          fontFamily: "Inter, sans-serif",
         }}
         data-testid="text-selected-plan-name"
       >
-        {service.name}
+        {cleanText(service.name)}
       </div>
 
       <div style={{ display: "flex", gap: 8, flexWrap: "wrap", marginBottom: service.description ? 12 : 0 }}>
-        <Pill label="Rate / 1k" value={`$${Number(service.rate).toFixed(4)}`} highlight />
+        <Pill label="Rate / 1k" value={`₹${Number(service.rate).toFixed(2)}`} highlight />
         <Pill label="Min" value={String(service.min)} />
         <Pill label="Max" value={String(service.max)} />
         {service.dripfeed && <Pill label="Drip-feed" value="Yes" />}
@@ -661,7 +683,7 @@ function PlanSummary({
               fontFamily: "Inter, sans-serif",
             }}
           >
-            {service.description}
+            {cleanText(service.description || "")}
           </pre>
         </details>
       )}
