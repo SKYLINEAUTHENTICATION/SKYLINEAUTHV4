@@ -12,6 +12,7 @@ export type PanelUser = {
   role: string;
   username: string;
   credits?: number;
+  walletBalance?: number;
   expiryDate?: string | null;
   accountId?: string;
 };
@@ -71,5 +72,6 @@ export function useAuth() {
     isAdmin: user?.role === "admin" || user?.role === "superadmin",
     isReseller: user?.role === "reseller",
     isUser: user?.role === "user",
+    isTopClient: user?.role === "topclient",
   };
 }

@@ -743,6 +743,7 @@ function registerLocalAuth(app: Express) {
         role: account?.role || "admin",
         username: account?.username || user.firstName,
         credits: account?.credits ?? 0,
+        walletBalance: account?.walletBalance ?? 0,
         expiryDate: account?.expiryDate ?? null,
         accountId: account?.id,
       });
@@ -778,6 +779,7 @@ function registerLocalAuth(app: Express) {
             username: acc.username,
             role: acc.role,
             email: acc.email || u?.email,
+            walletBalance: acc.walletBalance ?? 0,
             createdAt: acc.createdAt,
           };
         })
@@ -797,12 +799,12 @@ function registerLocalAuth(app: Express) {
       if (!account || account.role !== "superadmin") {
         return res.status(403).json({ message: "Access denied" });
       }
-      const { username, password, role, email } = req.body;
+      const { username, password, role, email, walletBalance } = req.body;
       if (!username || !password || !role) {
         return res.status(400).json({ message: "Username, password, and role are required." });
       }
-      if (!["admin", "reseller"].includes(role)) {
-        return res.status(400).json({ message: "Role must be 'admin' or 'reseller'." });
+      if (!["admin", "reseller", "topclient"].includes(role)) {
+        return res.status(400).json({ message: "Role must be 'admin', 'reseller', or 'topclient'." });
       }
       if (username.length < 3) {
         return res.status(400).json({ message: "Username must be at least 3 characters." });
@@ -815,6 +817,13 @@ function registerLocalAuth(app: Express) {
       const userId = randomUUID();
       await db.insert(users).values({ id: userId, firstName: username, email: email || null });
       const newAccount = await storage.createAccount(username, passwordHash, userId, role, email || null);
+
+      // For Top Client, set initial wallet balance
+      if (role === "topclient") {
+        const initialWallet = Math.max(0, Number(walletBalance) || 0);
+        await storage.updateAccount(newAccount.id, { walletBalance: initialWallet });
+      }
+
       return res.json({ success: true, user: { id: newAccount.id, username, role, email } });
     } catch (error: any) {
       console.error("Create panel user error:", error);
@@ -844,6 +853,37 @@ function registerLocalAuth(app: Express) {
     } catch (error) {
       console.error("Delete panel user error:", error);
       return res.status(500).json({ message: "Failed to delete user." });
+    }
+  });
+
+  // Set/adjust a Top Client's wallet balance (super admin only)
+  app.patch("/api/panel/users/:id/wallet", async (req, res) => {
+    try {
+      const session = getLocalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const account = await storage.getAccountByUserId(session.userId);
+      if (!account || account.role !== "superadmin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const { mode, amount } = req.body || {};
+      const amt = Number(amount);
+      if (!isFinite(amt) || amt < 0) {
+        return res.status(400).json({ message: "Amount must be a non-negative number." });
+      }
+      const target = (await storage.getAllAccounts()).find((a) => a.id === req.params.id);
+      if (!target) return res.status(404).json({ message: "User not found" });
+      if (target.role !== "topclient") {
+        return res.status(400).json({ message: "Wallet only applies to Top Client users." });
+      }
+      const next =
+        mode === "add"
+          ? (Number(target.walletBalance) || 0) + amt
+          : amt; // default: set
+      await storage.updateAccount(target.id, { walletBalance: next });
+      return res.json({ success: true, walletBalance: next });
+    } catch (error) {
+      console.error("Wallet update error:", error);
+      return res.status(500).json({ message: "Failed to update wallet." });
     }
   });
 
@@ -937,8 +977,35 @@ export async function registerRoutes(
     }
   }
 
+  // Helper: only superadmin and topclient may use SMM endpoints
+  async function requireSmmAccess(req: any, res: any): Promise<{ account: any } | null> {
+    const session = getLocalSession(req);
+    if (!session || session.isAppUser) {
+      res.status(401).json({ message: "Not authenticated" });
+      return null;
+    }
+    const account = await storage.getAccountByUserId(session.userId);
+    if (!account || (account.role !== "superadmin" && account.role !== "topclient")) {
+      res.status(403).json({ message: "Access denied" });
+      return null;
+    }
+    return { account };
+  }
+
+  // Wallet balance for the current Top Client (or superadmin)
+  app.get("/api/smm/wallet", async (req, res) => {
+    const ctx = await requireSmmAccess(req, res);
+    if (!ctx) return;
+    res.json({
+      role: ctx.account.role,
+      walletBalance: Number(ctx.account.walletBalance) || 0,
+    });
+  });
+
   // List Instagram-Followers services only
-  app.get("/api/smm/instagram-followers/services", isAuthenticatedCombined, async (_req, res) => {
+  app.get("/api/smm/instagram-followers/services", async (req, res) => {
+    const ctx = await requireSmmAccess(req, res);
+    if (!ctx) return;
     try {
       const data = await callSmmApi({ action: "services" });
       if (!Array.isArray(data)) {
@@ -956,12 +1023,35 @@ export async function registerRoutes(
   });
 
   // Place an order
-  app.post("/api/smm/instagram-followers/order", isAuthenticatedCombined, async (req, res) => {
+  app.post("/api/smm/instagram-followers/order", async (req, res) => {
+    const ctx = await requireSmmAccess(req, res);
+    if (!ctx) return;
     try {
-      const { service, link, quantity, runs, interval } = req.body || {};
+      const { service, link, quantity, runs, interval, rate } = req.body || {};
       if (!service || !link || !quantity) {
         return res.status(400).json({ message: "service, link and quantity are required" });
       }
+
+      // Wallet enforcement for Top Client (superadmin bypasses wallet)
+      const qty = Number(quantity);
+      const unitRate = Number(rate);
+      let cost = 0;
+      if (isFinite(qty) && isFinite(unitRate)) {
+        cost = (qty * unitRate) / 1000;
+      }
+
+      if (ctx.account.role === "topclient") {
+        if (!isFinite(cost) || cost <= 0) {
+          return res.status(400).json({ message: "Invalid order cost." });
+        }
+        const balance = Number(ctx.account.walletBalance) || 0;
+        if (balance < cost) {
+          return res.status(402).json({
+            message: `Insufficient wallet balance. Need ₹${cost.toFixed(2)}, have ₹${balance.toFixed(2)}.`,
+          });
+        }
+      }
+
       const params: Record<string, any> = {
         action: "add",
         service: String(service),
@@ -975,7 +1065,15 @@ export async function registerRoutes(
       if (data?.error) {
         return res.status(400).json({ message: String(data.error) });
       }
-      res.json(data);
+
+      // Deduct wallet for Top Client only after successful order
+      let newBalance: number | undefined;
+      if (ctx.account.role === "topclient") {
+        newBalance = (Number(ctx.account.walletBalance) || 0) - cost;
+        await storage.updateAccount(ctx.account.id, { walletBalance: newBalance });
+      }
+
+      res.json({ ...data, walletBalance: newBalance });
     } catch (err: any) {
       console.error("SMM order error:", err);
       res.status(500).json({ message: err?.message || "Failed to place order" });

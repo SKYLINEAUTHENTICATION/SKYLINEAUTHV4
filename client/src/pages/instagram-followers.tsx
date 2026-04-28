@@ -1,7 +1,9 @@
 import { useEffect, useMemo, useState } from "react";
 import { useQuery, useMutation } from "@tanstack/react-query";
-import { apiRequest } from "@/lib/queryClient";
+import { apiRequest, queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
+import { useAuth } from "@/hooks/use-auth";
+import { Wallet, AlertTriangle } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -68,8 +70,14 @@ function cleanText(input: string): string {
 
 export default function InstagramFollowersPage() {
   const { toast } = useToast();
+  const { isTopClient, isSuperAdmin } = useAuth();
 
   const [selectedId, setSelectedId] = useState<string>("");
+
+  const { data: walletInfo } = useQuery<{ role: string; walletBalance: number }>({
+    queryKey: ["/api/smm/wallet"],
+    enabled: isTopClient || isSuperAdmin,
+  });
 
   // Order form state
   const [link, setLink] = useState("");
@@ -126,6 +134,7 @@ export default function InstagramFollowersPage() {
       return res.json();
     },
     onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["/api/smm/wallet"] });
       if (data?.order) {
         setLastOrderId(data.order);
         toast({ title: "Order placed", description: `Order ID: ${data.order}` });
@@ -153,11 +162,15 @@ export default function InstagramFollowersPage() {
   const maxNum = selected ? Number(selected.max) || 0 : 0;
   const qtyValid = !!selected && qtyNum >= minNum && qtyNum <= maxNum;
 
+  const walletBalance = Number(walletInfo?.walletBalance) || 0;
+  const insufficientFunds = isTopClient && totalCost > walletBalance;
+
   const canSubmit =
     !!selected &&
     !!link.trim() &&
     qtyValid &&
     !orderMutation.isPending &&
+    !insufficientFunds &&
     (!useDripfeed || (Number(runs) > 0 && Number(interval) > 0));
 
   const handleSubmit = () => {
@@ -166,6 +179,7 @@ export default function InstagramFollowersPage() {
       service: selected.service,
       link: link.trim(),
       quantity: qtyNum,
+      rate: rateNum,
     };
     if (useDripfeed) {
       payload.runs = Number(runs);
@@ -231,26 +245,54 @@ export default function InstagramFollowersPage() {
           </div>
         </div>
 
-        {lastOrderId !== null && (
-          <div
-            data-testid="banner-last-order"
-            style={{
-              display: "flex",
-              alignItems: "center",
-              gap: 10,
-              padding: "10px 14px",
-              borderRadius: 10,
-              background: "rgba(34,197,94,0.08)",
-              border: "1px solid rgba(34,197,94,0.3)",
-              color: "#4ade80",
-              fontSize: 13,
-              fontWeight: 600,
-            }}
-          >
-            <CheckCircle2 size={16} />
-            Last Order ID: <span style={{ color: "#fff" }}>{lastOrderId}</span>
-          </div>
-        )}
+        <div style={{ display: "flex", alignItems: "center", gap: 10, flexWrap: "wrap" }}>
+          {(isTopClient || isSuperAdmin) && walletInfo && (
+            <div
+              data-testid="badge-wallet-balance"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 8,
+                padding: "10px 14px",
+                borderRadius: 10,
+                background: "rgba(236,72,153,0.08)",
+                border: "1px solid rgba(236,72,153,0.3)",
+                color: "#f9a8d4",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              <Wallet size={15} />
+              <span style={{ color: "#71717a", fontSize: 11, textTransform: "uppercase", letterSpacing: 0.5 }}>
+                {isTopClient ? "Wallet" : "Top Client wallet (admin view)"}
+              </span>
+              <span style={{ color: "#fff", fontWeight: 800, fontSize: 14 }} data-testid="text-wallet-balance">
+                ₹{walletBalance.toFixed(2)}
+              </span>
+            </div>
+          )}
+
+          {lastOrderId !== null && (
+            <div
+              data-testid="banner-last-order"
+              style={{
+                display: "flex",
+                alignItems: "center",
+                gap: 10,
+                padding: "10px 14px",
+                borderRadius: 10,
+                background: "rgba(34,197,94,0.08)",
+                border: "1px solid rgba(34,197,94,0.3)",
+                color: "#4ade80",
+                fontSize: 13,
+                fontWeight: 600,
+              }}
+            >
+              <CheckCircle2 size={16} />
+              Last Order ID: <span style={{ color: "#fff" }}>{lastOrderId}</span>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Body */}
@@ -503,11 +545,11 @@ export default function InstagramFollowersPage() {
                   justifyContent: "space-between",
                   padding: "12px 14px",
                   borderRadius: 10,
-                  background: "rgba(170,68,255,0.08)",
-                  border: "1px solid rgba(170,68,255,0.25)",
+                  background: insufficientFunds ? "rgba(239,68,68,0.08)" : "rgba(170,68,255,0.08)",
+                  border: `1px solid ${insufficientFunds ? "rgba(239,68,68,0.35)" : "rgba(170,68,255,0.25)"}`,
                 }}
               >
-                <span style={{ fontSize: 12, color: "#d4b3ff", fontWeight: 600 }}>
+                <span style={{ fontSize: 12, color: insufficientFunds ? "#fca5a5" : "#d4b3ff", fontWeight: 600 }}>
                   Total cost
                 </span>
                 <span
@@ -517,6 +559,27 @@ export default function InstagramFollowersPage() {
                   ₹{totalCost.toFixed(2)}
                 </span>
               </div>
+
+              {insufficientFunds && (
+                <div
+                  data-testid="warning-insufficient-funds"
+                  style={{
+                    display: "flex",
+                    alignItems: "center",
+                    gap: 10,
+                    padding: "10px 14px",
+                    borderRadius: 10,
+                    background: "rgba(239,68,68,0.08)",
+                    border: "1px solid rgba(239,68,68,0.3)",
+                    color: "#fca5a5",
+                    fontSize: 12,
+                    fontWeight: 600,
+                  }}
+                >
+                  <AlertTriangle size={15} />
+                  Insufficient wallet balance. Need ₹{totalCost.toFixed(2)}, you have ₹{walletBalance.toFixed(2)}.
+                </div>
+              )}
 
               <button
                 onClick={handleSubmit}

@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Shield, Trash2, Plus, Key } from "lucide-react";
+import { Shield, Trash2, Plus, Key, Wallet } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -14,6 +14,7 @@ type PanelAccount = {
   username: string;
   role: string;
   email?: string | null;
+  walletBalance?: number;
   createdAt?: string;
 };
 
@@ -21,6 +22,7 @@ const ROLE_COLORS: Record<string, { bg: string; border: string; text: string; la
   superadmin: { bg: "rgba(234,179,8,0.12)", border: "rgba(234,179,8,0.35)", text: "#fbbf24", label: "Super Admin" },
   admin: { bg: "rgba(102,0,255,0.12)", border: "rgba(102,0,255,0.35)", text: "#aa44ff", label: "Admin" },
   reseller: { bg: "rgba(59,130,246,0.12)", border: "rgba(59,130,246,0.35)", text: "#60a5fa", label: "Reseller" },
+  topclient: { bg: "rgba(236,72,153,0.12)", border: "rgba(236,72,153,0.35)", text: "#ec4899", label: "Top Client" },
 };
 
 function RoleBadge({ role }: { role: string }) {
@@ -48,9 +50,10 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
   const [password, setPassword] = useState("");
   const [role, setRole] = useState("admin");
   const [email, setEmail] = useState("");
+  const [wallet, setWallet] = useState("");
 
   const createMutation = useMutation({
-    mutationFn: async (data: { username: string; password: string; role: string; email?: string }) => {
+    mutationFn: async (data: { username: string; password: string; role: string; email?: string; walletBalance?: number }) => {
       const res = await fetch("/api/panel/users", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -114,9 +117,32 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
           <SelectContent>
             <SelectItem value="admin">Admin</SelectItem>
             <SelectItem value="reseller">Reseller</SelectItem>
+            <SelectItem value="topclient">Top Client</SelectItem>
           </SelectContent>
         </Select>
       </div>
+
+      {role === "topclient" && (
+        <div style={{ display: "flex", flexDirection: "column", gap: 6 }}>
+          <label style={{ fontSize: 12, fontWeight: 600, color: "#ec4899", display: "flex", alignItems: "center", gap: 6 }}>
+            <Wallet size={13} /> Wallet Amount (₹)
+          </label>
+          <Input
+            type="number"
+            min="0"
+            step="0.01"
+            placeholder="e.g. 500"
+            value={wallet}
+            onChange={(e) => setWallet(e.target.value)}
+            style={{ background: "rgba(236,72,153,0.08)", border: "1px solid rgba(236,72,153,0.3)", color: "#fff" }}
+            data-testid="input-wallet-amount"
+          />
+          <p style={{ fontSize: 11, color: "#71717a", margin: 0 }}>
+            This client can spend up to ₹{Number(wallet || 0).toFixed(2)} on Instagram Followers orders.
+          </p>
+        </div>
+      )}
+
       <div style={{ display: "flex", gap: 10, justifyContent: "flex-end", marginTop: 6 }}>
         <button
           onClick={onClose}
@@ -125,8 +151,21 @@ function CreateUserModal({ onClose }: { onClose: () => void }) {
           Cancel
         </button>
         <button
-          onClick={() => createMutation.mutate({ username, password, role, email: email || undefined })}
-          disabled={!username || !password || createMutation.isPending}
+          onClick={() =>
+            createMutation.mutate({
+              username,
+              password,
+              role,
+              email: email || undefined,
+              walletBalance: role === "topclient" ? Number(wallet) || 0 : undefined,
+            })
+          }
+          disabled={
+            !username ||
+            !password ||
+            createMutation.isPending ||
+            (role === "topclient" && (!wallet || Number(wallet) < 0))
+          }
           style={{
             background: "linear-gradient(135deg, #6600ff, #7722ff)",
             border: "none",
@@ -153,6 +192,9 @@ export default function PanelUsersPage() {
   const [open, setOpen] = useState(false);
   const [resetId, setResetId] = useState<string | null>(null);
   const [newPassword, setNewPassword] = useState("");
+  const [walletEdit, setWalletEdit] = useState<{ id: string; current: number } | null>(null);
+  const [walletAmount, setWalletAmount] = useState("");
+  const [walletMode, setWalletMode] = useState<"set" | "add">("add");
 
   const { data: panelUsers, isLoading } = useQuery<PanelAccount[]>({
     queryKey: ["/api/panel/users"],
@@ -174,6 +216,27 @@ export default function PanelUsersPage() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/panel/users"] });
       toast({ title: "User deleted" });
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
+  });
+
+  const walletMutation = useMutation({
+    mutationFn: async ({ id, mode, amount }: { id: string; mode: "set" | "add"; amount: number }) => {
+      const res = await fetch(`/api/panel/users/${id}/wallet`, {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ mode, amount }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Failed");
+      return json;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/panel/users"] });
+      toast({ title: "Wallet updated" });
+      setWalletEdit(null);
+      setWalletAmount("");
     },
     onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
@@ -212,7 +275,7 @@ export default function PanelUsersPage() {
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: "0.5px" }}>Panel Users</h1>
-          <p style={{ fontSize: 13, color: "#52525b", marginTop: 2 }}>Manage admins and resellers</p>
+          <p style={{ fontSize: 13, color: "#52525b", marginTop: 2 }}>Manage admins, resellers and top clients</p>
         </div>
         <Dialog open={open} onOpenChange={setOpen}>
           <DialogTrigger asChild>
@@ -254,7 +317,7 @@ export default function PanelUsersPage() {
         <table style={{ width: "100%", borderCollapse: "collapse" }}>
           <thead>
             <tr style={{ borderBottom: "1px solid rgba(102,0,255,0.18)" }}>
-              {["Username", "Role", "Email", "Created", "Actions"].map((h) => (
+              {["Username", "Role", "Email", "Wallet", "Created", "Actions"].map((h) => (
                 <th key={h} style={{ padding: "12px 18px", textAlign: "left", fontSize: 11, fontWeight: 600, color: "#52525b", textTransform: "uppercase", letterSpacing: "1px" }}>{h}</th>
               ))}
             </tr>
@@ -262,11 +325,11 @@ export default function PanelUsersPage() {
           <tbody>
             {isLoading ? (
               <tr>
-                <td colSpan={5} style={{ padding: 28, textAlign: "center", color: "#52525b" }}>Loading...</td>
+                <td colSpan={6} style={{ padding: 28, textAlign: "center", color: "#52525b" }}>Loading...</td>
               </tr>
             ) : !panelUsers?.length ? (
               <tr>
-                <td colSpan={5} style={{ padding: 28, textAlign: "center", color: "#52525b" }}>No users found</td>
+                <td colSpan={6} style={{ padding: 28, textAlign: "center", color: "#52525b" }}>No users found</td>
               </tr>
             ) : panelUsers.map((u, i) => (
               <tr key={u.id} style={{ borderBottom: i < panelUsers.length - 1 ? "1px solid rgba(102,0,255,0.08)" : "none" }} data-testid={`row-user-${u.id}`}>
@@ -288,12 +351,28 @@ export default function PanelUsersPage() {
                 </td>
                 <td style={{ padding: "13px 18px" }}><RoleBadge role={u.role} /></td>
                 <td style={{ padding: "13px 18px", fontSize: 13, color: "#a1a1aa" }}>{u.email || "—"}</td>
+                <td style={{ padding: "13px 18px", fontSize: 13, color: u.role === "topclient" ? "#ec4899" : "#52525b", fontWeight: u.role === "topclient" ? 700 : 400 }} data-testid={`text-wallet-${u.id}`}>
+                  {u.role === "topclient" ? `₹${(Number(u.walletBalance) || 0).toFixed(2)}` : "—"}
+                </td>
                 <td style={{ padding: "13px 18px", fontSize: 12, color: "#52525b" }}>
                   {u.createdAt ? new Date(u.createdAt).toLocaleDateString() : "—"}
                 </td>
                 <td style={{ padding: "13px 18px" }}>
                   {u.role !== "superadmin" && (
-                    <div style={{ display: "flex", gap: 8 }}>
+                    <div style={{ display: "flex", gap: 8, flexWrap: "wrap" }}>
+                      {u.role === "topclient" && (
+                        <button
+                          onClick={() => {
+                            setWalletEdit({ id: u.id, current: Number(u.walletBalance) || 0 });
+                            setWalletAmount("");
+                            setWalletMode("add");
+                          }}
+                          style={{ background: "rgba(236,72,153,0.12)", border: "1px solid rgba(236,72,153,0.3)", color: "#ec4899", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
+                          data-testid={`button-wallet-${u.id}`}
+                        >
+                          <Wallet size={12} /> Wallet
+                        </button>
+                      )}
                       <button
                         onClick={() => { setResetId(u.id); setNewPassword(""); }}
                         style={{ background: "rgba(102,0,255,0.15)", border: "1px solid rgba(102,0,255,0.3)", color: "#aa44ff", borderRadius: 6, padding: "5px 10px", cursor: "pointer", fontSize: 12, display: "flex", alignItems: "center", gap: 5 }}
@@ -316,6 +395,66 @@ export default function PanelUsersPage() {
           </tbody>
         </table>
       </div>
+
+      {walletEdit && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999,
+        }}>
+          <div style={{ background: "#0a0812", border: "1px solid rgba(236,72,153,0.3)", borderRadius: 10, padding: 28, width: 360 }}>
+            <h3 style={{ color: "#f9a8d4", fontWeight: 700, marginBottom: 6, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
+              <Wallet size={16} /> Manage Wallet
+            </h3>
+            <p style={{ fontSize: 12, color: "#71717a", margin: 0, marginBottom: 14 }}>
+              Current balance: <span style={{ color: "#ec4899", fontWeight: 700 }}>₹{walletEdit.current.toFixed(2)}</span>
+            </p>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <button
+                onClick={() => setWalletMode("add")}
+                style={{
+                  flex: 1, padding: "7px", borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  background: walletMode === "add" ? "rgba(236,72,153,0.2)" : "transparent",
+                  border: `1px solid ${walletMode === "add" ? "rgba(236,72,153,0.5)" : "rgba(255,255,255,0.1)"}`,
+                  color: walletMode === "add" ? "#ec4899" : "#71717a",
+                }}
+                data-testid="button-wallet-mode-add"
+              >Add to balance</button>
+              <button
+                onClick={() => setWalletMode("set")}
+                style={{
+                  flex: 1, padding: "7px", borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  background: walletMode === "set" ? "rgba(236,72,153,0.2)" : "transparent",
+                  border: `1px solid ${walletMode === "set" ? "rgba(236,72,153,0.5)" : "rgba(255,255,255,0.1)"}`,
+                  color: walletMode === "set" ? "#ec4899" : "#71717a",
+                }}
+                data-testid="button-wallet-mode-set"
+              >Set new balance</button>
+            </div>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder={walletMode === "add" ? "Amount to add (₹)" : "New balance (₹)"}
+              value={walletAmount}
+              onChange={(e) => setWalletAmount(e.target.value)}
+              style={{ background: "rgba(236,72,153,0.08)", border: "1px solid rgba(236,72,153,0.3)", color: "#fff", marginBottom: 14 }}
+              data-testid="input-wallet-edit"
+            />
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button onClick={() => setWalletEdit(null)} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.15)", color: "#a1a1aa", borderRadius: 6, padding: "7px 16px", cursor: "pointer", fontSize: 13 }}>
+                Cancel
+              </button>
+              <button
+                onClick={() => walletMutation.mutate({ id: walletEdit.id, mode: walletMode, amount: Number(walletAmount) || 0 })}
+                disabled={!walletAmount || walletMutation.isPending}
+                style={{ background: "linear-gradient(135deg, #ec4899, #db2777)", border: "none", color: "#fff", borderRadius: 6, padding: "7px 16px", cursor: "pointer", fontSize: 13, fontWeight: 700, opacity: !walletAmount ? 0.5 : 1 }}
+                data-testid="button-confirm-wallet"
+              >
+                {walletMutation.isPending ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       {resetId && (
         <div style={{

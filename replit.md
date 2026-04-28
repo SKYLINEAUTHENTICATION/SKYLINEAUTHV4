@@ -11,6 +11,8 @@ A software licensing and authentication management panel with SKYLINE UI. Featur
 - **Auto-logout**: 3-minute inactivity timer shown in header with visual countdown
 - **Profile Page**: All users can update email, profile picture URL, and password at /dashboard/profile
 - **Reseller UI**: Updated reseller page with expiry date, status badges, and plan quick-add buttons
+- **SMM / Instagram Followers**: New page proxying IndiansMMHub API. Visible only to Super Admin and Top Client.
+- **Top Client role**: New role with restricted access (Announcements, Chat, Instagram Followers, Profile only). Each Top Client has a wallet balance (₹) set by Super Admin at creation; Instagram Followers order cost is deducted from the wallet on each successful order. Super Admin can top up / set the wallet from the Panel Users page.
 
 ## Credentials
 - **Super Admin**: username `SKY-SR`, password `vc3yge5f` (seeded on startup)
@@ -23,9 +25,11 @@ A software licensing and authentication management panel with SKYLINE UI. Featur
 - **Routing**: wouter (client-side)
 
 ## Role System
-- **superadmin**: Full access — can create admins, resellers; manage all resources
+- **superadmin**: Full access — can create admins, resellers, top clients; manage all resources; sees Instagram Followers
 - **admin**: Can manage apps, licenses, app users, tokens, settings
 - **reseller**: Limited access — licenses and app users only
+- **topclient**: Restricted access — Announcements, Chat, Instagram Followers, Profile only. Has a wallet (₹) used to pay for Instagram Followers orders.
+- **user**: App user (community-only access)
 
 ## Project Structure
 ```

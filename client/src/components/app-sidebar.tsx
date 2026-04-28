@@ -38,6 +38,7 @@ const ROLE_LABEL: Record<string, string> = {
   admin: "Admin",
   reseller: "Reseller",
   user: "App User",
+  topclient: "Top Client",
 };
 
 const ROLE_COLOR: Record<string, string> = {
@@ -45,6 +46,7 @@ const ROLE_COLOR: Record<string, string> = {
   admin: "#aa44ff",
   reseller: "#60a5fa",
   user: "#34d399",
+  topclient: "#ec4899",
 };
 
 function ExpiryCountdown({ expiryDate }: { expiryDate: string | null | undefined }) {
@@ -80,7 +82,7 @@ function ExpiryCountdown({ expiryDate }: { expiryDate: string | null | undefined
 
 export function AppSidebar() {
   const [location] = useLocation();
-  const { user, logout, isSuperAdmin, isAdmin, isReseller, isUser } = useAuth();
+  const { user, logout, isSuperAdmin, isAdmin, isReseller, isUser, isTopClient } = useAuth();
 
   const { data: resellerMe } = useQuery<{ credits: number; expiryDate: string | null; status: string }>({
     queryKey: ["/api/resellers/me"],
@@ -127,99 +129,138 @@ export function AppSidebar() {
       </SidebarHeader>
 
       <SidebarContent>
-        {!isUser && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Overview</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {renderItem("Dashboard", "/dashboard", LayoutDashboard)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+        {/* ── Top Client: limited menu ───────────────────────────── */}
+        {isTopClient && (
+          <>
+            <SidebarGroup>
+              <SidebarGroupLabel>Community</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {renderItem("Announcements", "/dashboard/announcements", Megaphone)}
+                  {renderItem("Chat", "/dashboard/chat", MessageCircle)}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>SMM</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {renderItem("Instagram Followers", "/dashboard/instagram-followers", Instagram)}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+
+            <SidebarGroup>
+              <SidebarGroupLabel>Account</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {renderItem("Profile", "/dashboard/profile", UserCircle)}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
+          </>
         )}
 
-        {isAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Management</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {renderItem("Applications", "/dashboard/apps", AppWindow)}
-                {renderItem("Licenses", "/dashboard/licenses", Key)}
-                {renderItem("App Users", "/dashboard/users", Users)}
-                {renderItem("Tokens", "/dashboard/tokens", Coins)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+        {/* ── Default menu for all other roles ───────────────────── */}
+        {!isTopClient && (
+          <>
+            {!isUser && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Overview</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {renderItem("Dashboard", "/dashboard", LayoutDashboard)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
 
-        {isReseller && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Management</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {renderItem("Licenses", "/dashboard/licenses", Key)}
-                {renderItem("App Users", "/dashboard/users", Users)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+            {isAdmin && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Management</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {renderItem("Applications", "/dashboard/apps", AppWindow)}
+                    {renderItem("Licenses", "/dashboard/licenses", Key)}
+                    {renderItem("App Users", "/dashboard/users", Users)}
+                    {renderItem("Tokens", "/dashboard/tokens", Coins)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
 
-        <SidebarGroup>
-          <SidebarGroupLabel>Community</SidebarGroupLabel>
-          <SidebarGroupContent>
-            <SidebarMenu>
-              {renderItem("Announcements", "/dashboard/announcements", Megaphone)}
-              {renderItem("Chat", "/dashboard/chat", MessageCircle)}
-              {renderItem("Files", "/dashboard/files", FolderOpen)}
-              {(isAdmin || isReseller) && renderItem("Resellers", "/dashboard/resellers", ShoppingBag)}
-            </SidebarMenu>
-          </SidebarGroupContent>
-        </SidebarGroup>
+            {isReseller && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Management</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {renderItem("Licenses", "/dashboard/licenses", Key)}
+                    {renderItem("App Users", "/dashboard/users", Users)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
 
-        {!isUser && (
-          <SidebarGroup>
-            <SidebarGroupLabel>SMM</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {renderItem("Instagram Followers", "/dashboard/instagram-followers", Instagram)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+            <SidebarGroup>
+              <SidebarGroupLabel>Community</SidebarGroupLabel>
+              <SidebarGroupContent>
+                <SidebarMenu>
+                  {renderItem("Announcements", "/dashboard/announcements", Megaphone)}
+                  {renderItem("Chat", "/dashboard/chat", MessageCircle)}
+                  {renderItem("Files", "/dashboard/files", FolderOpen)}
+                  {(isAdmin || isReseller) && renderItem("Resellers", "/dashboard/resellers", ShoppingBag)}
+                </SidebarMenu>
+              </SidebarGroupContent>
+            </SidebarGroup>
 
-        {isSuperAdmin && (
-          <SidebarGroup>
-            <SidebarGroupLabel>System</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {renderItem("Panel Users", "/dashboard/panel-users", UserCog)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+            {/* SMM - Instagram Followers visible only to Super Admin */}
+            {isSuperAdmin && (
+              <SidebarGroup>
+                <SidebarGroupLabel>SMM</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {renderItem("Instagram Followers", "/dashboard/instagram-followers", Instagram)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
 
-        {!isUser && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Insights</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {renderItem("Statistics", "/dashboard/statistics", BarChart3)}
-                {isAdmin && renderItem("Settings", "/dashboard/settings", Settings)}
-                {renderItem("Profile", "/dashboard/profile", UserCircle)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
-        )}
+            {isSuperAdmin && (
+              <SidebarGroup>
+                <SidebarGroupLabel>System</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {renderItem("Panel Users", "/dashboard/panel-users", UserCog)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
 
-        {isUser && (
-          <SidebarGroup>
-            <SidebarGroupLabel>Account</SidebarGroupLabel>
-            <SidebarGroupContent>
-              <SidebarMenu>
-                {renderItem("Profile", "/dashboard/profile", UserCircle)}
-              </SidebarMenu>
-            </SidebarGroupContent>
-          </SidebarGroup>
+            {!isUser && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Insights</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {renderItem("Statistics", "/dashboard/statistics", BarChart3)}
+                    {isAdmin && renderItem("Settings", "/dashboard/settings", Settings)}
+                    {renderItem("Profile", "/dashboard/profile", UserCircle)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
+
+            {isUser && (
+              <SidebarGroup>
+                <SidebarGroupLabel>Account</SidebarGroupLabel>
+                <SidebarGroupContent>
+                  <SidebarMenu>
+                    {renderItem("Profile", "/dashboard/profile", UserCircle)}
+                  </SidebarMenu>
+                </SidebarGroupContent>
+              </SidebarGroup>
+            )}
+          </>
         )}
       </SidebarContent>
 

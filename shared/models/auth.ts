@@ -30,6 +30,7 @@ export const accounts = pgTable("accounts", {
   role: varchar("role", { length: 20 }).notNull().default("admin"),
   email: varchar("email", { length: 255 }),
   credits: real("credits").notNull().default(0),
+  walletBalance: real("wallet_balance").notNull().default(0),
   expiryDate: timestamp("expiry_date"),
   createdAt: timestamp("created_at").defaultNow(),
 });

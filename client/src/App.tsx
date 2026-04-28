@@ -261,12 +261,26 @@ function DashboardLayout({ children }: { children: React.ReactNode }) {
 }
 
 function AuthenticatedApp() {
-  const { isUser } = useAuth();
+  const { isUser, isTopClient } = useAuth();
   return (
     <DashboardLayout>
       <Switch>
-        {/* App users (role=user) get community-only access */}
-        {isUser ? (
+        {/* Top Client: only Announcements, Chat, Instagram Followers, Profile */}
+        {isTopClient ? (
+          <>
+            <Route path="/dashboard/announcements" component={AnnouncementsPage} />
+            <Route path="/dashboard/chat" component={ChatPage} />
+            <Route path="/dashboard/instagram-followers" component={InstagramFollowersPage} />
+            <Route path="/dashboard/profile" component={ProfilePage} />
+            <Route path="/dashboard">
+              <Redirect to="/dashboard/instagram-followers" />
+            </Route>
+            <Route path="/">
+              <Redirect to="/dashboard/instagram-followers" />
+            </Route>
+          </>
+        ) : isUser ? (
+          /* App users (role=user) get community-only access */
           <>
             <Route path="/dashboard/announcements" component={AnnouncementsPage} />
             <Route path="/dashboard/chat" component={ChatPage} />
