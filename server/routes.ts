@@ -818,9 +818,21 @@ function registerLocalAuth(app: Express) {
       await db.insert(users).values({ id: userId, firstName: username, email: email || null });
       const newAccount = await storage.createAccount(username, passwordHash, userId, role, email || null);
 
-      // For Top Client, set initial wallet balance
+      // For Top Client, set initial wallet balance — deducted from superadmin's wallet
       if (role === "topclient") {
         const initialWallet = Math.max(0, Number(walletBalance) || 0);
+        if (initialWallet > 0) {
+          const superBalance = Number(account.walletBalance) || 0;
+          if (superBalance < initialWallet) {
+            // Roll back the account/user we just created so nothing is left dangling
+            await storage.deleteAccount(newAccount.id);
+            await db.delete(users).where(eq(users.id, userId));
+            return res.status(400).json({
+              message: `Insufficient super admin wallet balance. Need ₹${initialWallet.toFixed(2)}, have ₹${superBalance.toFixed(2)}.`,
+            });
+          }
+          await storage.updateAccount(account.id, { walletBalance: superBalance - initialWallet });
+        }
         await storage.updateAccount(newAccount.id, { walletBalance: initialWallet });
       }
 
@@ -857,6 +869,7 @@ function registerLocalAuth(app: Express) {
   });
 
   // Set/adjust a Top Client's wallet balance (super admin only)
+  // Funds are transferred from / refunded to the superadmin's own wallet
   app.patch("/api/panel/users/:id/wallet", async (req, res) => {
     try {
       const session = getLocalSession(req);
@@ -875,14 +888,62 @@ function registerLocalAuth(app: Express) {
       if (target.role !== "topclient") {
         return res.status(400).json({ message: "Wallet only applies to Top Client users." });
       }
-      const next =
-        mode === "add"
-          ? (Number(target.walletBalance) || 0) + amt
-          : amt; // default: set
+      const currentTarget = Number(target.walletBalance) || 0;
+      const next = mode === "add" ? currentTarget + amt : amt; // default: set
+      const delta = next - currentTarget; // positive = take from super, negative = refund to super
+      const superBalance = Number(account.walletBalance) || 0;
+      if (delta > 0 && superBalance < delta) {
+        return res.status(400).json({
+          message: `Insufficient super admin wallet balance. Need ₹${delta.toFixed(2)}, have ₹${superBalance.toFixed(2)}.`,
+        });
+      }
+      if (delta !== 0) {
+        await storage.updateAccount(account.id, { walletBalance: superBalance - delta });
+      }
       await storage.updateAccount(target.id, { walletBalance: next });
-      return res.json({ success: true, walletBalance: next });
+      return res.json({ success: true, walletBalance: next, superWalletBalance: superBalance - delta });
     } catch (error) {
       console.error("Wallet update error:", error);
+      return res.status(500).json({ message: "Failed to update wallet." });
+    }
+  });
+
+  // Super admin's own wallet (used to fund top clients)
+  app.get("/api/panel/super-wallet", async (req, res) => {
+    try {
+      const session = getLocalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const account = await storage.getAccountByUserId(session.userId);
+      if (!account || account.role !== "superadmin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      return res.json({ walletBalance: Number(account.walletBalance) || 0 });
+    } catch (error) {
+      console.error("Super wallet read error:", error);
+      return res.status(500).json({ message: "Failed to read wallet." });
+    }
+  });
+
+  // Top up the super admin's own wallet (set or add)
+  app.patch("/api/panel/super-wallet", async (req, res) => {
+    try {
+      const session = getLocalSession(req);
+      if (!session) return res.status(401).json({ message: "Not authenticated" });
+      const account = await storage.getAccountByUserId(session.userId);
+      if (!account || account.role !== "superadmin") {
+        return res.status(403).json({ message: "Access denied" });
+      }
+      const { mode, amount } = req.body || {};
+      const amt = Number(amount);
+      if (!isFinite(amt) || amt < 0) {
+        return res.status(400).json({ message: "Amount must be a non-negative number." });
+      }
+      const current = Number(account.walletBalance) || 0;
+      const next = mode === "add" ? current + amt : amt;
+      await storage.updateAccount(account.id, { walletBalance: next });
+      return res.json({ success: true, walletBalance: next });
+    } catch (error) {
+      console.error("Super wallet update error:", error);
       return res.status(500).json({ message: "Failed to update wallet." });
     }
   });

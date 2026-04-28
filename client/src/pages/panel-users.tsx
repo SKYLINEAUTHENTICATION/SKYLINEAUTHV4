@@ -3,7 +3,7 @@ import { useQuery, useMutation } from "@tanstack/react-query";
 import { queryClient } from "@/lib/queryClient";
 import { useToast } from "@/hooks/use-toast";
 import { useAuth } from "@/hooks/use-auth";
-import { Shield, Trash2, Plus, Key, Wallet } from "lucide-react";
+import { Shield, Trash2, Plus, Key, Wallet, Server, Plus as PlusIcon } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
@@ -195,6 +195,9 @@ export default function PanelUsersPage() {
   const [walletEdit, setWalletEdit] = useState<{ id: string; current: number } | null>(null);
   const [walletAmount, setWalletAmount] = useState("");
   const [walletMode, setWalletMode] = useState<"set" | "add">("add");
+  const [superTopupOpen, setSuperTopupOpen] = useState(false);
+  const [superTopupAmount, setSuperTopupAmount] = useState("");
+  const [superTopupMode, setSuperTopupMode] = useState<"set" | "add">("add");
 
   const { data: panelUsers, isLoading } = useQuery<PanelAccount[]>({
     queryKey: ["/api/panel/users"],
@@ -204,6 +207,51 @@ export default function PanelUsersPage() {
       return res.json();
     },
     enabled: isSuperAdmin,
+  });
+
+  const { data: superWallet } = useQuery<{ walletBalance: number }>({
+    queryKey: ["/api/panel/super-wallet"],
+    queryFn: async () => {
+      const res = await fetch("/api/panel/super-wallet", { credentials: "include" });
+      if (!res.ok) throw new Error("Failed to load super wallet");
+      return res.json();
+    },
+    enabled: isSuperAdmin,
+  });
+
+  const { data: apiBalance, isLoading: apiBalanceLoading, error: apiBalanceError } = useQuery<{ balance: number; currency: string }>({
+    queryKey: ["/api/smm/api-balance"],
+    queryFn: async () => {
+      const res = await fetch("/api/smm/api-balance", { credentials: "include" });
+      if (!res.ok) {
+        const j = await res.json().catch(() => ({}));
+        throw new Error(j.message || "Failed to load API balance");
+      }
+      return res.json();
+    },
+    enabled: isSuperAdmin,
+    refetchInterval: 60000,
+  });
+
+  const superTopupMutation = useMutation({
+    mutationFn: async ({ mode, amount }: { mode: "set" | "add"; amount: number }) => {
+      const res = await fetch("/api/panel/super-wallet", {
+        method: "PATCH",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ mode, amount }),
+      });
+      const json = await res.json();
+      if (!res.ok) throw new Error(json.message || "Failed");
+      return json;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["/api/panel/super-wallet"] });
+      toast({ title: "Super wallet updated" });
+      setSuperTopupOpen(false);
+      setSuperTopupAmount("");
+    },
+    onError: (err: Error) => toast({ title: "Error", description: err.message, variant: "destructive" }),
   });
 
   const deleteMutation = useMutation({
@@ -234,6 +282,7 @@ export default function PanelUsersPage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["/api/panel/users"] });
+      queryClient.invalidateQueries({ queryKey: ["/api/panel/super-wallet"] });
       toast({ title: "Wallet updated" });
       setWalletEdit(null);
       setWalletAmount("");
@@ -272,6 +321,70 @@ export default function PanelUsersPage() {
 
   return (
     <div style={{ padding: 28 }}>
+      {/* Wallet overview */}
+      <div style={{ display: "grid", gridTemplateColumns: "repeat(auto-fit, minmax(260px, 1fr))", gap: 16, marginBottom: 24 }}>
+        {/* Super admin wallet */}
+        <div style={{
+          background: "linear-gradient(135deg, rgba(102,0,255,0.18), rgba(102,0,255,0.05))",
+          border: "1px solid rgba(102,0,255,0.35)",
+          borderRadius: 12,
+          padding: "16px 18px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }} data-testid="card-super-wallet">
+          <div style={{ display: "flex", alignItems: "center", justifyContent: "space-between" }}>
+            <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#c4b5fd", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" }}>
+              <Wallet size={14} /> Super Admin Wallet
+            </div>
+            <button
+              onClick={() => { setSuperTopupOpen(true); setSuperTopupAmount(""); setSuperTopupMode("add"); }}
+              style={{
+                background: "rgba(102,0,255,0.25)", border: "1px solid rgba(102,0,255,0.5)",
+                color: "#c4b5fd", borderRadius: 6, padding: "4px 10px", fontSize: 11, fontWeight: 700,
+                cursor: "pointer", display: "flex", alignItems: "center", gap: 4,
+              }}
+              data-testid="button-super-topup"
+            >
+              <PlusIcon size={11} /> Top Up
+            </button>
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Rajdhani, sans-serif" }} data-testid="text-super-wallet-balance">
+            ₹{(Number(superWallet?.walletBalance) || 0).toFixed(2)}
+          </div>
+          <p style={{ margin: 0, fontSize: 11, color: "#71717a" }}>
+            Used to fund top client wallets. Deducted automatically.
+          </p>
+        </div>
+
+        {/* API wallet (IndiansMMHub provider balance) */}
+        <div style={{
+          background: "linear-gradient(135deg, rgba(236,72,153,0.18), rgba(236,72,153,0.05))",
+          border: "1px solid rgba(236,72,153,0.35)",
+          borderRadius: 12,
+          padding: "16px 18px",
+          display: "flex",
+          flexDirection: "column",
+          gap: 8,
+        }} data-testid="card-api-wallet">
+          <div style={{ display: "flex", alignItems: "center", gap: 8, color: "#f9a8d4", fontSize: 11, fontWeight: 700, letterSpacing: "1px", textTransform: "uppercase" }}>
+            <Server size={14} /> API Wallet (IndiansMMHub)
+          </div>
+          <div style={{ fontSize: 26, fontWeight: 800, color: "#fff", fontFamily: "Rajdhani, sans-serif" }} data-testid="text-api-wallet-balance">
+            {apiBalanceLoading
+              ? "..."
+              : apiBalanceError
+                ? "—"
+                : `${apiBalance?.currency === "INR" ? "₹" : (apiBalance?.currency || "")}${(Number(apiBalance?.balance) || 0).toFixed(2)}`}
+          </div>
+          <p style={{ margin: 0, fontSize: 11, color: "#71717a" }}>
+            {apiBalanceError
+              ? (apiBalanceError as Error).message
+              : "Live balance from IndiansMMHub. Used to fulfil orders."}
+          </p>
+        </div>
+      </div>
+
       <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center", marginBottom: 24 }}>
         <div>
           <h1 style={{ fontSize: 20, fontWeight: 800, color: "#fff", letterSpacing: "0.5px" }}>Panel Users</h1>
@@ -450,6 +563,66 @@ export default function PanelUsersPage() {
                 data-testid="button-confirm-wallet"
               >
                 {walletMutation.isPending ? "Saving..." : "Save"}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {superTopupOpen && (
+        <div style={{
+          position: "fixed", inset: 0, background: "rgba(0,0,0,0.7)", display: "flex", alignItems: "center", justifyContent: "center", zIndex: 999,
+        }}>
+          <div style={{ background: "#0a0812", border: "1px solid rgba(102,0,255,0.3)", borderRadius: 10, padding: 28, width: 360 }}>
+            <h3 style={{ color: "#c4b5fd", fontWeight: 700, marginBottom: 6, fontSize: 15, display: "flex", alignItems: "center", gap: 8 }}>
+              <Wallet size={16} /> Super Admin Wallet
+            </h3>
+            <p style={{ fontSize: 12, color: "#71717a", margin: 0, marginBottom: 14 }}>
+              Current balance: <span style={{ color: "#c4b5fd", fontWeight: 700 }}>₹{(Number(superWallet?.walletBalance) || 0).toFixed(2)}</span>
+            </p>
+            <div style={{ display: "flex", gap: 8, marginBottom: 12 }}>
+              <button
+                onClick={() => setSuperTopupMode("add")}
+                style={{
+                  flex: 1, padding: "7px", borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  background: superTopupMode === "add" ? "rgba(102,0,255,0.2)" : "transparent",
+                  border: `1px solid ${superTopupMode === "add" ? "rgba(102,0,255,0.5)" : "rgba(255,255,255,0.1)"}`,
+                  color: superTopupMode === "add" ? "#c4b5fd" : "#71717a",
+                }}
+                data-testid="button-super-topup-mode-add"
+              >Add to balance</button>
+              <button
+                onClick={() => setSuperTopupMode("set")}
+                style={{
+                  flex: 1, padding: "7px", borderRadius: 6, fontSize: 12, fontWeight: 700, cursor: "pointer",
+                  background: superTopupMode === "set" ? "rgba(102,0,255,0.2)" : "transparent",
+                  border: `1px solid ${superTopupMode === "set" ? "rgba(102,0,255,0.5)" : "rgba(255,255,255,0.1)"}`,
+                  color: superTopupMode === "set" ? "#c4b5fd" : "#71717a",
+                }}
+                data-testid="button-super-topup-mode-set"
+              >Set new balance</button>
+            </div>
+            <Input
+              type="number"
+              min="0"
+              step="0.01"
+              placeholder={superTopupMode === "add" ? "Amount to add (₹)" : "New balance (₹)"}
+              value={superTopupAmount}
+              onChange={(e) => setSuperTopupAmount(e.target.value)}
+              style={{ background: "rgba(102,0,255,0.08)", border: "1px solid rgba(102,0,255,0.25)", color: "#fff", marginBottom: 14 }}
+              data-testid="input-super-topup-amount"
+            />
+            <div style={{ display: "flex", gap: 10, justifyContent: "flex-end" }}>
+              <button onClick={() => setSuperTopupOpen(false)} style={{ background: "transparent", border: "1px solid rgba(255,255,255,0.15)", color: "#a1a1aa", borderRadius: 6, padding: "7px 16px", cursor: "pointer", fontSize: 13 }}>
+                Cancel
+              </button>
+              <button
+                onClick={() => superTopupMutation.mutate({ mode: superTopupMode, amount: Number(superTopupAmount) || 0 })}
+                disabled={!superTopupAmount || superTopupMutation.isPending}
+                style={{ background: "linear-gradient(135deg, #6600ff, #7722ff)", border: "none", color: "#fff", borderRadius: 6, padding: "7px 16px", cursor: "pointer", fontSize: 13, fontWeight: 700, opacity: !superTopupAmount ? 0.5 : 1 }}
+                data-testid="button-confirm-super-topup"
+              >
+                {superTopupMutation.isPending ? "Saving..." : "Save"}
               </button>
             </div>
           </div>
